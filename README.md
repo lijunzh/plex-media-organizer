@@ -146,6 +146,18 @@ src/
 - Run clippy for linting: `cargo clippy`
 - Ensure all tests pass: `cargo test`
 
+### Development Workflow
+```bash
+# Quality check (run before committing)
+cargo fmt && cargo clippy && cargo test
+
+# Quick development cycle
+cargo check          # Fast compilation check
+cargo test          # Run tests
+cargo build         # Build project
+cargo run -- help   # Test CLI
+```
+
 ## 📊 Performance
 
 ### Current Metrics

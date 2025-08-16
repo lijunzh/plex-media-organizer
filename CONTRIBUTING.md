@@ -56,6 +56,9 @@ cargo clippy
 
 # Check for security issues
 cargo audit
+
+# Quick quality check (run before committing)
+cargo fmt && cargo clippy && cargo test
 ```
 
 ### 5. **Commit Your Changes**
