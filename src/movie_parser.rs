@@ -69,29 +69,28 @@ impl MovieParser {
         confidence_score += 0.3; // Base confidence from filename parsing
 
         // If we have a TMDB client, try to get additional data
-        if let Some(ref tmdb_client) = self.tmdb_client {
-            if let Some(tmdb_movie) = tmdb_client
+        if let Some(ref tmdb_client) = self.tmdb_client
+            && let Some(tmdb_movie) = tmdb_client
                 .find_best_match(&movie_info.title, movie_info.year)
                 .await?
-            {
-                // Update movie info with TMDB data
-                let tmdb_info = tmdb_client.tmdb_to_movie_info(&tmdb_movie);
-                movie_info = self.merge_movie_info(movie_info, tmdb_info);
+        {
+            // Update movie info with TMDB data
+            let tmdb_info = tmdb_client.tmdb_to_movie_info(&tmdb_movie);
+            movie_info = self.merge_movie_info(movie_info, tmdb_info);
 
-                // Add external source
-                external_sources.push(ExternalSource {
-                    name: "TMDB".to_string(),
-                    external_id: tmdb_movie.id.to_string(),
-                    url: Some(format!(
-                        "https://www.themoviedb.org/movie/{}",
-                        tmdb_movie.id
-                    )),
-                    fetched_at: Utc::now(),
-                });
+            // Add external source
+            external_sources.push(ExternalSource {
+                name: "TMDB".to_string(),
+                external_id: tmdb_movie.id.to_string(),
+                url: Some(format!(
+                    "https://www.themoviedb.org/movie/{}",
+                    tmdb_movie.id
+                )),
+                fetched_at: Utc::now(),
+            });
 
-                parsing_strategy = ParsingStrategy::ExternalApi;
-                confidence_score += 0.5; // High confidence from external API
-            }
+            parsing_strategy = ParsingStrategy::ExternalApi;
+            confidence_score += 0.5; // High confidence from external API
         }
 
         // Create MediaFile and MediaMetadata

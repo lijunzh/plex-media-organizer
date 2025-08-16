@@ -113,13 +113,12 @@ impl Cli {
         println!("🔧 Plex Media Organizer - Setup");
 
         // Check if config already exists
-        if !force {
-            if let Ok(config) = AppConfig::load() {
-                if config.apis.tmdb_api_key.is_some() {
-                    println!("Configuration already exists. Use --force to reconfigure.");
-                    return Ok(());
-                }
-            }
+        if !force
+            && let Ok(config) = AppConfig::load()
+            && config.apis.tmdb_api_key.is_some()
+        {
+            println!("Configuration already exists. Use --force to reconfigure.");
+            return Ok(());
         }
 
         // Run interactive setup
