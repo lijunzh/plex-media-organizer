@@ -1,11 +1,17 @@
 [package]
 name = "plex-media-organizer"
 version = "0.1.0"
-edition = "2021"
+edition = "2021"  # Stable, production-ready edition
 authors = ["Your Name <your.email@example.com>"]
 description = "Intelligent media file organizer following Plex naming conventions"
 license = "MIT"
-repository = "https://github.com/yourusername/plex-media-organizer"
+repository = "https://github.com/lijunzh/plex-media-organizer"
+
+# Rust Edition Migration Plan:
+# - Current: Rust 2021 (stable, production-ready)
+# - Future: Rust 2024 (when stable, ~2025)
+# - Benefits: Latest features, better performance, improved diagnostics
+# - Migration: Minimal breaking changes expected, mostly additive
 
 [dependencies]
 # Core dependencies

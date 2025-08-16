@@ -11,11 +11,11 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        rust: [stable, 1.70]
+        rust: [stable, 1.70.0]
         include:
           - rust: stable
             cache-key: stable
-          - rust: 1.70
+          - rust: 1.70.0
             cache-key: 1.70.0
     
     steps:
@@ -28,7 +28,10 @@ jobs:
           toolchain: ${{ matrix.rust }}
           override: true
           profile: minimal
-          components: rustfmt, clippy
+      
+      - name: Install Rust Components
+        run: |
+          rustup component add rustfmt clippy
       
       - name: Cache Dependencies
         uses: actions/cache@v3
@@ -129,7 +132,11 @@ jobs:
         uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
-          components: rustfmt, clippy
+          profile: minimal
+      
+      - name: Install Rust Components
+        run: |
+          rustup component add rustfmt clippy
       
       - name: Check Dependencies
         run: |

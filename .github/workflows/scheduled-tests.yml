@@ -19,6 +19,10 @@ jobs:
           toolchain: stable
           profile: minimal
       
+      - name: Install Rust Components
+        run: |
+          rustup component add rustfmt clippy
+      
       - name: Cache Dependencies
         uses: actions/cache@v3
         with:
