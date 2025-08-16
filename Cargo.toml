@@ -1,15 +1,11 @@
 [package]
 name = "plex-media-organizer"
 version = "0.1.0"
-edition = "2024"  # Latest stable edition with latest features
+edition = "2024"
 authors = ["Your Name <your.email@example.com>"]
 description = "Intelligent media file organizer following Plex naming conventions"
 license = "MIT"
 repository = "https://github.com/lijunzh/plex-media-organizer"
-
-# Rust Edition: 2024 (Stable as of February 2025)
-# Benefits: Latest features, better performance, improved diagnostics
-# Migration: Completed successfully with minimal breaking changes
 
 [dependencies]
 # Core dependencies

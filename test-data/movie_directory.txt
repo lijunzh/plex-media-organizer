@@ -1,0 +1,733 @@
+/Volumes/media/movie
+├── Chinese
+│   ├── 白蛇
+│   │   ├── 白蛇2：青蛇劫起..Green.Snake.2021.1080p.WEB-DL.H264.DDP5.1.Atmos-OurTV.mkv
+│   │   └── White.Snake.2019.2160p.HQ.WEB-DL.H265.60fps.DDP5.1.Atmos-CHDWEB.mkv
+│   ├── 半个喜剧.Almost.a.Comedy.2019.WEB-DL.4K.H265.DDP5.1-PTerWEB.mp4
+│   ├── 长安三万里.Chang.An.2023.1080p.WEB-DL.H264.AAC-GPTHD.mp4
+│   ├── 逃学威龙三部曲.Fight.Back.to.School.1991-1993.Bluray.1080p.x265.AAC(5.1).2Audios.GREENOTEA
+│   │   ├── 逃学威龙.Fight.Back.to.School.1991.Bluray.1080p.x265.AAC(5.1).2Audios.GREENOTEA.mkv
+│   │   ├── 逃学威龙2.Fight.Back.to.School.II.1992.Bluray.1080p.x265.AAC(5.1).2Audios.GREENOTEA.mkv
+│   │   └── 逃学威龙3之龙过鸡年.Fight.Back.to.School.III.1993.Bluray.1080p.x265.AAC(5.1).2Audios.GREENOTEA.mkv
+│   ├── 银河写手.Galaxy.Writer.2024.1080p.WEB-DL.H264.AAC-HHWEB
+│   │   └── Galaxy.Writer.2024.1080p.WEB-DL.H264.AAC-HHWEB.mkv
+│   ├── 狄仁杰之幽兵借路.Ghost.Soldier.Borrowed.2023.WEB-DL.2160p.HEVC.AAC-ZmWeb.mp4
+│   ├── 赌侠.God.of.Gamblers.II.1991.Bluray.1080p.x265.AAC(5.1).2Audios.GREENOTEA.mkv
+│   ├── 一步之遥.Gone.With.The.Bullets.2014.2160p.WEB-DL.H265.10bit.HDR.AAC-PTerWEB.mp4
+│   ├── 武状元苏乞儿.King.of.Beggars.1992.2160p.WEB-DL.H264.AAC.2Audio-OurTV.mp4
+│   ├── 消失的她.Lost.in.the.Stars.2022.1080p.WEB-DL.mkv
+│   ├── 破坏之王.Love.on.Delivery.1994.Bluray.1080p.x265.AAC.2Audios.GREENOTEA.mkv
+│   ├── 莫斯科行动.Moscow.Mission.2023.1080p.WEB-DL.AVC.AAC-HDVWEB.mp4
+│   ├── 百变星君.Sixty.Million.Dollar.Man.1995.Bluray.1080p.x265.AAC(5.1).2Audios.GREENOTEA.mkv
+│   ├── 狙击手.Snipers.2022.60fps.2160p.WEB-DL.DDP5.1.AAC.H265-HDSWEB.mkv
+│   ├── 食神.The.God.of.Cookery.1996.HDTV.1080p.x265.AAC(5.1).2Audios.GREENOTEA.mkv
+│   ├── 美猴王.The.Monkey.King.2023.1080p.NF.WEB-DL.x264.DDP5.1.Atmos-PTerWEB
+│   │   ├── Plex Versions
+│   │   │   └── Optimized for TV
+│   │   └── The.Monkey.King.2023.1080p.NF.WEB-DL.x264.DDP5.1.Atmos-PTerWEB.mkv
+│   ├── 超级马力欧兄弟大电影.The.Super.Mario.Bros.Movie.2023.1080p.WEBRip.x264.AC3@Will1869.mp4
+│   ├── 整蛊专家.Tricky.Brains.1991.Bluray.1080p.x265.AAC(5.1).2Audios.GREENOTEA.mkv
+│   ├── 二手杰作.World's.Greatest.Dad.2023.1080p.WEB-DL.H264.AAC-GPTHD.mp4
+│   ├── 家有喜事(修复加长版).All's.Well.End's.Well.1992.EXTENDED.Bluray.1080p.x265.AAC(5.1).2Audios.GREENOTEA.mkv
+│   ├── [雏菊(导演剪辑版)].Daisy.2006.DVDRip.x264.DTS-CMCT.mkv
+│   ├── [大内密探零零发(国粤双语)].Forbidden.City.Cop.1996.BluRay.720p.x264.AC3-CMCT.mkv
+│   ├── [青蛇].Green.Snake.1993.DVDRip.x264.2Audio.AC3.INT-NowOur.mkv
+│   ├── [人在囧途].Lost.On.Journey.2010.720p.HDTV.x264-CMCT.mkv
+│   ├── [怒火·重案].Raging.Fire.2021.GBR.UHD.BluRay.2160p.x265.10bit.HDR.DTS-HD.MA.7.1.2Audios-CMCT.mkv
+│   ├── [不能说的秘密].Secret.2007.BluRay.1080p.x264.DTS-CMCT.mkv
+│   ├── [戏梦巴黎].The.Dreamers.2003.ESP.BluRay.1080p.x264.DTS-CMCT.mkv
+│   ├── [金手指].The.Goldfinger.2023.2160p.60fps.WEB-DL.HEVC.10bit.DDP5.1.6Audios-QHstudIo.mp4
+│   ├── [热搜].Trending.Topic.2023.2160p.WEB-DL.HEVC.10bit.DDP5.1.4Audios-NukeHD.mp4
+│   ├── [当爱来的时候].When.Love.Comes.2010.BluRay.1080p.x264.DTS-CMCT.mkv
+│   ├── [杀破狼2].SPL.2.A.Time.For.Consequences.2015.BluRay.720p.x264.AC3.2Audios-CMCT.mkv
+│   ├── [千王之王2000].The.Tricky.Master.1999.DVDRip.X264.AC3-tdw9430
+│   │   ├── [千王之王2000].The.Tricky.Master.1999.DVDRip.X264.AC3.CD1-tdw9430.avi
+│   │   └── [千王之王2000].The.Tricky.Master.1999.DVDRip.X264.AC3.CD2-tdw9430.avi
+│   ├── 潜伏2.Insidious.Chapter.2.2013.1080p.BluRay.HEVC.10bit-DalekW@FRDS.mkv
+│   ├── 非诚勿扰3.If.You.Are.the.One.3.2023.2160p.WEB-DL.H265.HQ.60fps.DDP5.1-HHWEB
+│   │   └── If.You.Are.the.One.3.2023.2160p.WEB-DL.H265.HQ.60fps.DDP5.1-HHWEB.mkv
+│   ├── 潜伏3.Insidious.Chapter.3.2015.1080p.Bluray.HEVC.10bit-DalekW@FRDS.mkv
+│   ├── 前任4.英年早婚.The.Ex-Files.4.Marriage.Plan.2023.120FPS.2160p.WEB-DL.H265.10bit.DDP5.1-OurTV.mkv
+│   ├── A.New.Old.Play.2021.1080p.WEB-DL.H264.AAC-PTerWEB.mkv
+│   ├── A.Sun.2019.1080p.NF.WEB-DL.DDP5.1.x264-NTG.mkv
+│   ├── All For The Winner 1990 HDTVRip x264 MP3 2Audio.mkv
+│   ├── Beijing.Love.Story.2014.1080p.NF.WEB-DL.DDP5.1.x264-TJUPT.mkv
+│   ├── Big.Shot's.Funeral.2001.1080p.BluRay.DDP.5.1.x264-PTer.mkv
+│   ├── CCTV6HD A World Without Thieves 2004 HDTV 720p x264-HDWTV.mkv
+│   ├── CCTV6HD.Crazy.Stone.2006.720p.HDTV.x264-HDWTV.mkv
+│   ├── CHC.Call.for.Love.2007.720p.HDTV.x264-CMCTV.mkv
+│   ├── Chungking.Express.1994.1080p.BluRay.DDP5.1.x264-c0kE.mkv
+│   ├── City.of.Life.and.Death.2009.BluRay.720p.DTS.x264-HDxT.mkv
+│   ├── Du.shen.2.AKA.God.of.Gamblers.Return.1994.DVDRip.x264-HANDJOB.mkv
+│   ├── Dust.To.Dust.2023.1080p.WEB-DL.H264.AAC-TJUPT.mp4
+│   ├── Fight Back to School 1991 720p BluRay DD5.1 Hi10P x264-npuer.mkv
+│   ├── Fight.Back.to.School.3.1993.BDRip.X264.DualAudio.iNT-TLF
+│   │   ├── Fight.Back.to.School.3.1993.BDRip.X264.DualAudio.iNT-TLF.mkv
+│   │   ├── sample
+│   │   │   └── tlf-fight.back.to.school.3.bd.sample.mkv
+│   │   ├── sub
+│   │   │   ├── Fight.Back.to.School.3.1993.BDRip.X264.DualAudio.iNT-TLF.chs.sup
+│   │   │   ├── Fight.Back.to.School.3.1993.BDRip.X264.DualAudio.iNT-TLF.cht.sup
+│   │   │   └── Fight.Back.to.School.3.1993.BDRip.X264.DualAudio.iNT-TLF.eng.sup
+│   │   └── tlf-fight.back.to.school.3.bd.nfo
+│   ├── From.Beijing.with.Love.1994.BluRay.1080p.x265.10bit.2Audio.MNHD-FRDS.mkv
+│   ├── Hail.the.Judge.1994.BluRay.1080p.x265.10bit.2Audio.MNHD-FRDS.mkv
+│   ├── Hello.Mr.Billionaire.2018.720p.BluRay.x264-Tv21
+│   │   ├── Hello.Mr.Billionaire.2018.720p.BluRay.x264.mkv
+│   │   └── Hello.Mr.Billionaire.2018.720p.BluRay.x264.srt
+│   ├── Hung.Hei.Kwun.Siu.Lam.ng.zou.AKA.The.New.Legend.of.Shaolin.1994.720p.BluRay.x264-HANDJOB.mkv
+│   ├── 赌侠II：上海滩赌圣.God.of.Gamblers.III.Back.to.Shanghai.1991.Bluray.1080p.x265.AAC(5.1).2Audios.GREENOTEA.mkv
+│   ├── Let.the.Bullets.Fly.2010.BluRay.1080p.x264.2Audios-BYRHD.mkv
+│   ├── Lost.in.the.Stars.2022.1080p.WEB-DL.H264.AAC-TJUPT.mp4
+│   ├── Love Will Tear Us Apart (2021) [1080p] [WEBRip] [YTS.MX]
+│   │   ├── Love.Will.Tear.Us.Apart.2021.1080p.WEBRip.x264.AAC-[YTS.MX].mp4
+│   │   ├── Love.Will.Tear.Us.Apart.2021.1080p.WEBRip.x264.AAC-[YTS.MX].srt
+│   │   ├── www.YTS.MX.jpg
+│   │   └── YTSYifyUP... (TOR).txt
+│   ├── Lover.of.the.Last.Empress.1995.1080p.BluRay.FLAC.2.0.x264-PuTao.mkv
+│   ├── Marry.My.Dead.Body.2022.1080p.NF.WEB-DL.x264.DDP5.1-ADWeb.mkv
+│   ├── Ne Zha 2 2025 1080p WEB-DL Chinese DDP5.1 Atmos x264-TBMovies
+│   │   ├── Ne Zha 2 2025 1080p WEB-DL Chinese DDP5.1 Atmos x264-TBMovies.mkv
+│   │   └── Ne Zha 2 2025 1080p WEB-DL Chinese DDP5.1 Atmos x264-TBMovies.mkv_thumbs.jpg
+│   ├── Royal.Tramp.1992.Bluray.1080p.x265.AAC(5.1).2Audios.GREENOTEA
+│   │   ├── \177\177\177.Royal.Tramp.1992.Bluray.1080p.x265.AAC(5.1).2Audios.GREENOTEA.mkv
+│   │   └── \177\177\1772\177\177\177\177.Royal.Tramp.II.1992.Bluray.1080p.x265.AAC(5.1).2Audios.GREENOTEA.mkv
+│   ├── Saat.Po.Long.2005.1080p.HKG.BluRay.DTS.2Audio.x264-HDS.mkv
+│   ├── Shaolin.Soccer.2001.1080p.BluRay.x264.DTS-WiKi.mkv
+│   ├── Sien.Nui.Yau.Wan.AKA.A.Chinese.Ghost.Story.1987.1080p.BluRay.x264-PTer.mkv
+│   ├── Star.Movie-HD.God.of.Gamblers.III.The.Early.Stage.1996.720p.HDTV.x264-CMCTV.mkv
+│   ├── The.Banquet.2006.1080p.BluRay.DTS.5.1.x264-PTer.mkv
+│   ├── The.Conman.1998.1080p.BluRay.x264.DTS-WiKi
+│   │   ├── Sample
+│   │   │   └── The.Conman.1998.1080p.BluRay.x264.DTS-WiKi.Sample.mkv
+│   │   ├── The.Conman.1998.1080p.BluRay.x264.DTS-WiKi.md5
+│   │   ├── The.Conman.1998.1080p.BluRay.x264.DTS-WiKi.mkv
+│   │   └── The.Conman.1998.1080p.BluRay.x264.DTS-WiKi.nfo
+│   ├── The.Dumpling.Queen.2025.1080p.WEB-DL.H264.AAC-PandaQT.mkv
+│   ├── The.Monk.and.the.Gun.2023.1080p.AMZN.WEB-DL.DDP5.1.H.264-BYNDR.mkv
+│   └── White.Snake.Afloat.2024.1080p.BluRay.x264.Atmos.TrueHD7.1-WiKi.mkv
+├── English
+│   ├── [DBD-Raws][4K_HDR][ready.player.one][2160P][BDRip][HEVC-10bit][FLAC].mkv
+│   ├── 3.Idiots.2009.BluRay.1080p.DTS.x264-LolHD.mkv
+│   ├── A.I.Artificial.Intelligence.2001.1080p.BluRay.x264-EbP.mkv
+│   ├── Air.Force.One.1997.REPACK.1080p.UHD.BluRay.DDP.7.1.DoVi.HDR10.x265-c0kE.mkv
+│   ├── American.Beauty.1999.REPACK.1080p.Blu-ray.DTS.x264-CtrlHD
+│   │   ├── American.Beauty.1999.REPACK.1080p.Blu-ray.DTS.x264-CtrlHD.mkv
+│   │   └── American.Beauty.1999.REPACK.1080p.Blu-ray.DTS.x264-CtrlHD.nfo
+│   ├── Anatomy.of.a.fall.2023.720p.WEB-DL.x264.AAC.2.0
+│   │   └── Anatomy.of.a.fall.2023.720p.WEB-DL.x264.AAC.2.0.mkv
+│   ├── Apples.2020.1080p.BluRay.x264.DDP5.1-BYRHD
+│   │   └── Apples.2020.1080p.BluRay.x264.DDP5.1-BYRHD.mkv
+│   ├── Avengers
+│   │   ├── Avengers.Age.of.Ultron.2015.Bluray.2160p.x265.10bit.HDR.4Audio.mUHD-FRDS.mkv
+│   │   ├── Avengers.Endgame.2019.BluRay.2160p.x265.10bit.HDR.2Audios.mUHD-FRDS.mkv
+│   │   ├── Avengers.g4_7wyyz.Endgame.2019.BluRay.2160p.x265.10bit.HDR.2Audios.mUHD-FRDS.mkv.part
+│   │   ├── Avengers.Infinity.War.2018.IMAX.2160p.DSNP.WEB-DL.x265.10bit.HDR.DTS-HD.MA.TrueHD.7.1.Atmos-SWTYBLZ.mkv
+│   │   └── The.Avengers.2012.Bluray.2160p.x265.10bit.HDR.3Audio.mUHD-FRDS.mkv
+│   ├── Babylon.5.the.Road.Home.2023.2160p.UHD.BluRay.x265.10bit.HDR.DTS-HD.MA.5.1-ADE
+│   │   └── Babylon.5.the.Road.Home.2023.2160p.UHD.BluRay.x265.10bit.HDR.DTS-HD.MA.5.1-ADE.mkv
+│   ├── Barbie.2023.2160p.WEB-DL.DDP5.1.Atmos.DV.HDR.H.265-MZABARBiE.mkv
+│   ├── Batman
+│   │   ├── batman.begins.2005.2160p.uhd.bluray.x265-terminal.mkv
+│   │   ├── The.Batman.2022.2160p.Remux.HEVC.DoVi.TrueHD.7.1-3L.mkv
+│   │   ├── The.Dark.Knight.2008.2160p.UHD.BluRay.X265-IAMABLE.mkv
+│   │   └── the.dark.knight.rises.2012.rerip.2160p.uhd.bluray.x265-terminal.mkv
+│   ├── Black.Panther.Wakanda.Forever.2022.1080p.BluRay.x264.DTS-WiKi
+│   │   ├── Black.Panther.Wakanda.Forever.2022.1080p.BluRay.x264.DTS-WiKi.md5
+│   │   ├── Black.Panther.Wakanda.Forever.2022.1080p.BluRay.x264.DTS-WiKi.mkv
+│   │   └── Black.Panther.Wakanda.Forever.2022.1080p.BluRay.x264.DTS-WiKi.nfo
+│   ├── Blue.Beetle.2023.2160p.iTunes.WEB-DL.DDP5.1.Atmos.HDR.H.265-HHWEB
+│   │   └── Blue.Beetle.2023.2160p.iTunes.WEB-DL.DDP5.1.Atmos.HDR.H.265-HHWEB.mkv
+│   ├── Children.of.Men.2006.1080p.BluRay.DD5.1.x264-SA89.mkv
+│   ├── CODA.2021.1080p.BluRay.x264.DTS-WiKi.mkv
+│   ├── Constantine 2005 1080p Blu-ray Remux VC-1 TrueHD 5.1 - KRaLiMaRKo
+│   │   └── Constantine 2005 1080p Blu-ray Remux VC-1 TrueHD 5.1 - KRaLiMaRKo.mkv
+│   ├── Contagion.2011.1080p.BluRay.x264.DTS-WiKi
+│   │   ├── Contagion.2011.1080p.BluRay.x264.DTS-WiKi.md5
+│   │   ├── Contagion.2011.1080p.BluRay.x264.DTS-WiKi.mkv
+│   │   ├── Contagion.2011.1080p.BluRay.x264.DTS-WiKi.nfo
+│   │   └── Sample
+│   │       └── Contagion.2011.1080p.BluRay.x264.DTS-WiKi.Sample.mkv
+│   ├── Dune.Part.Two.2024.2160p.WEB-DL.DDP5.1.Atmos.DV.HDR.H.265-FLUX.mkv
+│   ├── Dungeons.and.Dragons.Honor.Among.Thieves.2023.1080p.AMZN.WEBRip.DDP5.1.x264-Kitsune.mkv
+│   ├── Dungeons.and.Dragons.Honor.Among.Thieves.2023.1080p.AMZN.WEBRip.DDP5.1.x264-Kitsune.srt
+│   ├── E.T.The.Extra-Terrestrial.1982.1080p.BluRay.DTS.x264-CtrlHD.mkv
+│   ├── Fast.X.2023.2160p.MA.WEB-DL.DDP5.1.Atmos.HDR.DV.HEVC-CMRG.mkv
+│   ├── Forrest Gump 1994 720p BluRay DD5.1 x264-LoRD.mkv
+│   ├── Frequency.2000.1080p.BluRay.DTS.x264-FANDANGO.mkv
+│   ├── Frequently Asked Questions About Time Travel WEB-DL 1080p.mkv
+│   ├── Glass.Onion.A.Knives.Out.Mystery.2022.2160p.NF.WEB-DL.DDP5.1.Atmos.HDR.DV-MZABI.mkv
+│   ├── Godzilla.Mothra.And.King.Ghidorah.Giant.Monsters.All-Out.Attack.2001.1080p.BluRay.x264-PHOBOS[rarbg]
+│   │   ├── Godzilla.Mothra.And.King.Ghidorah.Giant.Monsters.All-Out.Attack.2001.1080p.BluRay.x264-PHOBOS.mkv
+│   │   └── godzilla.mothra.and.king.ghidorah.giant.monsters.all-out.attack.2001.1080p.bluray.x264-phobos.nfo
+│   ├── Greyhound.2020.1080p.ATVP.WEB-DL.DDP5.1.Atmos.H.264-MZABI.mkv
+│   ├── Guardians.of.the.Galaxy.Vol.3.2023.2160p.WEB-DL.DDP5.1.Atmos.HDR.DV.HEVC-CMRG.mkv
+│   ├── Her 2013 1080p BluRay DTS x264-DON.mkv
+│   ├── I, Robot.mkv
+│   ├── Iron Man
+│   │   ├── 钢铁侠.Iron.Man.2008.BluRay.2160p.x265.10bit.HDR.4Audio.mUHD-FRDS.mkv
+│   │   ├── 钢铁侠2.Iron.Man.2.2010.BluRay.2160p.x265.10bit.HDR.4Audio.mUHD-FRDS.mkv
+│   │   └── 钢铁侠3.Iron.Man.3.2013.BluRay.2160p.x265.10bit.HDR.4Audio.mUHD-FRDS.mkv
+│   ├── Joker
+│   │   ├── Joker.2019.2160p.UHD.BluRay.REMUX.HEVC.TrueHD.7.1.Atmos-PTHOME.mkv
+│   │   └── Joker.Folie.a.Deux.2024.2160p.AMZN.WEB-DL.H265.DDP5.1-ADWeb.mkv
+│   ├── Jurassic.Park.Ultimate.Trilogy.1993-2001.1080p.BluRay.x264.DTS-HDChina
+│   │   ├── Jurassic.Park.1993.1080P.BluRay.x264.DTS-HDChina
+│   │   │   ├── Jurassic.Park.1993.1080P.BluRay.x264.DTS-HDChina.mkv
+│   │   │   ├── Jurassic.Park.1993.1080P.BluRay.x264.DTS-HDChina.nfo
+│   │   │   └── sample
+│   │   │       └── Jurassic.Park.1993.1080P.BluRay.x264.DTS-HDChina.sample.mkv
+│   │   ├── Jurassic.Park.III.2001.1080p.BluRay.x264.DTS-HDChina
+│   │   │   ├── Jurassic.Park.III.2001.1080p.BluRay.x264.DTS-HDChina.mkv
+│   │   │   └── Jurassic.Park.III.2001.1080p.BluRay.x264.DTS-HDChina.nfo
+│   │   └── The.Lost.World.Jurassic.Park.1997.1080p.BluRay.x264.DTS-HDChina
+│   │       ├── The.Lost.World.Jurassic.Park.1997.1080p.BluRay.x264.DTS-HDChina.mkv
+│   │       └── The.Lost.World.Jurassic.Park.1997.1080p.BluRay.x264.DTS-HDChina.nfo
+│   ├── Jurassic.World.Rebirth.2025.MULTi.1080p.HDTS-SyncUP
+│   │   ├── _CheerfulTomato.txt
+│   │   ├── bilgi.txt
+│   │   ├── Info.txt
+│   │   ├── Jurassic.World.Rebirth.2025.MULTi.1080p.HDTS-SyncUP.mkv
+│   │   ├── Samples
+│   │   │   ├── Sample1.mkv
+│   │   │   └── Sample2.mkv
+│   │   ├── screenshot_1_1080p.jpg
+│   │   ├── screenshot_2_1080p.jpg
+│   │   └── screenshot_3_1080p.jpg
+│   ├── Kill.Bill.Vol.1.2003.BluRay.1080p.x265.10bit.MNHD-FRDS.mkv
+│   ├── Kill.Bill.Vol.2.2004.BluRay.1080p.x265.10bit.MNHD-FRDS.mkv
+│   ├── Killers.of.the.Flower.Moon.2023.2160p.WEB-DL.DDP5.1.Atmos.DV.HDR.H.265-FLUX.mkv
+│   ├── Kingdom.Of.The.Planet.Of.The.Apes.2024.HDR.2160p.WEB.h265-ETHEL.mkv
+│   ├── Klaus.2019.Netflix.WEB-DL.1080p.HEVC.DDP-AREY.mkv
+│   ├── Land.Of.Bad.2024.1080p.WEB.H264-RABiDS.mkv
+│   ├── Leon.The.Professional.1994.BluRay.2160p.x265.10bit.HDR.3Audio.mUHD-FRDS.mkv
+│   ├── Les Misérables.mkv
+│   ├── Looper.2012.1080p.BluRay.x264.DTS-WiKi
+│   │   ├── Looper.2012.1080p.BluRay.x264.DTS-WiKi.md5
+│   │   ├── Looper.2012.1080p.BluRay.x264.DTS-WiKi.mkv
+│   │   ├── Looper.2012.1080p.BluRay.x264.DTS-WiKi.nfo
+│   │   └── Sample
+│   │       └── Looper.2012.1080p.BluRay.x264.DTS-WiKi.Sample.mkv
+│   ├── Love.and.Other.Drugs.2010.BluRay.720p.DTS.x264-CHD
+│   │   ├── Love.and.Other.Drugs.2010.BluRay.720p.DTS.x264-CHD-sample.mkv
+│   │   ├── Love.and.Other.Drugs.2010.BluRay.720p.DTS.x264-CHD.mkv
+│   │   └── Love.and.Other.Drugs.2010.BluRay.720p.DTS.x264-CHD.nfo
+│   ├── Mission.Impossible.Dead.Reckoning.Part.One.2023.2160p.WEB-DL.H265.EDR.DDP5.1-HHWEB
+│   │   └── Mission.Impossible.Dead.Reckoning.Part.One.2023.2160p.WEB-DL.H265.EDR.DDP5.1-HHWEB.mkv
+│   ├── Moneyball.2011.UHD.2160p.WEB-Rip.DDP.5.1.HEVC-DDR[EtHD]
+│   │   ├── Downloaded from www.ETTV.tv .txt
+│   │   └── Moneyball.2011.UHD.2160p.WEB-Rip.DDP.5.1.HEVC-DDR[EtHD].mkv
+│   ├── Moon 2009 1080p BluRay DD5.1 x264-RightSiZE.mkv
+│   ├── Now.You.See.Me.2.2016.1080p.BluRay.x264-WiKi.mkv
+│   ├── Now.You.See.Me.2013.2160p.UHD.BluRay.X265-IAMABLE.mkv
+│   ├── Once.Upon.a.Time.in.America.Extended.DC.1984.BluRay.1080p.x265.10bit.MNHD-FRDS.mkv
+│   ├── Oppenheimer.2023.1080p.Blu-ray.Remux.AVC.DTS-HD.MA.5.1-CiNEPHiLES.mkv
+│   ├── Pearl.Harbor.2001.1080p.Bluray.DTS.x264-D-Z0N3.mkv
+│   ├── Pirates of the Caribbean
+│   │   ├── \177\177\177\177\177.Pirates.of.the.Caribbean.The.Curse.of.the.Black.Pearl.2003.Bluray.1080p.x265.AAC(5.1).2Audios.GREENOTEA.mkv
+│   │   ├── \177\177\177\177\1772\177\177\177\177.Pirates.of.the.Caribbean.Dead.Man's.Chest.2006.Bluray.1080p.x265.AAC(5.1).2Audios.GREENOTEA.mkv
+│   │   ├── \177\177\177\177\1773\177\177\177\177\177\177.Pirates.of.the.Caribbean.At.World's.End.2007.Bluray.1080p.x265.AAC(5.1).2Audios.GREENOTEA.mkv
+│   │   ├── \177\177\177\177\1774\177\177\177\177\177.Pirates.of.the.Caribbean.On.Stranger.Tides.2011.Bluray.1080p.x265.AAC(5.1).2Audios.GREENOTEA.mkv
+│   │   └── \177\177\177\177\1775\177\177\177\177\177.Pirates.of.the.Caribbean.Dead.Men.Tell.No.Tales.2017.Bluray.1080p.x265.AAC(5.1).2Audios.GREENOTEA.mkv
+│   ├── Poirot.Murder.on.the.Orient.Express.2010.720p.BluRay.x264-DON.chs&amp;eng.srt
+│   ├── Poirot.Murder.on.the.Orient.Express.2010.720p.BluRay.x264-DON.mkv
+│   ├── Poor.Things.2023.1080p.BluRay.x264.DTS-WiKi
+│   │   ├── Poor.Things.2023.1080p.BluRay.x264.DTS-WiKi.md5
+│   │   ├── Poor.Things.2023.1080p.BluRay.x264.DTS-WiKi.mkv
+│   │   └── Poor.Things.2023.1080p.BluRay.x264.DTS-WiKi.nfo
+│   ├── Roald.Dahls.Matilda.The.Musical.2022.1080p.NF.WEB-DL.DDP5.1.Atmos.H.264-SMURF.mkv
+│   ├── Saving.Private.Ryan.1998.BluRay.1080p.x265.10bit.4Audio.MnHD-FRDS.mkv
+│   ├── Schindler's.List.1993.BluRay.2160p.x265.10bit.HDR.5Audio.mUHD-FRDS.mkv
+│   ├── Sleepy.Hollow.1999.x264.720p.DTS.BDRiP-CHD
+│   │   ├── chd-sleepy-hollow-dts-bdrip.mkv
+│   │   └── chd-sleepy-hollow-dts-bdrip.nfo
+│   ├── Star.Wars.The.Complete.Saga.1977-2019.2160p.UHD.BluRay.HDR.x265.Atmos.TrueHD7.1-HDChina
+│   │   ├── Rogue.One.A.Star.Wars.Story.2016.2160p.UHD.BluRay.HDR.x265.Atmos.TrueHD7.1-HDChina.mkv
+│   │   ├── Rogue.One.A.Star.Wars.Story.2016.2160p.UHD.BluRay.HDR.x265.Atmos.TrueHD7.1-HDChina.nfo
+│   │   ├── Solo.A.Star.Wars.Story.2018.2160p.UHD.BluRay.HDR.x265.Atmos.TrueHD7.1-HDChina.mkv
+│   │   ├── Solo.A.Star.Wars.Story.2018.2160p.UHD.BluRay.HDR.x265.Atmos.TrueHD7.1-HDChina.nfo
+│   │   ├── Star.Wars.Episode.I.The.Phantom.Menace.1999.2160p.UHD.BluRay.HDR.x265.Atmos.TrueHD7.1-HDChina.mkv
+│   │   ├── Star.Wars.Episode.I.The.Phantom.Menace.1999.2160p.UHD.BluRay.HDR.x265.Atmos.TrueHD7.1-HDChina.nfo
+│   │   ├── Star.Wars.Episode.II.Attack.of.the.Clones.2002.2160p.UHD.BluRay.HDR.x265.Atmos.TrueHD7.1-HDChina.mkv
+│   │   ├── Star.Wars.Episode.II.Attack.of.the.Clones.2002.2160p.UHD.BluRay.HDR.x265.Atmos.TrueHD7.1-HDChina.nfo
+│   │   ├── Star.Wars.Episode.III.Revenge.of.the.Sith.2005.2160p.UHD.BluRay.HDR.x265.Atmos.TrueHD7.1-HDChina.mkv
+│   │   ├── Star.Wars.Episode.III.Revenge.of.the.Sith.2005.2160p.UHD.BluRay.HDR.x265.Atmos.TrueHD7.1-HDChina.nfo
+│   │   ├── Star.Wars.Episode.IV.A.New.Hope.1977.2160p.UHD.BluRay.HDR.x265.Atmos.TrueHD7.1-HDChina.mkv
+│   │   ├── Star.Wars.Episode.IV.A.New.Hope.1977.2160p.UHD.BluRay.HDR.x265.Atmos.TrueHD7.1-HDChina.nfo
+│   │   ├── Star.Wars.Episode.IX.The.Rise.of.Skywalker.2019.2160p.UHD.BluRay.HDR.x265.Atmos.TrueHD7.1-HDChina.mkv
+│   │   ├── Star.Wars.Episode.IX.The.Rise.of.Skywalker.2019.2160p.UHD.BluRay.HDR.x265.Atmos.TrueHD7.1-HDChina.nfo
+│   │   ├── Star.Wars.Episode.V.The.Empire.Strikes.Back.1980.2160p.UHD.BluRay.HDR.x265.Atmos.TrueHD7.1-HDChina.mkv
+│   │   ├── Star.Wars.Episode.V.The.Empire.Strikes.Back.1980.2160p.UHD.BluRay.HDR.x265.Atmos.TrueHD7.1-HDChina.nfo
+│   │   ├── Star.Wars.Episode.VI.Return.of.the.Jedi.1983.2160p.UHD.BluRay.HDR.x265.Atmos.TrueHD7.1-HDChina.mkv
+│   │   ├── Star.Wars.Episode.VI.Return.of.the.Jedi.1983.2160p.UHD.BluRay.HDR.x265.Atmos.TrueHD7.1-HDChina.nfo
+│   │   ├── Star.Wars.Episode.VII.The.Force.Awakens.2015.2160p.UHD.BluRay.HDR.x265.Atmos.TrueHD7.1-HDChina.mkv
+│   │   ├── Star.Wars.Episode.VII.The.Force.Awakens.2015.2160p.UHD.BluRay.HDR.x265.Atmos.TrueHD7.1-HDChina.nfo
+│   │   ├── Star.Wars.Episode.VIII.The.Last.Jedi.2017.2160p.UHD.BluRay.HDR.x265.Atmos.TrueHD7.1-HDChina.mkv
+│   │   └── Star.Wars.Episode.VIII.The.Last.Jedi.2017.2160p.UHD.BluRay.HDR.x265.Atmos.TrueHD7.1-HDChina.nfo
+│   ├── Stranger.Than.Paradise.1984.BluRay.720p.x264.AAC1.0-PTer.mkv
+│   ├── The Intern 2015 1080p WEB-DL x264 AC3-JYK
+│   │   ├── Subs
+│   │   │   └── English.srt
+│   │   ├── The Intern 2015 1080p WEB-DL x264 AC3-JYK.mkv
+│   │   └── The Intern 2015 1080p WEB-DL x264 AC3-JYK.mkv.jpg
+│   ├── The Lord of the Rings
+│   │   ├── The.Lord.of.the.Rings.The.Fellowship.of.the.Ring.2001.Extended.UHD.BluRay.2160p.Atmos.TrueHD.7.1.HDR.x265.10bit-CHD.mkv
+│   │   ├── The.Lord.of.the.Rings.The.Return.of.the.King.2003.Extended.UHD.BluRay.2160p.Atmos.TrueHD.7.1.HDR.x265.10bit-CHD.mkv
+│   │   └── The.Lord.of.the.Rings.The.Two.Towers.2002.Extended.UHD.BluRay.2160p.Atmos.TrueHD.7.1.HDR.x265.10bit-CHD.mkv
+│   ├── The Man from Earth (2007) RM (1080p BluRay x265 HEVC 10bit AAC 5.1 Silence)
+│   │   ├── Featurettes
+│   │   │   ├── Contagion - A Micro Short Film.mkv
+│   │   │   ├── On the Set.mkv
+│   │   │   ├── Original 2007 Trailer.mkv
+│   │   │   ├── Photo Gallery.mkv
+│   │   │   ├── Restoration Demo.mkv
+│   │   │   ├── Star Trek - Jerome Bixby's Sci Fi Legacy.mkv
+│   │   │   ├── The Man from Earth - Legacy.mkv
+│   │   │   └── The Story of the Story.mkv
+│   │   └── The Man from Earth (2007) (1080p BluRay x265 Silence).mkv
+│   ├── The Witch  Part 1. The Subversion 2018 1080p WEB-DL  H264 AAC-KBTV.mp4
+│   ├── The.Banshees.of.Inisherin.2022.2160p.WEB-DL.DDP5.1.DV.HDR.H.265-FLUX.mkv
+│   ├── The.Beasts.(2022).1080p.BluRay.DD+5.1.x264-DON.mkv
+│   ├── The.Fast.and.the.Furious.2001.1080p.UHD.BluRay.DDP7.1.HDR.x265-NCmt.mkv
+│   ├── The.Fast.and.the.Furious.Tokyo.Drift.2006.1080p.UHD.BluRay.DDP7.1.HDR.x265-NCmt.mkv
+│   ├── The.Fog.of.War.2003.1080p.AMZN.WEB-DL.DDP5.1.x264-ABM.mkv
+│   ├── The.Foreigner.2017.Hybrid.BluRay.1080p.DTS.x264-MTeam.mkv
+│   ├── The.Great.Gatsby.2013.BluRay.1080p.x265.10bit.2Audio.MNHD-FRDS.mkv
+│   ├── The.Hunger.Games.The.Ballad.of.Songbirds.and.Snakes.2023.2160p.WEB-DL.DDP5.1.Atmos.DV.HDR.H.265-FLUX.mkv
+│   ├── The.Killer.2023.1080p.NF.WEB-DL.DDP5.1.H.264-playWEB.mkv
+│   ├── The.Man.From.Earth.2007.BluRay.iPad.720p.x264.AAC-BYRPAD.mp4
+│   ├── The.Marvels.2023.1080p.WEB-DL.DDP5.1.Atmos.H.264-FLUX.mkv
+│   ├── The.Mauritanian.2021.2160p.WEB-DL.60fps.H265.10bit.AAC-PTerWEB.mp4
+│   ├── The.Shawshank.Redemption.1994.1080p.BluRay.DD+.5.1.x264-c0kE.mkv
+│   ├── The.Witch.Part.1.The.Subversion.2018.BluRay.1080p.x264.DTS-HD.MA.5.1-HDChina
+│   │   ├── The.Witch.Part.1.The.Subversion.2018.BluRay.1080p.x264.DTS-HD.MA.5.1-HDChina.mkv
+│   │   └── The.Witch.Part.1.The.Subversion.2018.BluRay.1080p.x264.DTS-HD.MA.5.1-HDChina.nfo
+│   ├── The.Witch.Part.2.The.Other.One.2022.1080p.BluRay.x264.DTS-WiKi
+│   │   ├── Sample
+│   │   │   └── The.Witch.Part.2.The.Other.One.2022.1080p.BluRay.x264.DTS-WiKi.Sample.mkv
+│   │   ├── The.Witch.Part.2.The.Other.One.2022.1080p.BluRay.x264.DTS-WiKi.md5
+│   │   ├── The.Witch.Part.2.The.Other.One.2022.1080p.BluRay.x264.DTS-WiKi.mkv
+│   │   └── The.Witch.Part.2.The.Other.One.2022.1080p.BluRay.x264.DTS-WiKi.nfo
+│   ├── The.Wolf.of.Wall.Street.2013.1080p.BluRay.DTS.x264-DON.mkv
+│   ├── Transformers Five Collections 2007-2017 BluRay 2160p TrueHD 7.1 Atmos x265 10bit-CHD
+│   │   ├── Transformers 2007
+│   │   │   ├── info.txt
+│   │   │   ├── Transformers 2007 BluRay 2160p TrueHD 7.1 Atmos x265 10bit-CHD.mkv
+│   │   │   └── Transformers 2007 BluRay 2160p TrueHD 7.1 Atmos x265 10bit-CHD.nfo
+│   │   ├── Transformers Age of Extinction 2014
+│   │   │   ├── info.txt
+│   │   │   ├── Transformers Age of Extinction 2014 BluRay 2160p TrueHD 7.1 Atmos x265 10bit-CHD.mkv
+│   │   │   └── Transformers Age of Extinction 2014 BluRay 2160p TrueHD 7.1 Atmos x265 10bit-CHD.nfo
+│   │   ├── Transformers Dark of the Moon 2011
+│   │   │   ├── info.txt
+│   │   │   ├── Transformers Dark of the Moon 2011 BluRay 2160p TrueHD 7.1 Atmos x265 10bit-CHD.mkv
+│   │   │   └── Transformers Dark of the Moon 2011 BluRay 2160p TrueHD 7.1 Atmos x265 10bit-CHD.nfo
+│   │   ├── Transformers Revenge of the Fallen 2009
+│   │   │   ├── info.txt
+│   │   │   ├── Transformers Revenge of the Fallen 2009 BluRay 2160p TrueHD 7.1 Atmos x265 10bit-CHD.mkv
+│   │   │   └── Transformers Revenge of the Fallen 2009 BluRay 2160p TrueHD 7.1 Atmos x265 10bit-CHD.nfo
+│   │   └── Transformers The Last Knight 2017
+│   │       ├── info.txt
+│   │       ├── Transformers The Last Knight 2017 BluRay 2160p TrueHD 7.1 Atmos x265 10bit-CHD.mkv
+│   │       └── Transformers The Last Knight 2017 BluRay 2160p TrueHD 7.1 Atmos x265 10bit-CHD.nfo
+│   ├── Transformers.One.2024.2160p.WEB-DL.DDP5.1.Atmos.DV.HDR.H.265-FLUX.mkv
+│   ├── Warcraft.mkv
+│   └── When Harry Met Sally.mkv
+├── Japanese
+│   ├── 宫崎骏
+│   │   ├── 千与千寻.国日双语.千と千尋の神隠し.Spirited.Away.2001.WEB-DL.2160P.H265.10bits.HDR.2xDDP 5.1-PTHweb.mkv
+│   │   ├── From.Kokuriko.Hill.2011.BluRay.720p.x264.DTS.AC3.4Audio-HDWinG.mkv
+│   │   ├── Gake.no.ue.no.Ponyo.2008.720p.BluRay.x264.DTS.AC3.4Audio-HDWinG.mkv
+│   │   ├── Grave.of.the.Fireflies.1988.720p.BluRay.x264.DTS.AC3.4Audio-HDWinG.mkv
+│   │   ├── Howls.Moving.Castle.2004.720p.BluRay.x264.DTS.AC3.4Audio-HDWinG.mkv
+│   │   ├── Kiki's.Delivery.Service.1989.720p.BluRay.x264.DTS.AC3.4Audio-HDWinG.mkv
+│   │   ├── Laputa.Castle.In.The.Sky.1986.720p.BluRay.x264.DTS.AC3.4Audio-HDWinG.mkv
+│   │   ├── My.Neighbor.Totoro.1988.720p.BluRay.x264.DTS.AC3.4Audio-HDWinG.mkv
+│   │   ├── My.Neighbors.The.Yamadas.1999.720p.BluRay.x264.DTS.AC3.3Audio-HDWinG.mkv
+│   │   ├── Nausicaa.Of.The.Valley.Of.The.Wind.1984.BluRay.720p.x264.AC3.4Audio-HDWinG.mkv
+│   │   ├── Only.Yesterday.1991.720p.BluRay.x264.DTS.AC3.3Audio-HDWinG.mkv
+│   │   ├── Porco.Rosso.1992.720p.BluRay.x264.DTS.AC3.4Audio-HDWinG.mkv
+│   │   ├── Princess.Mononoke.1997.720p.BluRay.x264.DTS.AC3.4Audio-HDWinG.mkv
+│   │   ├── Tales.From.Earthsea.2006.720p.BluRay.x264.DTS.AC3.4Audio-HDWinG.mkv
+│   │   ├── The.Borrower.Arrietty.2010.720p.BluRay.x264.DTS.3Audio-HDWinG.mkv
+│   │   ├── The.Cat.Returns.2002.720p.BluRay.x264.DTS.AC3.4Audio-HDWinG.mkv
+│   │   ├── The.Racoon.War.1994.720p.BluRay.x264.DTS.AC3.4Audio-HDWinG.mkv
+│   │   ├── The.Wind.Rises.2013.BluRay.720p.x264.AC3.4Audio-HDWinG.mkv
+│   │   └── Whisper.of.the.Heart.1995.720p.BluRay.x264.DTS.AC3.4Audio-HDWinG.mkv
+│   ├── [名侦探柯南：百万美元的五棱星].Detective.Conan.The.Million-dollar.Pentagram.2024.JPN.BluRay.1080p.x265.10bit.DD5.1-CMCT.mkv
+│   ├── [晨曦&老M制作][剧场版][灌篮高手][咆哮吧 篮球员的灵魂!花道流川的炙热夏季][BDrip][HEVC Main10P FLAC MKV].mkv
+│   ├── [晨曦&老M制作][剧场版][灌篮高手][湘北最大的危机!燃烧吧 樱木花道][BDrip][HEVC Main10P FLAC MKV].mkv
+│   ├── [晨曦&老M制作][剧场版][灌篮高手][称霸全国!樱木花道][BDrip][HEVC Main10P FLAC MKV].mkv
+│   ├── [晨曦&老M制作][剧场版][灌篮高手][BDrip][HEVC Main10P FLAC MKV].mkv
+│   ├── [2023 Movie][Detective Conan Movie 26][BDRIP][1080P+SP]
+│   │   ├── 菅野祐悟 - 劇場版『名探偵コナン 黒鉄の魚影(サブマリン)』オリジナル・サウンドトラック.cue
+│   │   ├── 菅野祐悟 - 劇場版『名探偵コナン 黒鉄の魚影(サブマリン)』オリジナル・サウンドトラック.log
+│   │   ├── 天使動漫合購／自購陷入困境，懇請大家參與.txt
+│   │   ├── [Detective Conan Kurogane no Submarine][JPN][BDRIP][1080P][H264_FLACx2_THD].mkv
+│   │   ├── [Detective Conan Kurogane no Submarine][Logo][BDRIP][1080P][H264_FLAC].mkv
+│   │   ├── [Detective Conan Kurogane no Submarine][Menu(Chapter 01)][PNG].png
+│   │   ├── [Detective Conan Kurogane no Submarine][Menu(Chapter 02)][PNG].png
+│   │   ├── [Detective Conan Kurogane no Submarine][Menu(Setup)][PNG].png
+│   │   ├── [Detective Conan Kurogane no Submarine][Menu(Visual Impairment)][BDRIP][1080P][H264_FLAC].mkv
+│   │   ├── [Detective Conan Kurogane no Submarine][Menu][BDRIP][1080P][H264_FLAC].mkv
+│   │   ├── [Detective Conan Kurogane no Submarine][Tokuten BD][Menu(Preview & CM)][PNG].png
+│   │   ├── [Detective Conan Kurogane no Submarine][Tokuten BD][Menu][BDRIP][1080P][H264_FLAC].mkv
+│   │   ├── [Detective Conan Kurogane no Submarine][Tokuten BD][SP01][Haibara Ai Monogatari Kurogane no Mystery Train][BDRIP][1080P][H264_THD].mkv
+│   │   ├── [Detective Conan Kurogane no Submarine][Tokuten BD][SP02][TV Series EP1080][BDRIP][1080P][H264_FLAC].mkv
+│   │   ├── [Detective Conan Kurogane no Submarine][Tokuten BD][SP03][TV Special Program][BDRIP][1080P][H264(60fps)_AC3].mkv
+│   │   ├── [Detective Conan Kurogane no Submarine][Tokuten BD][SP04][Super Trailer][BDRIP][1080P][H264_AC3].mkv
+│   │   ├── [Detective Conan Kurogane no Submarine][Tokuten BD][SP05][Trailer #01][BDRIP][1080P][H264_AC3].mkv
+│   │   ├── [Detective Conan Kurogane no Submarine][Tokuten BD][SP06][Trailer #02][BDRIP][1080P][H264_AC3].mkv
+│   │   ├── [Detective Conan Kurogane no Submarine][Tokuten BD][SP07][Preview #01][BDRIP][1080P][H264_AC3].mkv
+│   │   ├── [Detective Conan Kurogane no Submarine][Tokuten BD][SP08][Preview #02][BDRIP][1080P][H264_AC3].mkv
+│   │   ├── [Detective Conan Kurogane no Submarine][Tokuten BD][SP09][TV Movie Preview #01][BDRIP][1080P][H264_AC3].mkv
+│   │   ├── [Detective Conan Kurogane no Submarine][Tokuten BD][SP10][TV Movie Preview #02][BDRIP][1080P][H264_AC3].mkv
+│   │   ├── [Detective Conan Kurogane no Submarine][Tokuten BD][SP11][TV Movie Preview #03][BDRIP][1080P][H264_AC3].mkv
+│   │   ├── [Detective Conan Kurogane no Submarine][Tokuten BD][SP12][TV Movie Preview #04][BDRIP][1080P][H264_AC3].mkv
+│   │   ├── [Detective Conan Kurogane no Submarine][Tokuten BD][SP13][TV-CM #01][BDRIP][1080P][H264_AC3].mkv
+│   │   ├── [Detective Conan Kurogane no Submarine][Tokuten BD][SP14][TV-CM #02][BDRIP][1080P][H264_AC3].mkv
+│   │   ├── [Detective Conan Kurogane no Submarine][Tokuten BD][SP15][TV-CM #03][BDRIP][1080P][H264_AC3].mkv
+│   │   ├── [Detective Conan Kurogane no Submarine][Tokuten BD][SP16][TV-CM #04][BDRIP][1080P][H264_AC3].mkv
+│   │   ├── 天使動漫@1572383自購.txt
+│   │   ├── 天使動漫@2032980自購.txt
+│   │   ├── Cover.jpg
+│   │   ├── Plex Versions
+│   │   │   └── Optimized for TV
+│   │   └── Thumbs.db
+│   ├── [Kimetsu no Yaiba Mugen Ressha Hen][JPN+ENG][BDRIP][1080P][H264_FLACx3_DTS-HDMA].mkv
+│   ├── 5.Centimeters.Per.Second.2007.BluRay.1080p-ted423@FRDS
+│   │   ├── 5.Centimeters.Per.Second.2007.BluRay.1080p.x265.10bit.DDP.5.1-ted423@FRDS.mkv
+│   │   └── Extras
+│   │       ├── BDMenu(JP).mkv
+│   │       ├── BDMenu(JPGLBL).mkv
+│   │       ├── BDMenu(SPA).mkv
+│   │       ├── BDMenu(TW).mkv
+│   │       ├── BDMV(US).mkv
+│   │       ├── DVDSP
+│   │       │   ├── 樱花抄 动画分镜.mkv
+│   │       │   ├── 尾上绫华访谈.mkv
+│   │       │   ├── 水桥研二访谈.mkv
+│   │       │   ├── 花村怜美访谈.mkv
+│   │       │   ├── 近藤好美访谈.mkv
+│   │       │   └── 秒速5厘米 轨迹照片回顾.mkv
+│   │       ├── Makoto.Shinkai.interview.mkv
+│   │       ├── One.more.time,One.more.chance.mkv
+│   │       ├── PV.mkv
+│   │       ├── PV02.mkv
+│   │       └── She.And.Her.Cat.5.min.ver.mkv
+│   ├── A.Letter.to.Momo.2011.BluRay.1080p.REMUX.AVC.DTS-HD.MA.5.1-HDH
+│   │   └── A.Letter.to.Momo.2011.BluRay.1080p.REMUX.AVC.DTS-HD.MA.5.1-HDH.mkv
+│   ├── Detective Conan
+│   │   ├── Detective.Conan.Movie.1.The.Time.Bomb.Skyscraper.1997.720p.BluRay.x264-WiKi
+│   │   │   ├── Detective.Conan.Movie.1.The.Time.Bomb.Skyscraper.1997.720p.BluRay.x264-WiKi.md5
+│   │   │   ├── Detective.Conan.Movie.1.The.Time.Bomb.Skyscraper.1997.720p.BluRay.x264-WiKi.mkv
+│   │   │   ├── Detective.Conan.Movie.1.The.Time.Bomb.Skyscraper.1997.720p.BluRay.x264-WiKi.nfo
+│   │   │   └── Sample
+│   │   │       └── Detective.Conan.Movie.1.The.Time.Bomb.Skyscraper.1997.720p.BluRay.x264-WiKi.Sample.mkv
+│   │   ├── Detective.Conan.Movie.10.The.Private.Eyes.Requiem.2006.720p.BluRay.x264-WiKi
+│   │   │   ├── Detective.Conan.Movie.10.The.Private.Eyes.Requiem.2006.720p.BluRay.x264-WiKi.md5
+│   │   │   ├── Detective.Conan.Movie.10.The.Private.Eyes.Requiem.2006.720p.BluRay.x264-WiKi.mkv
+│   │   │   ├── Detective.Conan.Movie.10.The.Private.Eyes.Requiem.2006.720p.BluRay.x264-WiKi.nfo
+│   │   │   └── Sample
+│   │   │       └── Detective.Conan.Movie.10.The.Private.Eyes.Requiem.2006.720p.BluRay.x264-WiKi.Sample.mkv
+│   │   ├── Detective.Conan.Movie.11.Jolly.Roger.in.the.Deep.Azure.2007.720p.BluRay.x264-WiKi
+│   │   │   ├── Detective.Conan.Movie.11.Jolly.Roger.in.the.Deep.Azure.2007.720p.BluRay.x264-WiKi.md5
+│   │   │   ├── Detective.Conan.Movie.11.Jolly.Roger.in.the.Deep.Azure.2007.720p.BluRay.x264-WiKi.mkv
+│   │   │   ├── Detective.Conan.Movie.11.Jolly.Roger.in.the.Deep.Azure.2007.720p.BluRay.x264-WiKi.nfo
+│   │   │   └── Sample
+│   │   │       └── Detective.Conan.Movie.11.Jolly.Roger.in.the.Deep.Azure.2007.720p.BluRay.x264-WiKi.Sample.mkv
+│   │   ├── Detective.Conan.Movie.12.Full.Score.of.Fear.2008.720p.BluRay.x264-WiKi
+│   │   │   ├── Detective.Conan.Movie.12.Full.Score.of.Fear.2008.720p.BluRay.x264-WiKi.md5
+│   │   │   ├── Detective.Conan.Movie.12.Full.Score.of.Fear.2008.720p.BluRay.x264-WiKi.mkv
+│   │   │   ├── Detective.Conan.Movie.12.Full.Score.of.Fear.2008.720p.BluRay.x264-WiKi.nfo
+│   │   │   └── Sample
+│   │   │       └── Detective.Conan.Movie.12.Full.Score.of.Fear.2008.720p.BluRay.x264-WiKi.Sample.mkv
+│   │   ├── Detective.Conan.Movie.13.The.Raven.Chaser.2009.720p.BluRay.x264-WiKi
+│   │   │   ├── Detective.Conan.The.Raven.Chaser.2009.720p.BluRay.x264-WiKi.md5
+│   │   │   ├── Detective.Conan.The.Raven.Chaser.2009.720p.BluRay.x264-WiKi.mkv
+│   │   │   ├── Detective.Conan.The.Raven.Chaser.2009.720p.BluRay.x264-WiKi.nfo
+│   │   │   └── Sample
+│   │   │       └── Detective.Conan.The.Raven.Chaser.2009.720p.BluRay.x264-WiKi.Sample.mkv
+│   │   ├── Detective.Conan.Movie.14The.Lost.Ship.in.the.Sky.2010.720p.BluRay.x264-WiKi
+│   │   │   ├── Detective.Conan.The.Lost.Ship.in.the.Sky.2010.720p.BluRay.x264-WiKi.md5
+│   │   │   ├── Detective.Conan.The.Lost.Ship.in.the.Sky.2010.720p.BluRay.x264-WiKi.mkv
+│   │   │   ├── Detective.Conan.The.Lost.Ship.in.the.Sky.2010.720p.BluRay.x264-WiKi.nfo
+│   │   │   └── Sample
+│   │   │       └── Detective.Conan.The.Lost.Ship.in.the.Sky.2010.720p.BluRay.x264-WiKi.Sample.mkv
+│   │   ├── Detective.Conan.Movie.15.Quarter.of.Silence.2011.720p.BluRay.x264-WiKi
+│   │   │   ├── Detective.Conan.Movie.15.Quarter.of.Silence.2011.720p.BluRay.x264-WiKi.md5
+│   │   │   ├── Detective.Conan.Movie.15.Quarter.of.Silence.2011.720p.BluRay.x264-WiKi.mkv
+│   │   │   ├── Detective.Conan.Movie.15.Quarter.of.Silence.2011.720p.BluRay.x264-WiKi.nfo
+│   │   │   └── Detective.Conan.Movie.15.Quarter.of.Silence.2011.720p.BluRay.x264-WiKi.Sample
+│   │   │       └── Detective.Conan.Movie.15.Quarter.of.Silence.2011.720p.BluRay.x264-WiKi.Sample.mkv
+│   │   ├── Detective.Conan.Movie.2.The.Fourteenth.Target.1998.720p.BluRay.x264-WiKi
+│   │   │   ├── Detective.Conan.Movie.2.The.Fourteenth.Target.1998.720p.BluRay.x264-WiKi.md5
+│   │   │   ├── Detective.Conan.Movie.2.The.Fourteenth.Target.1998.720p.BluRay.x264-WiKi.mkv
+│   │   │   ├── Detective.Conan.Movie.2.The.Fourteenth.Target.1998.720p.BluRay.x264-WiKi.nfo
+│   │   │   └── Sample
+│   │   │       └── Detective.Conan.Movie.2.The.Fourteenth.Target.1998.720p.BluRay.x264-WiKi.Sample.mkv
+│   │   ├── Detective.Conan.Movie.3.The.Last.Wizard.of.the.Century.1999.720p.BluRay.x264-WiKi
+│   │   │   ├── Detective.Conan.Movie.3.The.Last.Wizard.of.the.Century.1999.720p.BluRay.x264-WiKi.md5
+│   │   │   ├── Detective.Conan.Movie.3.The.Last.Wizard.of.the.Century.1999.720p.BluRay.x264-WiKi.mkv
+│   │   │   ├── Detective.Conan.Movie.3.The.Last.Wizard.of.the.Century.1999.720p.BluRay.x264-WiKi.nfo
+│   │   │   └── Sample
+│   │   │       └── Detective.Conan.Movie.3.The.Last.Wizard.of.the.Century.1999.720p.BluRay.x264-WiKi.Sample.mkv
+│   │   ├── Detective.Conan.Movie.4.Captured.In.Her.Eyes.2000.720p.BluRay.x264-WiKi
+│   │   │   ├── Detective.Conan.Movie.4.Captured.In.Her.Eyes.2000.720p.BluRay.x264-WiKi.md5
+│   │   │   ├── Detective.Conan.Movie.4.Captured.In.Her.Eyes.2000.720p.BluRay.x264-WiKi.mkv
+│   │   │   ├── Detective.Conan.Movie.4.Captured.In.Her.Eyes.2000.720p.BluRay.x264-WiKi.nfo
+│   │   │   └── Sample
+│   │   │       └── Detective.Conan.Movie.4.Captured.In.Her.Eyes.2000.720p.BluRay.x264-WiKi.Sample.mkv
+│   │   ├── Detective.Conan.Movie.5.Count.Down.to.Heaven.2001.720p.BluRay.x264-WiKi
+│   │   │   ├── Detective.Conan.Movie.5.Count.Down.to.Heaven.2001.720p.BluRay.x264-WiKi.md5
+│   │   │   ├── Detective.Conan.Movie.5.Count.Down.to.Heaven.2001.720p.BluRay.x264-WiKi.mkv
+│   │   │   ├── Detective.Conan.Movie.5.Count.Down.to.Heaven.2001.720p.BluRay.x264-WiKi.nfo
+│   │   │   └── Sample
+│   │   │       └── Detective.Conan.Movie.5.Count.Down.to.Heaven.2001.720p.BluRay.x264-WiKi.Sample.mkv
+│   │   ├── Detective.Conan.Movie.6.The.Phantom.Of.Baker.Street.2002.720p.BluRay.x264-WiKi
+│   │   │   ├── Detective.Conan.Movie.6.The.Phantom.Of.Baker.Street.2002.720p.BluRay.x264-WiKi.md5
+│   │   │   ├── Detective.Conan.Movie.6.The.Phantom.Of.Baker.Street.2002.720p.BluRay.x264-WiKi.mkv
+│   │   │   ├── Detective.Conan.Movie.6.The.Phantom.Of.Baker.Street.2002.720p.BluRay.x264-WiKi.nfo
+│   │   │   └── Sample
+│   │   │       └── Detective.Conan.Movie.6.The.Phantom.Of.Baker.Street.2002.720p.BluRay.x264-WiKi.Sample.mkv
+│   │   ├── Detective.Conan.Movie.7.Crossroad.in.the.Ancient.Capital.2003.720p.BluRay.x264-WiKi
+│   │   │   ├── Detective.Conan.Movie.7.Crossroad.in.the.Ancient.Capital.2003.720p.BluRay.x264-WiKi.md5
+│   │   │   ├── Detective.Conan.Movie.7.Crossroad.in.the.Ancient.Capital.2003.720p.BluRay.x264-WiKi.mkv
+│   │   │   ├── Detective.Conan.Movie.7.Crossroad.in.the.Ancient.Capital.2003.720p.BluRay.x264-WiKi.nfo
+│   │   │   └── Sample
+│   │   │       └── Detective.Conan.Movie.7.Crossroad.in.the.Ancient.Capital.2003.720p.BluRay.x264-WiKi.Sample.mkv
+│   │   ├── Detective.Conan.Movie.8.Magician.of.the.Silver.Sky.2004.720p.BluRay.x264-WiKi
+│   │   │   ├── Detective.Conan.Movie.8.Magician.of.the.Silver.Sky.2004.720p.BluRay.x264-WiKi.md5
+│   │   │   ├── Detective.Conan.Movie.8.Magician.of.the.Silver.Sky.2004.720p.BluRay.x264-WiKi.mkv
+│   │   │   ├── Detective.Conan.Movie.8.Magician.of.the.Silver.Sky.2004.720p.BluRay.x264-WiKi.nfo
+│   │   │   └── Sample
+│   │   │       └── Detective.Conan.Movie.8.Magician.of.the.Silver.Sky.2004.720p.BluRay.x264-WiKi.Sample.mkv
+│   │   ├── Detective.Conan.Movie.9.Strategy.Above.the.Depths.2005.720p.BluRay.x264-WiKi
+│   │   │   ├── Detective.Conan.Movie.9.Strategy.Above.the.Depths.2005.720p.BluRay.x264-WiKi.md5
+│   │   │   ├── Detective.Conan.Movie.9.Strategy.Above.the.Depths.2005.720p.BluRay.x264-WiKi.mkv
+│   │   │   ├── Detective.Conan.Movie.9.Strategy.Above.the.Depths.2005.720p.BluRay.x264-WiKi.nfo
+│   │   │   └── Sample
+│   │   │       └── Detective.Conan.Movie.9.Strategy.Above.the.Depths.2005.720p.BluRay.x264-WiKi.Sample.mkv
+│   │   ├── Detective.Conan.Private.Eye.in.the.Distant.Sea.2013.720p.BluRay.x264-WiKi
+│   │   │   ├── Detective.Conan.Private.Eye.in.the.Distant.Sea.2013.720p.BluRay.x264-WiKi.md5
+│   │   │   ├── Detective.Conan.Private.Eye.in.the.Distant.Sea.2013.720p.BluRay.x264-WiKi.mkv
+│   │   │   ├── Detective.Conan.Private.Eye.in.the.Distant.Sea.2013.720p.BluRay.x264-WiKi.nfo
+│   │   │   └── Sample
+│   │   │       └── Detective.Conan.Private.Eye.in.the.Distant.Sea.2013.720p.BluRay.x264-WiKi.sample.mkv
+│   │   ├── Detective.Conan.Sunflowers.of.Inferno.2015.720p.BluRay.x264-WiKi
+│   │   │   ├── Detective.Conan.Sunflowers.of.Inferno.2015.720p.BluRay.x264-WiKi.md5
+│   │   │   ├── Detective.Conan.Sunflowers.of.Inferno.2015.720p.BluRay.x264-WiKi.mkv
+│   │   │   ├── Detective.Conan.Sunflowers.of.Inferno.2015.720p.BluRay.x264-WiKi.nfo
+│   │   │   └── Sample
+│   │   │       └── Detective.Conan.Sunflowers.of.Inferno.2015.720p.BluRay.x264-WiKi.Sample.mkv
+│   │   ├── Detective.Conan.The.Crimson.Love.Letter.2017.720p.BluRay.x264-WiKi
+│   │   │   ├── Detective.Conan.The.Crimson.Love.Letter.2017.720p.BluRay.x264-WiKi.md5
+│   │   │   ├── Detective.Conan.The.Crimson.Love.Letter.2017.720p.BluRay.x264-WiKi.mkv
+│   │   │   ├── Detective.Conan.The.Crimson.Love.Letter.2017.720p.BluRay.x264-WiKi.nfo
+│   │   │   └── Sample
+│   │   │       └── Detective.Conan.The.Crimson.Love.Letter.2017.720p.BluRay.x264-WiKi.Sample.mkv
+│   │   ├── Detective.Conan.The.Darkest.Nightmare.2016.720p.BluRay.x264-WiKi
+│   │   │   ├── Detective.Conan.The.Darkest.Nightmare.2016.720p.BluRay.x264-WiKi.md5
+│   │   │   ├── Detective.Conan.The.Darkest.Nightmare.2016.720p.BluRay.x264-WiKi.mkv
+│   │   │   ├── Detective.Conan.The.Darkest.Nightmare.2016.720p.BluRay.x264-WiKi.nfo
+│   │   │   └── Sample
+│   │   │       └── Detective.Conan.The.Darkest.Nightmare.2016.720p.BluRay.x264-WiKi.sample.mkv
+│   │   ├── Detective.Conan.The.Eleventh.Striker.2012.720p.BluRay.x264-WiKi
+│   │   │   ├── Detective.Conan.The.Eleventh.Striker.2012.720p.BluRay.x264-WiKi.md5
+│   │   │   ├── Detective.Conan.The.Eleventh.Striker.2012.720p.BluRay.x264-WiKi.mkv
+│   │   │   ├── Detective.Conan.The.Eleventh.Striker.2012.720p.BluRay.x264-WiKi.nfo
+│   │   │   └── Sample
+│   │   │       └── Detective.Conan.The.Eleventh.Striker.2012.720p.BluRay.x264-WiKi.Sample.mkv
+│   │   ├── Detective.Conan.The.Fist.of.Blue.Sapphire.2019.720p.BluRay.x264-WiKi
+│   │   │   ├── Detective.Conan.The.Fist.of.Blue.Sapphire.2019.720p.BluRay.x264-WiKi.md5
+│   │   │   ├── Detective.Conan.The.Fist.of.Blue.Sapphire.2019.720p.BluRay.x264-WiKi.mkv
+│   │   │   ├── Detective.Conan.The.Fist.of.Blue.Sapphire.2019.720p.BluRay.x264-WiKi.nfo
+│   │   │   └── Sample
+│   │   │       └── Detective.Conan.The.Fist.of.Blue.Sapphire.2019.720p.BluRay.x264-WiKi.Sample.mkv
+│   │   ├── Detective.Conan.The.Sniper.from.Another.Dimension.2014.720p.BluRay.x264-WiKi
+│   │   │   ├── Detective.Conan.The.Sniper.from.Another.Dimension.2014.720p.BluRay.x264-WiKi.md5
+│   │   │   ├── Detective.Conan.The.Sniper.from.Another.Dimension.2014.720p.BluRay.x264-WiKi.mkv
+│   │   │   ├── Detective.Conan.The.Sniper.from.Another.Dimension.2014.720p.BluRay.x264-WiKi.nfo
+│   │   │   └── Sample
+│   │   │       └── Detective.Conan.The.Sniper.from.Another.Dimension.2014.720p.BluRay.x264-WiKi.sample.mkv
+│   │   └── Detective.Conan.Zero.the.Enforcer.2018.720p.BluRay.x264-WiKi
+│   │       ├── Detective.Conan.Zero.the.Enforcer.2018.720p.BluRay.x264-WiKi.md5
+│   │       ├── Detective.Conan.Zero.the.Enforcer.2018.720p.BluRay.x264-WiKi.mkv
+│   │       ├── Detective.Conan.Zero.the.Enforcer.2018.720p.BluRay.x264-WiKi.nfo
+│   │       └── Sample
+│   │           └── Detective.Conan.Zero.the.Enforcer.2018.720p.BluRay.x264-WiKi.sample.mkv
+│   ├── Ghost.in.the.Shell.1995.1080p.BluRay.x264-WiKi.mkv
+│   ├── Ghost.in.the.Shell.2.Innocence.2004.2160p.HDR.UHD.BluRay.DTS-HD.MA.7.1.x265-10bit-HDS.mkv
+│   ├── Initial.D.2005.BluRay.REMUX.1080p.AVC.DD5.1-HDS.m2ts
+│   ├── Kokuhaku.2010.1080p.BluRay.DD5.1.x264-NTb.mkv
+│   ├── Lupin.III.The.Castle.of.Cagliostro.1979.BluRay.720p.x264.AC3-HDWinG.mkv
+│   ├── Overlord.The.Scared.Kingdom.2024.1080p.ATVP.WEB-DL.JPN.DD5.1.H.264.mkv
+│   ├── Parasyte.Part.1.2014.BluRay.iPad.720p.x264.AAC-NYPAD.mp4
+│   └── Suzume.2022.1080p.iT.WEB-DL.DD5.1.H.264-ZigZag.mkv
+└── Kids
+    ├── Abominable.mkv
+    ├── Aladdin.1992.1080p.BluRay.DTS.x264-DON.mkv
+    ├── Cars 2 2011 Hybrid 1080p BluRay x264-EbP.mkv
+    ├── Cars.2006.1080p.BluRay.DTS.x264-Geek.mkv
+    ├── Cars.3.2017.1080p.UHD.BluRay.DD5.1.HDR.x265-CtrlHD.mkv
+    ├── Despicable Me
+    │   ├── Despicable.Me.2.2013.BluRay.1080p.x265.10bit.4Audio.MNHD-FRDS.mkv
+    │   ├── Despicable.Me.2010.720p.BluRay.DTS.x264-HiDt.mkv
+    │   └── Despicable.Me.3.2017.2160p.UHD.BluRay.DTS-HD.MA.7.1.HDR.x265-CtrlHD.mkv
+    ├── Despicable Me 4 2024 2160p WEB-DL DDP5 1 Atmos DV HDR H 265-FLUX[TGx]
+    │   ├── [TGx]Downloaded from torrentgalaxy.to .txt
+    │   ├── Despicable Me 4 2024 2160p WEB-DL DDP5 1 Atmos DV HDR H 265-FLUX.mkv
+    │   ├── Despicable Me 4 2024 2160p WEB-DL DDP5 1 Atmos DV HDR H 265-FLUX.mkv.nfo
+    │   └── NEW upcoming releases by Xclusive.txt
+    ├── Dog Man.mkv
+    ├── Elemental.2023.2160p.WEB-DL.DDP5.1.Atmos.DV.HDR.H.265-FLUX.mkv
+    ├── Enchanted.mkv
+    ├── Fantastic.Beasts.and.Where.to.Find.Them.2016.1080p.BluRay.x264-DON.mkv
+    ├── Fantastic.Beasts.The.Crimes.of.Grindelwald.2018.Extended.Cut.1080p.BluRay.DTS.x264-TayTO.mkv
+    ├── Fantastic.Beasts.The.Secrets.of.Dumbledore.2022.2160p.HMAX.WEB-DL.DDP5.1.Atmos.HDR.H.265-SMURF.mkv
+    ├── Finding Nemo 2003 1080p BluRay DD5.1 x264-EbP.mkv
+    ├── Flow.2024.1080p.AMZN.WEB-DL.DDP5.1.H.264-FLUX.mkv
+    ├── Frozen.2013.UHD.BluRay.2160p.10bit.HDR.4Audio.TrueHD(Atmos).7.1.DTS-HD.MA.7.1.x265-beAst (1).mkv
+    ├── Frozen.II.2019.RERIP.UHD.BluRay.2160p.10bit.HDR.4Audio.TrueHD(Atmos).7.1.x265-beAst.mkv
+    ├── Guillermo.del.Toros.Pinocchio.2022.1080p.NF.WEB-DL.DDP5.1.Atmos.H.264-SMURF.mkv
+    ├── Harry Potter
+    │   ├── 480p
+    │   │   ├── HARRY POTTER AND DEATHLY HALLOWS PART 1 (2010).mkv
+    │   │   ├── HARRY POTTER AND DEATHLY HALLOWS PART 2 (2011).mkv
+    │   │   ├── HARRY POTTER AND HALF BLOOD PRINCE.mkv
+    │   │   ├── HARRY POTTER AND THE CHAMBER OF SECRETS.mkv
+    │   │   ├── HARRY POTTER AND THE ORDER OF THE PHOENIX.mkv
+    │   │   ├── HARRY POTTER AND THE SORCERERS STONE.mkv
+    │   │   ├── HARRY POTTER GOBLET OF FIRE.mkv
+    │   │   └── HARRY POTTER PRISONER OF AZKABAN.mkv
+    │   └── 4k
+    │       ├── Harry.Potter.and.the.Chamber.of.Secrets.2002.UHD.BluRay.2160p.x265.HDR.10bit.DTS-HD.MA.7.1-HDH.mkv
+    │       ├── Harry.Potter.and.the.Deathly.Hallows.Part.1.2010.2160p.UHD.BluRay.x265.HDR.10bit.DTS-HD.MA.7.1-HDH.mkv
+    │       ├── Harry.Potter.and.the.Deathly.Hallows.Part.2.2011.2160p.UHD.BluRay.x265.HDR.10bit.DTS-HD.MA.7.1-HDH.mkv
+    │       ├── Harry.Potter.and.the.Goblet.of.Fire.2005.UHD.BluRay.2160p.x265.HDR.10bit.DTS-HD.MA.7.1-HDH.mkv
+    │       ├── Harry.Potter.and.the.Half-Blood.Prince.2009.2160p.UHD.BluRay.x265.HDR.10bit.DTS-HD.MA.7.1-HDH.mkv
+    │       ├── Harry.Potter.and.the.Order.of.the.Phoenix.2007.2160p.UHD.BluRay.x265.HDR.10bit.DTS-HD.MA.7.1-HDH.mkv
+    │       ├── Harry.Potter.and.the.Prisoner.of.Azkaban.2004.UHD.BluRay.2160p.x265.HDR.10bit.DTS-HD.MA.7.1-HDH.mkv
+    │       └── Harry.Potter.and.the.Sorcerers.Stone.2001.UHD.BluRay.2160p.x265.HDR.10bit.DTS-HD.MA.7.1-HDH.mkv
+    ├── Home (2015)
+    │   ├── Home.2015.720p.BluRay.x264.YIFY.mp4
+    │   └── WWW.YTS.TO.jpg
+    ├── Home Alone
+    │   ├── Home Alone 2.mkv
+    │   ├── Home Alone 3.mkv
+    │   ├── Home Alone 4.mkv
+    │   ├── Home Alone 5.mkv
+    │   └── Home Alone.mkv
+    ├── How to Train Your Dragon 2 (2014) [1080p]
+    │   ├── How.to.Train.Your.Dragon.2.2014.1080p.BluRay.x264.YIFY.mp4
+    │   └── WWW.YTS.RE.jpg
+    ├── How To Train Your Dragon The Hidden World (2019) [BluRay] [1080p] [YTS.AM]
+    │   ├── How.To.Train.Your.Dragon.The.Hidden.World.2019.1080p.BluRay.x264-[YTS.AM].mp4
+    │   └── www.YTS.AM.jpg
+    ├── how_to_train_your_dragon
+    │   └── how_to_train_your_dragon.mkv
+    ├── Ice Age.mkv
+    ├── Incredibles.2.2018.1080p.UHD.BluRay.DDP7.1.HDR.x265-NCmt.mkv
+    ├── Inside.Out.2.2024.1080p.WEBRip.DDP5.1.x265.10bit-GalaxyRG265[TGx]
+    │   ├── [TGx]Downloaded from torrentgalaxy.to .txt
+    │   ├── Inside.Out.2.2024.1080p.WEBRip.DDP5.1.x265.10bit-GalaxyRG265.mkv
+    │   ├── NEW upcoming releases by Xclusive.txt
+    │   └── source.txt
+    ├── Inside.Out.2015.720p.BluRay.x264-SPARKS[rarbg]
+    │   ├── inside.out.2015.720p.bluray.x264-sparks.jpg
+    │   ├── Inside.Out.2015.720p.BluRay.x264-SPARKS.mkv
+    │   ├── inside.out.2015.720p.bluray.x264-sparks.nfo
+    │   ├── RARBG.com.txt
+    │   └── Subs
+    │       ├── Inside.Out.2015.720p.BluRay.x264-SPARKS.idx
+    │       └── Inside.Out.2015.720p.BluRay.x264-SPARKS.sub
+    ├── iron_giant.mkv
+    ├── Kung Fu Panda 2 2011 720p BluRay x264-EbP.mkv
+    ├── Kung.Fu.Panda.2008.720p.BluRay.DTS.x264-FoRM.mkv
+    ├── Kung.Fu.Panda.3.2016.720p.BluRay.DTS-ES.x264-CRiME.mkv
+    ├── Kung.Fu.Panda.4.2024.2160p.WEB-DL.DDP5.1.Atmos.DV.HDR.H.265-FLUX.mkv
+    ├── Lightyear.2022.2160p.MA.WEB-DL.DDP5.1.HDR.HEVC-PaODEQUEiJO.mkv
+    ├── Madagascar (2005) 1080p
+    │   ├── Madagascar 2005.1080p.BrRip.x264.YIFY.mp4
+    │   ├── Other
+    │   │   ├── AhaShare.com.txt
+    │   │   ├── Torrent downloaded from Demonoid.com - Copy.txt
+    │   │   └── Torrent Downloaded From ExtraTorrent.com.txt
+    │   └── WWW.YIFY-TORRENTS.COM.jpg
+    ├── MADAGASCAR2.mkv
+    ├── MADAGASCAR3.mkv
+    ├── minions the risse of gru.mkv
+    ├── Minions.2015.720p.WEB-DL.XviD.MP3-RARBG
+    │   ├── Minions.2015.720p.WEB-DL.XviD.MP3-RARBG.avi
+    │   └── Minions.2015.720p.WEB-DL.XviD.MP3-RARBG.nfo
+    ├── Moana 2016 1080p BluRay x264 DTS-JYK
+    │   ├── Moana 2016 1080p BluRay x264 DTS-JYK.mkv
+    │   ├── Moana 2016 1080p BluRay x264 DTS-JYK.mkv.jpg
+    │   └── Subs
+    │       ├── English.srt
+    │       └── English(SDH).srt
+    ├── Moana2.mkv
+    ├── Monsters.Inc.2001.UHD.BluRay.2160p.x265.HDR.TrueHD.7.1.RERIP.mUHD-FRDS.mkv
+    ├── Monsters.University.2013.UHD.BluRay.HDR.2160p.Atmos.TrueHD.7.1.4Audio.x265.10bit-CHD.mkv
+    ├── Mufasa The Lion King.mkv
+    ├── Ne Zha zhi mo tong jiang shi 2019 1080p UHD BluRay DD 5.1 HDR x265-DON.mkv
+    ├── New.Gods.Nezha.Reborn.2021.2160p.WEB-DL.HEVC.DDP5.1-HVAC.mkv
+    ├── New.Gods.Yang.Jian.2022.2160p.WEB-DL.H265.120FPS.10bit.AAC-MaoZhan.mkv
+    ├── Penguins of Madagascar (2014) [1080p]
+    │   ├── Penguins.of.Madagascar.2014.1080p.BluRay.x264.YIFY.mp4
+    │   └── WWW.YTS.RE.jpg
+    ├── Pinocchio.2022.2160p.DSNP.WEB-DL.DDP5.1.Atmos.HDR.H.265-SMURF.mkv
+    ├── Puss.in.Boots.The.Last.Wish.2022.REPACK.R2160p.MA.WEB-DL.DDP5.1.Atmos.DV.HDR.H.265-FLUX.mkv
+    ├── Ratatouille.mkv
+    ├── Secrects of the furious five.mkv
+    ├── Shang.Chi.and.the.Legend.of.the.Ten.Rings.2021.2160p.HDR.UHD.BluRay.TrueHD.7.1.Atmos.x265-10bit-HDS.mkv
+    ├── SING.2.2021.2160p.HDR.UHD.BluRay.TrueHD.7.1.Atmos.x265-10bit-HDS.mkv
+    ├── Sing.2016.1080p.BluRay.DD5.1.x264-VietHD.mkv
+    ├── Smallfoot (2018).mkv
+    ├── Sonic.the.Hedgehog.2020.1080p.UHD.BluRay.DDP7.1.HDR.x265-NCmt.mkv
+    ├── Spider-Man.Across.the.Spider-Verse.2023.2160p.WEB-DL.DDP5.1.Atmos.DV.HDR.H.265-FLUX.mkv
+    ├── Storks 2016 1080p BluRay x264 AC3-JYK.mkv
+    ├── The nutcracker and the four realms.mkv
+    ├── The.Amazing.Maurice.2022.1080p.NOW.WEB-DL.DDP5.1.H.264-SMURF.mkv
+    ├── The.Boss.Baby.2017.1080p.WEB-DL.H264.mkv
+    ├── The.Incredibles.2004.720p.BluRay.x264-EbP.mkv
+    ├── The.LEGO.Ninjago.Movie.2017.RERIP.1080p.BluRay.x264-GECKOS[EtHD]
+    │   ├── Downloaded from www.ETTV.tv .txt
+    │   ├── Proof
+    │   │   └── the.lego.ninjago.movie.2017.rerip.1080p.bluray.x264-geckos.proof.jpg
+    │   ├── Subs
+    │   │   ├── The.LEGO.Ninjago.Movie.2017.RERIP.1080p.BluRay.x264-GECKOS.idx
+    │   │   ├── The.LEGO.Ninjago.Movie.2017.RERIP.1080p.BluRay.x264-GECKOS.sub
+    │   │   └── the.lego.ninjago.movie.2017.rerip.1080p.bluray.x264-geckos.subs.sfv
+    │   ├── the.lego.ninjago.movie.2017.rerip.1080p.bluray.x264-geckos.jpg
+    │   ├── the.lego.ninjago.movie.2017.rerip.1080p.bluray.x264-geckos.nfo
+    │   ├── the.lego.ninjago.movie.2017.rerip.1080p.bluray.x264-geckos.sfv
+    │   └── The.LEGO.Ninjago.Movie.2017.RERIP.1080p.BluRay.x264-GECKOS[EtHD].mkv
+    ├── The.Wild.Robot.2024.2160p.WEB-DL.DDP5.1.Atmos.DV.HDR.H.265-FLUX.mkv
+    ├── Troll.2022.1080p.NF.WEB-DL.DDP5.1.Atmos.H.264-playWEB.mkv
+    ├── Up.2009.1080p.BluRay.DTS-ES.Hi10P.x264-DON.mkv
+    ├── Wish (2023) [1080p] [WEBRip] [5.1] [YTS.MX]
+    │   ├── Subs
+    │   │   ├── ara.srt
+    │   │   ├── bul.srt
+    │   │   ├── cze.srt
+    │   │   ├── English.srt
+    │   │   ├── SDH.eng.HI.srt
+    │   │   └── Traditional.chi.srt
+    │   ├── Wish.2023.1080p.WEBRip.x264.AAC5.1-[YTS.MX].mp4
+    │   ├── Wish.2023.1080p.WEBRip.x264.AAC5.1-[YTS.MX].srt
+    │   ├── www.YTS.MX.jpg
+    │   └── YTSYifyUP... (TOR).txt
+    ├── www.Torrenting.com - Mulan 1998 1080p BluRay x264-nikt0
+    │   ├── Mulan.1998.1080p.BluRay.x264-nikt0
+    │   │   ├── Mulan.1998.1080p.BluRay.x264-nikt0.fanart.jpg
+    │   │   ├── Mulan.1998.1080p.BluRay.x264-nikt0.jpg
+    │   │   └── Mulan.1998.1080p.BluRay.x264-nikt0.mkv
+    │   ├── Mulan.1998.1080p.BluRay.x264-nikt0.mkv.nfo
+    │   └── Torrent Downloaded From www.Torrenting.org   .txt
+    └── www.UIndex.org    -    Smurfs The Lost Village 2017 1080p HULU WEB-DL DDP 5 1 H 264-PiRaTeS
+        ├── Smurfs The Lost Village 2017 1080p HULU WEB-DL DDP 5 1 H 264-PiRaTeS.mkv
+        ├── Smurfs The Lost Village 2017 1080p HULU WEB-DL DDP 5 1 H 264-PiRaTeS.mkv.nfo
+        └── Torrent Downloaded From     UIndex.org      .txt
+
+148 directories, 583 files

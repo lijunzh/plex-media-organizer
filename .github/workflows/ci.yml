@@ -11,12 +11,10 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        rust: [stable, 1.70.0]
+        rust: [stable]
         include:
           - rust: stable
             cache-key: stable
-          - rust: 1.70.0
-            cache-key: 1.70.0
     
     steps:
       - name: Checkout Repository
