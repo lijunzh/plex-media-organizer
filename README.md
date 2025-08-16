@@ -127,23 +127,44 @@ White.Snake.2019.2160p.HQ.WEB-DL.H265.60fps.DDP5.1.Atmos-CHDWEB.mkv
 
 ## 🧪 **Testing & Validation**
 
-### **Dynamic Testing Framework**
-Our comprehensive testing suite validates against real-world data:
-- **Real Media Collections**: Tests against actual `tree` output from media servers
-- **Pattern Coverage**: Automatically discovers and validates new naming conventions
-- **Performance Benchmarks**: Ensures parsing speed meets production requirements
-- **Edge Case Handling**: Tests malformed filenames and unusual patterns
+### **Comprehensive Test Suite**
+Our testing framework provides both static and dynamic validation:
+
+#### **Static Unit Tests** (`real_world_patterns_test.rs`)
+- **Specific Pattern Validation**: Tests individual filename patterns with hardcoded examples
+- **Fast Execution**: Quick feedback during development
+- **Edge Case Coverage**: Validates error handling and unusual patterns
+- **Regression Prevention**: Ensures changes don't break existing functionality
+
+#### **Dynamic Integration Tests** (`dynamic_real_world_test.rs`)
+- **Real-World Validation**: Tests against actual media server directory structures
+- **Performance Benchmarking**: Validates parsing speed (445+ files/second)
+- **Success Rate Measurement**: Ensures >95% success on real data
+- **Pattern Discovery**: Automatically identifies new naming conventions
+
+#### **Test Data** (`test-data/` directory)
+- **Real Tree Outputs**: Actual `tree` command output from media servers
+- **Comprehensive Coverage**: 417+ movies, 5,774+ TV episodes, 17,899+ music files
+- **Multiple Languages**: Chinese, English, Japanese content
+- **Various Formats**: mkv, mp4, flac, and more
 
 ### **Run Tests**
 ```bash
 # Run all tests
 cargo test
 
-# Run dynamic real-world tests
+# Run unit tests only
+cargo test --lib
+cargo test --test real_world_patterns_test
+
+# Run integration tests only
 cargo test --test dynamic_real_world_test
 
-# Run with output
+# Run with detailed output
 cargo test --test dynamic_real_world_test -- --nocapture
+
+# Run specific test
+cargo test test_movie_directory_dynamic
 ```
 
 ## 🔧 **Development**
@@ -176,8 +197,9 @@ cargo run -- help   # Test CLI
 - **[User Guide](docs/USER_GUIDE.md)** - Complete usage instructions
 - **[Architecture](docs/ARCHITECTURE.md)** - System design and architecture
 - **[Implementation Roadmap](docs/IMPLEMENTATION_ROADMAP.md)** - Development phases
-- **[Phase 1 Summary](PHASE_1_SUMMARY.md)** - Detailed Phase 1 accomplishments
+- **[Phase 1 Summary](docs/PHASE_1_SUMMARY.md)** - Detailed Phase 1 accomplishments
 - **[Contributing](CONTRIBUTING.md)** - How to contribute to the project
+- **[Testing Guide](tests/README.md)** - Comprehensive test suite documentation
 
 ## 🗺️ **Roadmap**
 
