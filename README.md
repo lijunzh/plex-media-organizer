@@ -142,7 +142,7 @@ Our testing framework provides both static and dynamic validation:
 - **Success Rate Measurement**: Ensures >95% success on real data
 - **Pattern Discovery**: Automatically identifies new naming conventions
 
-#### **Test Data** (`test-data/` directory)
+#### **Test Data** (`test_data/` directory)
 - **Real Tree Outputs**: Actual `tree` command output from media servers
 - **Comprehensive Coverage**: 417+ movies, 5,774+ TV episodes, 17,899+ music files
 - **Multiple Languages**: Chinese, English, Japanese content

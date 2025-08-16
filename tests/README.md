@@ -13,7 +13,7 @@ This directory contains the comprehensive test suite for the Plex Media Organize
 
 ### **Integration Tests**
 - **`dynamic_real_world_test.rs`** - Dynamic integration tests using actual tree files
-  - Tests against real directory tree outputs from `../test-data/`
+  - Tests against real directory tree outputs from `test_data/`
   - Validates performance and success rates
   - Uses actual media server directory structures
   - Comprehensive real-world validation
@@ -27,17 +27,18 @@ This directory contains the comprehensive test suite for the Plex Media Organize
 
 ## 🎯 **Test Data**
 
-Test data is stored in `../test-data/` directory (at project root):
+Test data is stored in `test_data/` directory (at project root):
 
 - **`movie_directory.txt`** - Real movie directory tree output
 - **`tv_directory.txt`** - Real TV show directory tree output  
 - **`music_directory.txt`** - Real music directory tree output
 
 ### **Why Test Data is at Root Level:**
-- **Standard practice** for large data files
+- **Standard practice** for large data files (1.7MB+)
 - **Easy to reference** from both unit and integration tests
 - **Separate from test code** for better organization
 - **Can be gitignored** if needed for privacy
+- **Better performance** - large files don't impact git operations
 
 ## 🚀 **Running Tests**
 
@@ -125,7 +126,7 @@ The dynamic tests validate:
 - Bug fixes require new test cases
 
 ### **Test Data Updates**
-- Update `../test-data/` files when directory structures change
+- Update `test_data/` files when directory structures change
 - Regenerate tree outputs after significant reorganization
 - Validate test data reflects current naming conventions
 

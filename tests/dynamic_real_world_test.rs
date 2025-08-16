@@ -9,14 +9,14 @@ fn test_movie_directory_dynamic() {
     let runner = DynamicTestRunner::new();
 
     // Test against the actual movie directory tree output
-    let tree_file = Path::new("../test-data/movie_directory.txt");
+    let tree_file = Path::new("test_data/movie_directory.txt");
 
     if !tree_file.exists() {
         eprintln!(
             "⚠️  Skipping dynamic test - movie directory file not found at: {}",
             tree_file.display()
         );
-        eprintln!("   Expected location: ../test-data/movie_directory.txt");
+        eprintln!("   Expected location: test_data/movie_directory.txt");
         return;
     }
 
@@ -85,7 +85,7 @@ fn test_movie_directory_dynamic() {
 fn test_tv_directory_dynamic() {
     let runner = DynamicTestRunner::new();
 
-    let tree_file = Path::new("../test-data/tv_directory.txt");
+    let tree_file = Path::new("test_data/tv_directory.txt");
 
     if !tree_file.exists() {
         eprintln!(
@@ -117,7 +117,7 @@ fn test_tv_directory_dynamic() {
 fn test_music_directory_dynamic() {
     let runner = DynamicTestRunner::new();
 
-    let tree_file = Path::new("../test-data/music_directory.txt");
+    let tree_file = Path::new("test_data/music_directory.txt");
 
     if !tree_file.exists() {
         eprintln!(
@@ -149,7 +149,7 @@ fn test_music_directory_dynamic() {
 fn test_performance_large_collection() {
     let runner = DynamicTestRunner::new();
 
-    let tree_file = Path::new("../test-data/movie_directory.txt");
+    let tree_file = Path::new("test_data/movie_directory.txt");
 
     if !tree_file.exists() {
         eprintln!("⚠️  Skipping performance test - movie directory file not found");
