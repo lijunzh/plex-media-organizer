@@ -113,7 +113,7 @@ impl MovieParser {
     }
 
     /// Parse filename using various patterns
-    fn parse_filename(&self, filename: &str) -> Result<MovieInfo> {
+    pub fn parse_filename(&self, filename: &str) -> Result<MovieInfo> {
         // Try Chinese-English bilingual pattern first
         if let Some(captures) = CHINESE_ENGLISH_PATTERN.captures(filename) {
             return self.parse_chinese_english_bilingual(filename, captures);
