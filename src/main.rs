@@ -7,7 +7,7 @@ use plex_media_organizer::cli::Cli;
 async fn main() -> Result<()> {
     // Initialize logging
     tracing_subscriber::fmt::init();
-    
+
     // Run the CLI application
     Cli::run().await
 }

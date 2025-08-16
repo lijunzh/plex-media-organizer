@@ -26,63 +26,53 @@ enum Commands {
         /// Directory to scan
         #[arg(value_name = "DIRECTORY")]
         directory: PathBuf,
-        
+
         /// Show detailed output
         #[arg(short, long)]
         verbose: bool,
     },
-    
+
     /// Set up configuration interactively
     Setup {
         /// Force reconfiguration even if config exists
         #[arg(short, long)]
         force: bool,
     },
-    
+
     /// Show current configuration
     Config {
         /// Show configuration file path
         #[arg(short, long)]
         path: bool,
     },
-    
+
     /// Test parsing with a single file
     Test {
         /// File to test parsing
         #[arg(value_name = "FILE")]
         file: PathBuf,
     },
-
 }
 
 impl Cli {
     /// Run the CLI application
     pub async fn run() -> Result<()> {
         let cli = Cli::parse();
-        
-        match cli.command {
-            Commands::Scan { directory, verbose } => {
-                Self::handle_scan(directory, verbose).await
-            }
-            Commands::Setup { force } => {
-                Self::handle_setup(force).await
-            }
-            Commands::Config { path } => {
-                Self::handle_config(path).await
-            }
-            Commands::Test { file } => {
-                Self::handle_test(file).await
-            }
 
+        match cli.command {
+            Commands::Scan { directory, verbose } => Self::handle_scan(directory, verbose).await,
+            Commands::Setup { force } => Self::handle_setup(force).await,
+            Commands::Config { path } => Self::handle_config(path).await,
+            Commands::Test { file } => Self::handle_test(file).await,
         }
     }
-    
+
     /// Handle the scan command
     async fn handle_scan(directory: PathBuf, verbose: bool) -> Result<()> {
         println!("🎬 Plex Media Organizer - Scanning Directory");
         println!("Directory: {}", directory.display());
         println!();
-        
+
         // Load configuration
         let config = match AppConfig::load() {
             Ok(config) => config,
@@ -91,39 +81,37 @@ impl Cli {
                 return Ok(());
             }
         };
-        
+
         // Validate API keys
         if let Err(e) = config.validate_api_keys() {
             println!("⚠️  Configuration issue: {}", e);
             println!("Run 'setup' to configure API keys.");
             return Ok(());
         }
-        
+
         // Create TMDB client
-        let tmdb_client = if let Some(api_key) = config.apis.tmdb_api_key {
-            Some(TmdbClient::new(api_key))
-        } else {
-            None
-        };
-        
+        let tmdb_client = config.apis.tmdb_api_key.map(TmdbClient::new);
+
         // Create movie parser and scanner
         let movie_parser = MovieParser::new(tmdb_client);
         let scanner = Scanner::new(movie_parser);
-        
+
         // Scan directory
-        let scan_result = scanner.scan_directory(&directory).await
+        let scan_result = scanner
+            .scan_directory(&directory)
+            .await
             .context("Failed to scan directory")?;
-        
+
         // Display results
         Self::display_scan_results(&scan_result, verbose);
-        
+
         Ok(())
     }
-    
+
     /// Handle the setup command
     async fn handle_setup(force: bool) -> Result<()> {
         println!("🔧 Plex Media Organizer - Setup");
-        
+
         // Check if config already exists
         if !force {
             if let Ok(config) = AppConfig::load() {
@@ -133,17 +121,19 @@ impl Cli {
                 }
             }
         }
-        
+
         // Run interactive setup
-        let _config = AppConfig::interactive_setup()
-            .context("Setup failed")?;
-        
+        let _config = AppConfig::interactive_setup().context("Setup failed")?;
+
         println!("✅ Setup completed successfully!");
-        println!("Configuration saved to: {}", AppConfig::get_config_dir()?.join("config.toml").display());
-        
+        println!(
+            "Configuration saved to: {}",
+            AppConfig::get_config_dir()?.join("config.toml").display()
+        );
+
         Ok(())
     }
-    
+
     /// Handle the config command
     async fn handle_config(path: bool) -> Result<()> {
         if path {
@@ -152,38 +142,62 @@ impl Cli {
             println!("Configuration file: {}", config_file.display());
             return Ok(());
         }
-        
+
         match AppConfig::load() {
             Ok(config) => {
                 println!("📋 Current Configuration:");
-                println!("TMDB API Key: {}", 
-                    if config.apis.tmdb_api_key.is_some() { "✅ Set" } else { "❌ Not set" });
-                println!("TVDB API Key: {}", 
-                    if config.apis.tvdb_api_key.is_some() { "✅ Set" } else { "❌ Not set" });
-                println!("MusicBrainz User Agent: {}", 
-                    if config.apis.musicbrainz_user_agent.is_some() { "✅ Set" } else { "❌ Not set" });
-                println!("AniDB Username: {}", 
-                    if config.apis.anidb_username.is_some() { "✅ Set" } else { "❌ Not set" });
+                println!(
+                    "TMDB API Key: {}",
+                    if config.apis.tmdb_api_key.is_some() {
+                        "✅ Set"
+                    } else {
+                        "❌ Not set"
+                    }
+                );
+                println!(
+                    "TVDB API Key: {}",
+                    if config.apis.tvdb_api_key.is_some() {
+                        "✅ Set"
+                    } else {
+                        "❌ Not set"
+                    }
+                );
+                println!(
+                    "MusicBrainz User Agent: {}",
+                    if config.apis.musicbrainz_user_agent.is_some() {
+                        "✅ Set"
+                    } else {
+                        "❌ Not set"
+                    }
+                );
+                println!(
+                    "AniDB Username: {}",
+                    if config.apis.anidb_username.is_some() {
+                        "✅ Set"
+                    } else {
+                        "❌ Not set"
+                    }
+                );
             }
             Err(e) => {
                 println!("❌ Failed to load configuration: {}", e);
                 println!("Run 'setup' to create configuration.");
             }
         }
-        
+
         Ok(())
     }
-    
+
     /// Handle the test command
     async fn handle_test(file: PathBuf) -> Result<()> {
         println!("🧪 Plex Media Organizer - Testing File Parsing");
         println!("File: {}", file.display());
         println!();
-        
+
         if !file.exists() {
             anyhow::bail!("File does not exist: {}", file.display());
         }
-        
+
         // Load configuration
         let config = match AppConfig::load() {
             Ok(config) => config,
@@ -193,18 +207,20 @@ impl Cli {
                 AppConfig::default()
             }
         };
-        
+
         // Create TMDB client if available
-        let tmdb_client = config.apis.tmdb_api_key
-            .map(|api_key| TmdbClient::new(api_key));
-        
+        let tmdb_client = config.apis.tmdb_api_key.map(TmdbClient::new);
+
         // Create movie parser and test parsing
         let movie_parser = MovieParser::new(tmdb_client);
-        
+
         match movie_parser.parse_movie(&file).await {
             Ok(result) => {
                 println!("✅ Parsing successful!");
-                println!("Title: {}", result.parsed_metadata.title.as_deref().unwrap_or("Unknown"));
+                println!(
+                    "Title: {}",
+                    result.parsed_metadata.title.as_deref().unwrap_or("Unknown")
+                );
                 if let Some(original_title) = &result.parsed_metadata.original_title {
                     println!("Original Title: {}", original_title);
                 }
@@ -219,7 +235,7 @@ impl Cli {
                 }
                 println!("Confidence: {:.1}%", result.confidence_score * 100.0);
                 println!("Strategy: {:?}", result.parsing_strategy);
-                
+
                 if !result.external_sources.is_empty() {
                     println!("External Sources:");
                     for source in &result.external_sources {
@@ -231,25 +247,35 @@ impl Cli {
                 println!("❌ Parsing failed: {}", e);
             }
         }
-        
+
         Ok(())
     }
-    
 
-    
     /// Display scan results
     fn display_scan_results(scan_result: &crate::types::ScanResult, verbose: bool) {
         println!("📊 Scan Results:");
         println!("Directory: {}", scan_result.directory.display());
         println!("Total files: {}", scan_result.statistics.total_files);
         println!("Media files: {}", scan_result.files.len());
-        println!("Successfully parsed: {}", scan_result.statistics.parsed_files);
+        println!(
+            "Successfully parsed: {}",
+            scan_result.statistics.parsed_files
+        );
         println!("Failed to parse: {}", scan_result.statistics.failed_files);
-        println!("Success rate: {:.1}%", scan_result.statistics.success_rate * 100.0);
-        println!("Average confidence: {:.1}%", scan_result.statistics.average_confidence * 100.0);
-        println!("Scan duration: {:.2}s", scan_result.statistics.duration_seconds);
+        println!(
+            "Success rate: {:.1}%",
+            scan_result.statistics.success_rate * 100.0
+        );
+        println!(
+            "Average confidence: {:.1}%",
+            scan_result.statistics.average_confidence * 100.0
+        );
+        println!(
+            "Scan duration: {:.2}s",
+            scan_result.statistics.duration_seconds
+        );
         println!();
-        
+
         if verbose && !scan_result.parsed_files.is_empty() {
             println!("📋 Parsed Files:");
             for (i, result) in scan_result.parsed_files.iter().enumerate() {
@@ -267,7 +293,7 @@ impl Cli {
                 println!();
             }
         }
-        
+
         if !scan_result.failed_files.is_empty() {
             println!("❌ Failed Files:");
             for failed in &scan_result.failed_files {
@@ -275,7 +301,7 @@ impl Cli {
             }
             println!();
         }
-        
+
         println!("✅ Scan completed!");
     }
 }
@@ -283,7 +309,7 @@ impl Cli {
 #[cfg(test)]
 mod tests {
     use super::*;
-    
+
     #[test]
     fn test_cli_creation() {
         let cli = Cli::parse_from(&["plex-media-organizer", "scan", "/test/dir"]);

@@ -1,8 +1,8 @@
 //! Core data types for the Plex Media Organizer
 
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
-use chrono::{DateTime, Utc};
 
 /// Represents a media file in the system
 #[derive(Debug, Clone, Serialize, Deserialize)]
