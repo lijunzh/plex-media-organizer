@@ -6,6 +6,7 @@ use serde::Deserialize;
 use std::time::Duration;
 
 /// TMDB API client
+#[derive(Clone)]
 pub struct TmdbClient {
     api_key: String,
     base_url: String,
@@ -160,14 +161,12 @@ impl TmdbClient {
             }
 
             // Year bonus
-            if let Some(search_year) = year {
-                if let Some(release_date) = &movie.release_date {
-                    if let Ok(movie_year) = release_date[..4].parse::<u32>() {
-                        if movie_year == search_year {
-                            score += 25.0;
-                        }
-                    }
-                }
+            if let Some(search_year) = year
+                && let Some(release_date) = &movie.release_date
+                && let Ok(movie_year) = release_date[..4].parse::<u32>()
+                && movie_year == search_year
+            {
+                score += 25.0;
             }
 
             // Popularity bonus

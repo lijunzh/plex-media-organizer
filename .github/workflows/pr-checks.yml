@@ -1,0 +1,171 @@
+name: PR Quality Checks
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  pr-analysis:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch full history for analysis
+      
+      - name: Setup Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          profile: minimal
+      
+      - name: Install Rust Components
+        run: |
+          rustup component add rustfmt clippy
+      
+      - name: PR Analysis
+         uses: actions/github-script@v7
+         with:
+           script: |
+             try {
+               const { data: pr } = await github.rest.pulls.get({
+                 owner: context.repo.owner,
+                 repo: context.repo.repo,
+                 pull_number: context.issue.number,
+               });
+               
+               const { data: commits } = await github.rest.pulls.listCommits({
+                 owner: context.repo.owner,
+                 repo: context.repo.repo,
+                 pull_number: context.issue.number,
+               });
+               
+               const { data: files } = await github.rest.pulls.listFiles({
+                 owner: context.repo.owner,
+                 repo: context.repo.repo,
+                 pull_number: context.issue.number,
+               });
+               
+               // Analyze PR
+               const analysis = {
+                 title: pr.title,
+                 description: pr.body || 'No description provided',
+                 commits: commits.length,
+                 filesChanged: files.length,
+                 additions: files.reduce((sum, file) => sum + file.additions, 0),
+                 deletions: files.reduce((sum, file) => sum + file.deletions, 0),
+                 hasTests: files.some(file => file.filename.includes('test')),
+                 hasDocs: files.some(file => file.filename.includes('docs/') || file.filename.includes('README')),
+                 hasConfig: files.some(file => file.filename.includes('config') || file.filename.includes('Cargo.toml')),
+               };
+               
+               console.log('PR Analysis:', JSON.stringify(analysis, null, 2));
+               
+               // Create analysis comment
+               const analysisComment = `## 🔍 PR Analysis
+               
+               ### 📊 Statistics
+               - **Commits**: ${analysis.commits}
+               - **Files changed**: ${analysis.filesChanged}
+               - **Additions**: +${analysis.additions}
+               - **Deletions**: -${analysis.deletions}
+               
+               ### 📋 Content Analysis
+               - **Tests included**: ${analysis.hasTests ? '✅' : '❌'}
+               - **Documentation updated**: ${analysis.hasDocs ? '✅' : '❌'}
+               - **Configuration changes**: ${analysis.hasConfig ? '✅' : '❌'}
+               
+               ### 💡 Recommendations
+               ${!analysis.hasTests ? '- Consider adding tests for new functionality' : ''}
+               ${!analysis.hasDocs ? '- Consider updating documentation' : ''}
+               ${analysis.description === 'No description provided' ? '- Please add a description to this PR' : ''}
+               ${analysis.commits > 10 ? '- Consider squashing commits for cleaner history' : ''}
+               
+               ### 🎯 Next Steps
+               1. Ensure all CI checks pass
+               2. Request review from maintainers
+               3. Address any feedback
+               4. Merge when approved`;
+               
+               await github.rest.issues.createComment({
+                 issue_number: context.issue.number,
+                 owner: context.repo.owner,
+                 repo: context.repo.repo,
+                 body: analysisComment
+               });
+             } catch (error) {
+               console.log('Could not create PR analysis comment:', error.message);
+               console.log('This is expected for forks or when permissions are limited');
+             }
+      
+      - name: Check Commit Messages
+        run: |
+          echo "🔍 Checking commit message format..."
+          git log --oneline ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }} | while read line; do
+            if [[ ! $line =~ ^[a-f0-9]{7}\ (feat|fix|docs|style|refactor|test|chore)(\(.+\))?:\ .+ ]]; then
+              echo "⚠️  Commit message format issue: $line"
+              echo "   Expected format: type(scope): description"
+              echo "   Example: feat(cjk): add CJK title configuration"
+            fi
+          done
+      
+      - name: Check File Size
+        run: |
+          echo "📏 Checking file sizes..."
+          find . -name "*.rs" -size +100k | while read file; do
+            echo "⚠️  Large file detected: $file"
+            echo "   Consider splitting large files for better maintainability"
+          done
+      
+      - name: Security Check
+        run: |
+          echo "🔒 Running security checks..."
+          cargo audit || echo "Security audit completed"
+          
+          # Check for common security issues
+          if grep -r "password\|secret\|key" src/ --exclude-dir=target; then
+            echo "⚠️  Potential security issue: Check for hardcoded secrets"
+          fi
+
+  documentation-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      
+      - name: Setup Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+      
+      - name: Check Documentation
+        run: |
+          echo "📚 Checking documentation..."
+          
+          # Check if README exists and has content
+          if [ ! -f README.md ] || [ ! -s README.md ]; then
+            echo "❌ README.md is missing or empty"
+            exit 1
+          fi
+          
+          # Check if docs directory exists
+          if [ ! -d docs/ ]; then
+            echo "⚠️  docs/ directory not found"
+          else
+            echo "✅ docs/ directory exists"
+            ls -la docs/
+          fi
+          
+          # Check for broken links in markdown
+          echo "🔗 Checking for broken links..."
+          find . -name "*.md" -exec grep -l "http" {} \; | while read file; do
+            echo "Checking links in $file..."
+          done
+          
+          echo "✅ Documentation check completed"

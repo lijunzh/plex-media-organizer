@@ -1,11 +1,11 @@
 [package]
 name = "plex-media-organizer"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
 authors = ["Your Name <your.email@example.com>"]
 description = "Intelligent media file organizer following Plex naming conventions"
 license = "MIT"
-repository = "https://github.com/yourusername/plex-media-organizer"
+repository = "https://github.com/lijunzh/plex-media-organizer"
 
 [dependencies]
 # Core dependencies

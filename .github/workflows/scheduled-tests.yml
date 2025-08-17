@@ -1,0 +1,88 @@
+name: Scheduled Comprehensive Testing
+
+on:
+  schedule:
+    # Run comprehensive tests weekly (Sunday 2 AM UTC)
+    - cron: '0 2 * * 0'
+  workflow_dispatch:  # Manual trigger
+
+jobs:
+  comprehensive-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      
+      - name: Setup Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          profile: minimal
+      
+      - name: Install Rust Components
+        run: |
+          rustup component add rustfmt clippy
+      
+      - name: Cache Dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-scheduled-${{ hashFiles('**/Cargo.lock') }}
+      
+      - name: Install System Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libsqlite3-dev
+      
+      - name: Run Full Test Suite
+        env:
+          TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
+        run: |
+          echo "🧪 Starting comprehensive test suite..."
+          echo "⏰ Started at: $(date)"
+          
+          # Run all tests with verbose output
+          cargo test --verbose --all-features -- --nocapture
+          
+          echo "✅ All tests completed successfully!"
+          echo "⏰ Finished at: $(date)"
+      
+      - name: Performance Validation
+        env:
+          TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
+        run: |
+          echo "⚡ Running performance tests..."
+          
+          # Run dynamic tests to validate performance
+          time cargo test --test dynamic_real_world_test -- --nocapture
+          
+          echo "🚀 Performance validation completed!"
+      
+      - name: Build Verification
+        run: |
+          echo "🔨 Building release version..."
+          cargo build --release
+          
+          echo "📦 Binary verification:"
+          ls -lh target/release/plex-media-organizer
+          
+          echo "✅ Build verification passed!"
+      
+      - name: Documentation Check
+        run: |
+          echo "📚 Building documentation..."
+          cargo doc --no-deps
+          
+          echo "✅ Documentation builds successfully!"
+      
+      - name: Summary Report
+        run: |
+          echo "🎉 Scheduled comprehensive testing completed!"
+          echo "📊 All tests passed"
+          echo "⚡ Performance validated"
+          echo "🔨 Build verified"
+          echo "📚 Documentation checked"
+          echo "🚀 System ready for production use"

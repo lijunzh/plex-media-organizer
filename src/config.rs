@@ -59,6 +59,8 @@ pub struct OrganizationConfig {
     pub music_template: String,
     /// Quality preferences
     pub quality: QualityConfig,
+    /// CJK (Chinese/Japanese/Korean) title preferences
+    pub cjk_titles: CJKTitleConfig,
     /// Whether to create organized directory structures
     pub create_directories: bool,
     /// Whether to rename files
@@ -76,6 +78,19 @@ pub struct QualityConfig {
     pub minimum_quality: Option<String>,
     /// Whether to prefer higher quality when duplicates exist
     pub prefer_higher_quality: bool,
+}
+
+/// CJK (Chinese/Japanese/Korean) title handling configuration
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CJKTitleConfig {
+    /// Use original CJK titles for organization instead of English
+    pub prefer_original_titles: bool,
+    /// Include English title in brackets: 英雄 [Hero] (2002)
+    pub include_english_subtitle: bool,
+    /// Fallback to English if CJK causes file system issues
+    pub fallback_to_english_on_error: bool,
+    /// Always preserve original title in metadata
+    pub preserve_original_in_metadata: bool,
 }
 
 /// Learning and pattern recognition settings
@@ -137,6 +152,7 @@ impl Default for OrganizationConfig {
                     .to_string(),
             music_template: "{artist}/{album}/{track:02} - {title}".to_string(),
             quality: QualityConfig::default(),
+            cjk_titles: CJKTitleConfig::default(),
             create_directories: true,
             rename_files: true,
             move_files: false,
@@ -150,6 +166,17 @@ impl Default for QualityConfig {
             preferred_quality: Some("1080p".to_string()),
             minimum_quality: Some("720p".to_string()),
             prefer_higher_quality: true,
+        }
+    }
+}
+
+impl Default for CJKTitleConfig {
+    fn default() -> Self {
+        Self {
+            prefer_original_titles: false,   // Keep current English-first behavior
+            include_english_subtitle: false, // No hybrid format by default
+            fallback_to_english_on_error: true, // Safe fallback
+            preserve_original_in_metadata: true, // Always preserve original
         }
     }
 }

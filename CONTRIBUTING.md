@@ -56,6 +56,9 @@ cargo clippy
 
 # Check for security issues
 cargo audit
+
+# Quick quality check (run before committing)
+cargo fmt && cargo clippy && cargo test
 ```
 
 ### 5. **Commit Your Changes**
@@ -183,7 +186,7 @@ What actually happens
 
 **Environment**
 - OS: [e.g., macOS 14.0]
-- Rust Version: [e.g., 1.70.0]
+- Rust Version: [e.g., stable (latest)]
 - Plex Media Organizer Version: [e.g., 0.1.0]
 
 **Additional Context**

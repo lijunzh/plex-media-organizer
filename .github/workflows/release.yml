@@ -1,0 +1,82 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      
+      - name: Setup Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          profile: minimal
+      
+      - name: Install Rust Components
+        run: |
+          rustup component add rustfmt clippy
+      
+      - name: Cache Dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-release-${{ hashFiles('**/Cargo.lock') }}
+      
+      - name: Install System Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libsqlite3-dev
+      
+      - name: Build Release
+        run: |
+          cargo build --release
+          echo "🚀 Release build completed successfully!"
+      
+      - name: Verify Binary
+        run: |
+          echo "📦 Binary details:"
+          ls -la target/release/
+          echo ""
+          echo "📊 Binary size:"
+          ls -lh target/release/plex-media-organizer
+          echo ""
+          echo "✅ Binary verification passed"
+      
+      - name: Test Release Binary
+        env:
+          TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
+        run: |
+          # Quick test of release binary
+          ./target/release/plex-media-organizer --help
+          ./target/release/plex-media-organizer setup --help
+          echo "✅ Release binary test passed"
+      
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            target/release/plex-media-organizer
+            target/release/plex-media-organizer.exe
+            PHASE_1_SUMMARY.md
+            README.md
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Release Summary
+        run: |
+          echo "🎉 Release created successfully!"
+          echo "📦 Binary files uploaded"
+          echo "📚 Documentation included"
+          echo "🚀 Ready for distribution"

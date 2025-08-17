@@ -6,6 +6,7 @@
 pub mod cli;
 pub mod config;
 pub mod movie_parser;
+pub mod organizer;
 pub mod scanner;
 pub mod tmdb_client;
 pub mod types;
@@ -13,6 +14,7 @@ pub mod types;
 pub use cli::*;
 pub use config::*;
 pub use movie_parser::*;
+pub use organizer::*;
 pub use scanner::*;
 pub use tmdb_client::*;
 pub use types::*;
