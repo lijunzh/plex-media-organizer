@@ -28,7 +28,7 @@ pub struct OrganizationConfig {
     /// Quality preferences
     pub quality: QualityConfig,
     /// CJK (Chinese/Japanese/Korean) title preferences
-    pub cjk_titles: CJKTitleConfig,
+    pub original_titles: OriginalTitleConfig,
 }
 
 /// Quality preferences
@@ -40,12 +40,12 @@ pub struct QualityConfig {
 
 /// CJK (Chinese/Japanese/Korean) title handling configuration
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct CJKTitleConfig {
-    /// Use original CJK titles for organization instead of English
+pub struct OriginalTitleConfig {
+    /// Use original titles for organization instead of English
     pub prefer_original_titles: bool,
     /// Include English title in brackets: 英雄 [Hero] (2002)
     pub include_english_subtitle: bool,
-    /// Fallback to English if CJK causes file system issues
+    /// Fallback to English if original title causes file system issues
     pub fallback_to_english_on_error: bool,
     /// Always preserve original title in metadata
     pub preserve_original_in_metadata: bool,
@@ -59,12 +59,12 @@ impl Default for QualityConfig {
     }
 }
 
-impl Default for CJKTitleConfig {
+impl Default for OriginalTitleConfig {
     fn default() -> Self {
         Self {
-            prefer_original_titles: false,   // Keep current English-first behavior
-            include_english_subtitle: false, // No hybrid format by default
-            fallback_to_english_on_error: true, // Safe fallback
+            prefer_original_titles: true,        // Prioritize original titles
+            include_english_subtitle: true,      // Include English subtitle for clarity
+            fallback_to_english_on_error: true,  // Safe fallback
             preserve_original_in_metadata: true, // Always preserve original
         }
     }

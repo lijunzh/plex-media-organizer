@@ -135,8 +135,10 @@ impl Cli {
         let tmdb_client = config.apis.tmdb_api_key.map(TmdbClient::new);
 
         // Create movie parser and scanner
-        let movie_parser =
-            MovieParser::with_cjk_config(tmdb_client, config.organization.cjk_titles.clone());
+        let movie_parser = MovieParser::with_original_title_config(
+            tmdb_client,
+            config.organization.original_titles.clone(),
+        );
         let scanner = Scanner::new(movie_parser);
 
         // Scan directory
@@ -245,8 +247,10 @@ impl Cli {
             let tmdb_client = config.apis.tmdb_api_key.map(TmdbClient::new);
 
             // Create movie parser and scanner
-            let movie_parser =
-                MovieParser::with_cjk_config(tmdb_client, config.organization.cjk_titles.clone());
+            let movie_parser = MovieParser::with_original_title_config(
+                tmdb_client,
+                config.organization.original_titles.clone(),
+            );
             let scanner = Scanner::new(movie_parser);
 
             // Scan directory
@@ -314,8 +318,10 @@ impl Cli {
             let tmdb_client = config.apis.tmdb_api_key.map(TmdbClient::new);
 
             // Create movie parser and test parsing
-            let movie_parser =
-                MovieParser::with_cjk_config(tmdb_client, config.organization.cjk_titles.clone());
+            let movie_parser = MovieParser::with_original_title_config(
+                tmdb_client,
+                config.organization.original_titles.clone(),
+            );
 
             match movie_parser.parse_movie(&path).await {
                 Ok(result) => {
@@ -448,8 +454,10 @@ impl Cli {
         let tmdb_client = config.apis.tmdb_api_key.map(TmdbClient::new);
 
         // Create movie parser and scanner
-        let movie_parser =
-            MovieParser::with_cjk_config(tmdb_client, config.organization.cjk_titles.clone());
+        let movie_parser = MovieParser::with_original_title_config(
+            tmdb_client,
+            config.organization.original_titles.clone(),
+        );
         let scanner = Scanner::new(movie_parser);
 
         // Scan directory first
