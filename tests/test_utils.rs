@@ -150,7 +150,7 @@ impl DynamicTestRunner {
         println!("📁 Found {} movie files in tree output", filenames.len());
 
         // First, run the parsing tests
-        let mut results = self.run_dynamic_tests(&filenames);
+        let results = self.run_dynamic_tests(&filenames);
 
         // Then, test organization workflow
         println!("🎬 Testing organization workflow...");

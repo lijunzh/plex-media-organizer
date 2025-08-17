@@ -135,8 +135,10 @@ impl Cli {
         let tmdb_client = config.apis.tmdb_api_key.map(TmdbClient::new);
 
         // Create movie parser and scanner
-        let movie_parser =
-            MovieParser::with_cjk_config(tmdb_client, config.organization.cjk_titles.clone());
+        let movie_parser = MovieParser::with_original_title_config(
+            tmdb_client,
+            config.organization.original_titles.clone(),
+        );
         let scanner = Scanner::new(movie_parser);
 
         // Scan directory
@@ -196,30 +198,6 @@ impl Cli {
                         "❌ Not set"
                     }
                 );
-                println!(
-                    "TVDB API Key: {}",
-                    if config.apis.tvdb_api_key.is_some() {
-                        "✅ Set"
-                    } else {
-                        "❌ Not set"
-                    }
-                );
-                println!(
-                    "MusicBrainz User Agent: {}",
-                    if config.apis.musicbrainz_user_agent.is_some() {
-                        "✅ Set"
-                    } else {
-                        "❌ Not set"
-                    }
-                );
-                println!(
-                    "AniDB Username: {}",
-                    if config.apis.anidb_username.is_some() {
-                        "✅ Set"
-                    } else {
-                        "❌ Not set"
-                    }
-                );
             }
             Err(e) => {
                 println!("❌ Failed to load configuration: {}", e);
@@ -269,8 +247,10 @@ impl Cli {
             let tmdb_client = config.apis.tmdb_api_key.map(TmdbClient::new);
 
             // Create movie parser and scanner
-            let movie_parser =
-                MovieParser::with_cjk_config(tmdb_client, config.organization.cjk_titles.clone());
+            let movie_parser = MovieParser::with_original_title_config(
+                tmdb_client,
+                config.organization.original_titles.clone(),
+            );
             let scanner = Scanner::new(movie_parser);
 
             // Scan directory
@@ -338,8 +318,10 @@ impl Cli {
             let tmdb_client = config.apis.tmdb_api_key.map(TmdbClient::new);
 
             // Create movie parser and test parsing
-            let movie_parser =
-                MovieParser::with_cjk_config(tmdb_client, config.organization.cjk_titles.clone());
+            let movie_parser = MovieParser::with_original_title_config(
+                tmdb_client,
+                config.organization.original_titles.clone(),
+            );
 
             match movie_parser.parse_movie(&path).await {
                 Ok(result) => {
@@ -472,8 +454,10 @@ impl Cli {
         let tmdb_client = config.apis.tmdb_api_key.map(TmdbClient::new);
 
         // Create movie parser and scanner
-        let movie_parser =
-            MovieParser::with_cjk_config(tmdb_client, config.organization.cjk_titles.clone());
+        let movie_parser = MovieParser::with_original_title_config(
+            tmdb_client,
+            config.organization.original_titles.clone(),
+        );
         let scanner = Scanner::new(movie_parser);
 
         // Scan directory first

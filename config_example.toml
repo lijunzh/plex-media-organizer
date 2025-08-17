@@ -1,29 +1,11 @@
 [apis]
 tmdb_api_key = ""
 
-[organization]
-movies_template = "{title} ({year}) {quality}"
-tv_shows_template = "{title}/Season {season:02}/{title} S{season:02}E{episode:02} {episode_title}"
-music_template = "{artist}/{album}/{track:02} - {title}"
-
 [organization.quality]
 preferred_quality = "1080p"
-minimum_quality = "720p" 
-prefer_higher_quality = true
 
-[organization.cjk_titles]
+[organization.original_titles]
 prefer_original_titles = true
 include_english_subtitle = true
 fallback_to_english_on_error = true
 preserve_original_in_metadata = true
-
-[learning]
-enable_pattern_learning = true
-confidence_threshold = 0.7
-max_patterns_per_type = 1000
-pattern_expiration_days = 365
-user_feedback_weight = 0.8
-
-[database]
-enable_logging = true
-connection_pool_size = 5

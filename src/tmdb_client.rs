@@ -29,6 +29,7 @@ struct TmdbMovieResponse {
     id: u32,
     title: String,
     original_title: Option<String>,
+    original_language: Option<String>,
     release_date: Option<String>,
     overview: Option<String>,
     poster_path: Option<String>,
@@ -117,6 +118,7 @@ impl TmdbClient {
             id: movie_response.id,
             title: movie_response.title,
             original_title: movie_response.original_title,
+            original_language: movie_response.original_language,
             release_date: movie_response.release_date,
             overview: movie_response.overview,
             poster_path: movie_response.poster_path,
@@ -196,13 +198,14 @@ impl TmdbClient {
         MovieInfo {
             title: tmdb_movie.title.clone(),
             original_title: tmdb_movie.original_title.clone(),
+            original_language: tmdb_movie.original_language.clone(),
             year,
-            part_number: None,    // TMDB doesn't provide this
-            is_collection: false, // Would need additional API call
+            part_number: None,
+            is_collection: false,
             collection_name: None,
-            quality: None,                       // Not provided by TMDB
-            source: None,                        // Not provided by TMDB
-            language: Some("en-US".to_string()), // Default assumption
+            quality: None,
+            source: None,
+            language: None,
         }
     }
 }
@@ -224,6 +227,7 @@ mod tests {
             id: 1,
             title: "Test Movie".to_string(),
             original_title: None,
+            original_language: None,
             release_date: Some("2023-01-01".to_string()),
             overview: None,
             poster_path: None,

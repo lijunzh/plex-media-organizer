@@ -1,6 +1,6 @@
 //! Movie parsing and organization logic
 
-use crate::config::CJKTitleConfig;
+use crate::config::OriginalTitleConfig;
 use crate::tmdb_client::TmdbClient;
 use crate::types::{
     ExternalSource, MediaFile, MediaMetadata, MediaType, MovieInfo, ParsingResult, ParsingStrategy,
@@ -15,6 +15,11 @@ lazy_static! {
     // Basic movie pattern: Movie Name (Year) Quality Source.ext
     static ref BASIC_MOVIE_PATTERN: Regex = Regex::new(
         r"^(.+?)\s*\((\d{4})\)\s*(.+?)\s*\.([a-zA-Z0-9]+)$"
+    ).unwrap();
+
+    // Japanese-Chinese-English trilingual pattern: 千与千寻.国日双语.千と千尋の神隠し.Spirited.Away.2001
+    static ref JAPANESE_CHINESE_ENGLISH_PATTERN: Regex = Regex::new(
+        r"^(.+?)\.(?:国日双语|中日双语|日国双语)\.(.+?)\.([A-Za-z][A-Za-z\s\.]*?)\.(\d{4})\."
     ).unwrap();
 
     // Chinese-English bilingual pattern: 白蛇2：青蛇劫起..Green.Snake.2021
@@ -34,7 +39,7 @@ lazy_static! {
 
     // Quality and source patterns
     static ref QUALITY_PATTERN: Regex = Regex::new(
-        r"(720p|1080p|2160p|4K|HDR|UHD)"
+        r"(720p|1080p|2160p|2160P|4K|HDR|UHD)"
     ).unwrap();
 
     static ref SOURCE_PATTERN: Regex = Regex::new(
@@ -46,7 +51,7 @@ lazy_static! {
 #[derive(Clone)]
 pub struct MovieParser {
     tmdb_client: Option<TmdbClient>,
-    cjk_config: CJKTitleConfig,
+    original_title_config: OriginalTitleConfig,
 }
 
 impl MovieParser {
@@ -54,15 +59,18 @@ impl MovieParser {
     pub fn new(tmdb_client: Option<TmdbClient>) -> Self {
         Self {
             tmdb_client,
-            cjk_config: CJKTitleConfig::default(),
+            original_title_config: OriginalTitleConfig::default(),
         }
     }
 
-    /// Create a new movie parser with CJK configuration
-    pub fn with_cjk_config(tmdb_client: Option<TmdbClient>, cjk_config: CJKTitleConfig) -> Self {
+    /// Create a new movie parser with original title configuration
+    pub fn with_original_title_config(
+        tmdb_client: Option<TmdbClient>,
+        original_title_config: OriginalTitleConfig,
+    ) -> Self {
         Self {
             tmdb_client,
-            cjk_config,
+            original_title_config,
         }
     }
 
@@ -83,28 +91,55 @@ impl MovieParser {
         confidence_score += 0.3; // Base confidence from filename parsing
 
         // If we have a TMDB client, try to get additional data
-        if let Some(ref tmdb_client) = self.tmdb_client
-            && let Some(tmdb_movie) = tmdb_client
+        if let Some(ref tmdb_client) = self.tmdb_client {
+            // Try to find movie in TMDB, even if we don't have a year
+            let tmdb_movie = tmdb_client
                 .find_best_match(&movie_info.title, movie_info.year)
-                .await?
-        {
-            // Update movie info with TMDB data
-            let tmdb_info = tmdb_client.tmdb_to_movie_info(&tmdb_movie);
-            movie_info = self.merge_movie_info(movie_info, tmdb_info);
+                .await?;
 
-            // Add external source
-            external_sources.push(ExternalSource {
-                name: "TMDB".to_string(),
-                external_id: tmdb_movie.id.to_string(),
-                url: Some(format!(
-                    "https://www.themoviedb.org/movie/{}",
-                    tmdb_movie.id
-                )),
-                fetched_at: Utc::now(),
-            });
+            if let Some(tmdb_movie) = tmdb_movie {
+                // Update movie info with TMDB data
+                let tmdb_info = tmdb_client.tmdb_to_movie_info(&tmdb_movie);
+                movie_info = self.merge_movie_info(movie_info, tmdb_info);
 
-            parsing_strategy = ParsingStrategy::ExternalApi;
-            confidence_score += 0.5; // High confidence from external API
+                // Add external source
+                external_sources.push(ExternalSource {
+                    name: "TMDB".to_string(),
+                    external_id: tmdb_movie.id.to_string(),
+                    url: Some(format!(
+                        "https://www.themoviedb.org/movie/{}",
+                        tmdb_movie.id
+                    )),
+                    fetched_at: Utc::now(),
+                });
+
+                parsing_strategy = ParsingStrategy::ExternalApi;
+                confidence_score += 0.5; // High confidence from external API
+            } else if movie_info.year.is_none() {
+                // If we don't have a year and TMDB didn't find a match,
+                // try a broader search without year constraint
+                let broader_movie = tmdb_client.find_best_match(&movie_info.title, None).await?;
+
+                if let Some(broader_movie) = broader_movie {
+                    // Update movie info with TMDB data (this will include the year)
+                    let tmdb_info = tmdb_client.tmdb_to_movie_info(&broader_movie);
+                    movie_info = self.merge_movie_info(movie_info, tmdb_info);
+
+                    // Add external source
+                    external_sources.push(ExternalSource {
+                        name: "TMDB".to_string(),
+                        external_id: broader_movie.id.to_string(),
+                        url: Some(format!(
+                            "https://www.themoviedb.org/movie/{}",
+                            broader_movie.id
+                        )),
+                        fetched_at: Utc::now(),
+                    });
+
+                    parsing_strategy = ParsingStrategy::ExternalApi;
+                    confidence_score += 0.4; // Slightly lower confidence for broader match
+                }
+            }
         }
 
         // Create MediaFile and MediaMetadata
@@ -127,7 +162,12 @@ impl MovieParser {
 
     /// Parse filename using various patterns
     pub fn parse_filename(&self, filename: &str) -> Result<MovieInfo> {
-        // Try Chinese-English bilingual pattern first
+        // Try Japanese-Chinese-English trilingual pattern first
+        if let Some(captures) = JAPANESE_CHINESE_ENGLISH_PATTERN.captures(filename) {
+            return self.parse_japanese_chinese_english_trilingual(filename, captures);
+        }
+
+        // Try Chinese-English bilingual pattern
         if let Some(captures) = CHINESE_ENGLISH_PATTERN.captures(filename) {
             return self.parse_chinese_english_bilingual(filename, captures);
         }
@@ -151,6 +191,59 @@ impl MovieParser {
         self.parse_basic_fallback(filename)
     }
 
+    /// Parse Japanese-Chinese-English trilingual pattern
+    fn parse_japanese_chinese_english_trilingual(
+        &self,
+        filename: &str,
+        captures: regex::Captures,
+    ) -> Result<MovieInfo> {
+        let _chinese_title = captures.get(1).unwrap().as_str().trim();
+        let japanese_title = captures.get(2).unwrap().as_str().trim();
+        let english_title = captures.get(3).unwrap().as_str().trim();
+        let year = captures.get(4).and_then(|m| m.as_str().parse::<u32>().ok());
+
+        let (quality, source) = self.extract_quality_and_source(filename);
+
+        // Apply original title strategy - prioritize Japanese as original
+        let (final_title, final_original_title) =
+            if self.original_title_config.prefer_original_titles {
+                if self.original_title_config.include_english_subtitle {
+                    // Original with English subtitle: 千と千尋の神隠し [Spirited Away]
+                    let subtitle = format!(" [{}]", self.clean_title_for_search(english_title));
+                    let combined_title = self.clean_title(japanese_title) + &subtitle;
+                    (
+                        combined_title,
+                        Some(self.clean_title_for_search(english_title)),
+                    )
+                } else {
+                    // Original title only: 千と千尋の神隠し
+                    (
+                        self.clean_title(japanese_title),
+                        Some(self.clean_title_for_search(english_title)),
+                    )
+                }
+            } else {
+                // English-first strategy
+                (
+                    self.clean_title_for_search(english_title),
+                    Some(self.clean_title(japanese_title)),
+                )
+            };
+
+        Ok(MovieInfo {
+            title: final_title,
+            original_title: final_original_title,
+            original_language: Some("ja".to_string()), // Japanese is the original language
+            year,
+            part_number: None,
+            is_collection: false,
+            collection_name: None,
+            quality,
+            source,
+            language: Some("Japanese,Chinese,English".to_string()),
+        })
+    }
+
     /// Parse Chinese-English bilingual pattern
     fn parse_chinese_english_bilingual(
         &self,
@@ -163,9 +256,36 @@ impl MovieParser {
 
         let (quality, source) = self.extract_quality_and_source(filename);
 
+        // Apply original title strategy immediately
+        let (final_title, final_original_title) =
+            if self.original_title_config.prefer_original_titles {
+                if self.original_title_config.include_english_subtitle {
+                    // Original with English subtitle: 白蛇2：青蛇劫起 [Green Snake]
+                    let subtitle = format!(" [{}]", self.clean_title_for_search(english_title));
+                    let combined_title = self.clean_title(chinese_title) + &subtitle;
+                    (
+                        combined_title,
+                        Some(self.clean_title_for_search(english_title)),
+                    )
+                } else {
+                    // Original title only: 白蛇2：青蛇劫起
+                    (
+                        self.clean_title(chinese_title),
+                        Some(self.clean_title_for_search(english_title)),
+                    )
+                }
+            } else {
+                // English-first strategy
+                (
+                    self.clean_title_for_search(english_title),
+                    Some(self.clean_title(chinese_title)),
+                )
+            };
+
         Ok(MovieInfo {
-            title: self.clean_title_for_search(english_title),
-            original_title: Some(self.clean_title(chinese_title)),
+            title: final_title,
+            original_title: final_original_title,
+            original_language: Some("zh".to_string()), // Chinese is the original language
             year,
             part_number: None,
             is_collection: false,
@@ -188,9 +308,33 @@ impl MovieParser {
 
         let (quality, source) = self.extract_quality_and_source(filename);
 
+        // Apply original title strategy immediately
+        let (final_title, final_original_title) =
+            if self.original_title_config.prefer_original_titles {
+                if self.original_title_config.include_english_subtitle {
+                    // Original with English subtitle: 青蛇 [Green Snake]
+                    let subtitle = format!(" [{}]", self.clean_title(english_title));
+                    let combined_title = self.clean_title(chinese_title) + &subtitle;
+                    (combined_title, Some(self.clean_title(english_title)))
+                } else {
+                    // Original title only: 青蛇
+                    (
+                        self.clean_title(chinese_title),
+                        Some(self.clean_title(english_title)),
+                    )
+                }
+            } else {
+                // English-first strategy
+                (
+                    self.clean_title(english_title),
+                    Some(self.clean_title(chinese_title)),
+                )
+            };
+
         Ok(MovieInfo {
-            title: self.clean_title(english_title),
-            original_title: Some(self.clean_title(chinese_title)),
+            title: final_title,
+            original_title: final_original_title,
+            original_language: Some("zh".to_string()), // Chinese is the original language
             year,
             part_number: None,
             is_collection: false,
@@ -215,6 +359,7 @@ impl MovieParser {
         Ok(MovieInfo {
             title: self.clean_title(base_title),
             original_title: None,
+            original_language: None,
             year: None, // Would need additional parsing
             part_number,
             is_collection: part_number.is_some(),
@@ -240,6 +385,7 @@ impl MovieParser {
         Ok(MovieInfo {
             title: self.clean_title(title),
             original_title: None,
+            original_language: None,
             year,
             part_number: None,
             is_collection: false,
@@ -250,7 +396,7 @@ impl MovieParser {
         })
     }
 
-    /// Basic fallback parsing
+    /// Basic fallback parsing with improved handling for simple filenames
     fn parse_basic_fallback(&self, filename: &str) -> Result<MovieInfo> {
         let (quality, source) = self.extract_quality_and_source(filename);
 
@@ -258,11 +404,30 @@ impl MovieParser {
         let year = self.extract_year(filename);
 
         // Clean title by removing common suffixes and quality indicators
-        let title = self.clean_title(filename);
+        let mut title = self.clean_title(filename);
+
+        // For simple filenames like "I.Robot.mkv", try to improve title extraction
+        if title.contains('.') && !title.contains(' ') {
+            // Replace dots with spaces for better readability
+            title = title.replace('.', " ");
+            title = title.trim().to_string();
+        }
+
+        // Remove file extension from title if present
+        if let Some(dot_pos) = title.rfind('.') {
+            let extension = &title[dot_pos + 1..];
+            // Check if it's a common video extension
+            if ["mkv", "mp4", "avi", "mov", "wmv", "flv", "webm"]
+                .contains(&extension.to_lowercase().as_str())
+            {
+                title = title[..dot_pos].to_string();
+            }
+        }
 
         Ok(MovieInfo {
             title,
             original_title: None,
+            original_language: None,
             year,
             part_number: None,
             is_collection: false,
@@ -288,13 +453,37 @@ impl MovieParser {
         (quality, source)
     }
 
-    /// Extract year from filename
+    /// Extract year from filename with improved detection
     fn extract_year(&self, filename: &str) -> Option<u32> {
-        let year_pattern = Regex::new(r"\b(19|20)\d{2}\b").unwrap();
-        year_pattern
-            .captures(filename)
-            .and_then(|caps| caps.get(0))
-            .and_then(|m| m.as_str().parse::<u32>().ok())
+        // Try multiple year patterns
+        let patterns = [
+            r"\b(19|20)\d{2}\b", // Standard year format
+            r"\[(\d{4})\]",      // Year in brackets
+            r"\((\d{4})\)",      // Year in parentheses
+            r"\.(\d{4})\.",      // Year with dots
+            r"_(\d{4})_",        // Year with underscores
+        ];
+
+        for pattern in &patterns {
+            if let Ok(regex) = Regex::new(pattern)
+                && let Some(captures) = regex.captures(filename)
+            {
+                // Get the first capture group or the full match
+                let year_str = captures
+                    .get(1)
+                    .map(|m| m.as_str())
+                    .unwrap_or_else(|| captures.get(0).unwrap().as_str());
+
+                if let Ok(year) = year_str.parse::<u32>() {
+                    // Validate year range (1900-2030)
+                    if (1900..=2030).contains(&year) {
+                        return Some(year);
+                    }
+                }
+            }
+        }
+
+        None
     }
 
     /// Clean title by removing common suffixes and quality indicators
@@ -351,12 +540,106 @@ impl MovieParser {
 
     /// Merge movie info from different sources
     fn merge_movie_info(&self, base: MovieInfo, tmdb: MovieInfo) -> MovieInfo {
-        // Apply CJK title strategy
-        let (final_title, final_original_title) = self.apply_cjk_title_strategy(&base, &tmdb);
+        // Use TMDB's original language information to determine the true original title
+        let (final_title, final_original_title, final_original_language) =
+            if let Some(tmdb_original_language) = &tmdb.original_language {
+                // TMDB tells us the original language
+                match tmdb_original_language.as_str() {
+                    "ja" | "zh" | "ko" => {
+                        // For CJK languages, prefer the original title from TMDB
+                        if let Some(tmdb_original_title) = &tmdb.original_title {
+                            if self.original_title_config.prefer_original_titles {
+                                if self.original_title_config.include_english_subtitle {
+                                    // Original with English subtitle: 千と千尋の神隠し [Spirited Away]
+                                    let subtitle = format!(" [{}]", tmdb.title);
+                                    let combined_title = tmdb_original_title.clone() + &subtitle;
+                                    (
+                                        combined_title,
+                                        Some(tmdb.title.clone()),
+                                        tmdb.original_language.clone(),
+                                    )
+                                } else {
+                                    // Original title only: 千と千尋の神隠し
+                                    (
+                                        tmdb_original_title.clone(),
+                                        Some(tmdb.title.clone()),
+                                        tmdb.original_language.clone(),
+                                    )
+                                }
+                            } else {
+                                // English-first strategy
+                                (
+                                    tmdb.title.clone(),
+                                    Some(tmdb_original_title.clone()),
+                                    tmdb.original_language.clone(),
+                                )
+                            }
+                        } else {
+                            // No original title from TMDB, fall back to base
+                            (
+                                base.title.clone(),
+                                base.original_title.clone(),
+                                base.original_language.clone(),
+                            )
+                        }
+                    }
+                    _ => {
+                        // For non-CJK languages, use English title as primary
+                        (
+                            tmdb.title.clone(),
+                            tmdb.original_title.clone(),
+                            tmdb.original_language.clone(),
+                        )
+                    }
+                }
+            } else {
+                // No original language info from TMDB, fall back to filename-based logic
+                let has_cjk_in_base = base
+                    .original_title
+                    .as_ref()
+                    .map(|title| self.contains_cjk_characters(title))
+                    .unwrap_or(false);
+
+                let has_cjk_in_tmdb = tmdb
+                    .original_title
+                    .as_ref()
+                    .map(|title| self.contains_cjk_characters(title))
+                    .unwrap_or(false);
+
+                if (has_cjk_in_base || has_cjk_in_tmdb)
+                    && self.original_title_config.prefer_original_titles
+                {
+                    // We have CJK content and prefer original titles
+                    let cjk_title = if has_cjk_in_base {
+                        base.original_title.unwrap()
+                    } else {
+                        tmdb.original_title.unwrap()
+                    };
+
+                    let english_title = if has_cjk_in_base {
+                        base.title
+                    } else {
+                        tmdb.title
+                    };
+
+                    if self.original_title_config.include_english_subtitle {
+                        let subtitle = format!(" [{}]", english_title);
+                        let combined_title = cjk_title.clone() + &subtitle;
+                        (combined_title, Some(english_title), None)
+                    } else {
+                        (cjk_title, Some(english_title), None)
+                    }
+                } else {
+                    // Apply standard title strategy
+                    let (title, original_title) = self.apply_cjk_title_strategy(&base, &tmdb);
+                    (title, original_title, None)
+                }
+            };
 
         MovieInfo {
             title: final_title,
             original_title: final_original_title,
+            original_language: final_original_language,
             year: tmdb.year.or(base.year),
             part_number: base.part_number, // Keep from filename
             is_collection: base.is_collection,
@@ -390,10 +673,10 @@ impl MovieParser {
             return (english_title, original_cjk_title);
         }
 
-        // Apply CJK title strategy
+        // Apply original title strategy
         match (
-            self.cjk_config.prefer_original_titles,
-            self.cjk_config.include_english_subtitle,
+            self.original_title_config.prefer_original_titles,
+            self.original_title_config.include_english_subtitle,
         ) {
             (true, true) => {
                 // Original with English subtitle: 英雄 [Hero]
@@ -512,6 +795,25 @@ mod tests {
     use super::*;
 
     #[test]
+    fn test_parse_japanese_chinese_english_trilingual() {
+        let parser = MovieParser::new(None);
+        let filename =
+            "千与千寻.国日双语.千と千尋の神隠し.Spirited.Away.2001.WEB-DL.2160P.H265.mkv";
+
+        let result = parser.parse_filename(filename).unwrap();
+
+        assert_eq!(result.title, "千と千尋の神隠し [Spirited Away]");
+        assert_eq!(result.original_title, Some("Spirited Away".to_string()));
+        assert_eq!(result.year, Some(2001));
+        assert_eq!(result.quality, Some("2160P".to_string()));
+        assert_eq!(result.source, Some("WEB-DL".to_string()));
+        assert_eq!(
+            result.language,
+            Some("Japanese,Chinese,English".to_string())
+        );
+    }
+
+    #[test]
     fn test_parse_chinese_english_bilingual() {
         let parser = MovieParser::new(None);
         let filename = "白蛇2：青蛇劫起..Green.Snake.2021.1080p.WEB-DL.mkv";
@@ -562,16 +864,17 @@ mod tests {
     }
 
     #[test]
-    fn test_cjk_title_strategy_default() {
-        use crate::config::CJKTitleConfig;
+    fn test_original_title_strategy_default() {
+        use crate::config::OriginalTitleConfig;
 
-        let cjk_config = CJKTitleConfig::default();
-        let parser = MovieParser::with_cjk_config(None, cjk_config);
+        let original_title_config = OriginalTitleConfig::default();
+        let parser = MovieParser::with_original_title_config(None, original_title_config);
 
         // Create test data
         let base = MovieInfo {
             title: "Hero".to_string(),
             original_title: Some("英雄".to_string()),
+            original_language: Some("zh".to_string()),
             year: Some(2002),
             part_number: None,
             is_collection: false,
@@ -585,6 +888,7 @@ mod tests {
         let tmdb = MovieInfo {
             title: "Hero".to_string(),
             original_title: Some("英雄".to_string()),
+            original_language: Some("zh".to_string()),
             year: Some(2002),
             part_number: None,
             is_collection: false,
@@ -597,27 +901,28 @@ mod tests {
 
         let result = parser.merge_movie_info(base, tmdb);
 
-        // Default behavior: English title, original preserved
-        assert_eq!(result.title, "Hero");
-        assert_eq!(result.original_title, Some("英雄".to_string()));
+        // Default behavior: Original title with English subtitle
+        assert_eq!(result.title, "英雄 [Hero]");
+        assert_eq!(result.original_title, Some("Hero".to_string()));
     }
 
     #[test]
-    fn test_cjk_title_strategy_prefer_original() {
-        use crate::config::CJKTitleConfig;
+    fn test_original_title_strategy_prefer_original() {
+        use crate::config::OriginalTitleConfig;
 
-        let cjk_config = CJKTitleConfig {
+        let original_title_config = OriginalTitleConfig {
             prefer_original_titles: true,
             include_english_subtitle: false,
             fallback_to_english_on_error: true,
             preserve_original_in_metadata: true,
         };
-        let parser = MovieParser::with_cjk_config(None, cjk_config);
+        let parser = MovieParser::with_original_title_config(None, original_title_config);
 
         // Create test data
         let base = MovieInfo {
             title: "Hero".to_string(),
             original_title: Some("英雄".to_string()),
+            original_language: Some("zh".to_string()),
             year: Some(2002),
             part_number: None,
             is_collection: false,
@@ -631,6 +936,7 @@ mod tests {
         let tmdb = MovieInfo {
             title: "Hero".to_string(),
             original_title: Some("英雄".to_string()),
+            original_language: Some("zh".to_string()),
             year: Some(2002),
             part_number: None,
             is_collection: false,
@@ -649,21 +955,22 @@ mod tests {
     }
 
     #[test]
-    fn test_cjk_title_strategy_hybrid() {
-        use crate::config::CJKTitleConfig;
+    fn test_original_title_strategy_hybrid() {
+        use crate::config::OriginalTitleConfig;
 
-        let cjk_config = CJKTitleConfig {
+        let original_title_config = OriginalTitleConfig {
             prefer_original_titles: true,
             include_english_subtitle: true,
             fallback_to_english_on_error: true,
             preserve_original_in_metadata: true,
         };
-        let parser = MovieParser::with_cjk_config(None, cjk_config);
+        let parser = MovieParser::with_original_title_config(None, original_title_config);
 
         // Create test data
         let base = MovieInfo {
             title: "Hero".to_string(),
             original_title: Some("英雄".to_string()),
+            original_language: Some("zh".to_string()),
             year: Some(2002),
             part_number: None,
             is_collection: false,
@@ -677,6 +984,7 @@ mod tests {
         let tmdb = MovieInfo {
             title: "Hero".to_string(),
             original_title: Some("英雄".to_string()),
+            original_language: Some("zh".to_string()),
             year: Some(2002),
             part_number: None,
             is_collection: false,

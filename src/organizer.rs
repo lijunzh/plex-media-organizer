@@ -188,15 +188,16 @@ impl Organizer {
             .as_ref()
             .ok_or_else(|| anyhow::anyhow!("No title found in metadata"))?;
 
-        let year = metadata
-            .year
-            .ok_or_else(|| anyhow::anyhow!("No year found in metadata"))?;
-
         // Clean title for directory name
         let clean_title = self.clean_title_for_directory(title);
 
-        // Create directory name: "Movie Name (Year)"
-        let dir_name = format!("{} ({})", clean_title, year);
+        // Create directory name with or without year
+        let dir_name = if let Some(year) = metadata.year {
+            format!("{} ({})", clean_title, year)
+        } else {
+            // Fallback: use current year or create "Unknown Year" directory
+            format!("{} (Unknown Year)", clean_title)
+        };
 
         // Get the parent directory of the original file
         let parent_dir = media_file
@@ -242,10 +243,6 @@ impl Organizer {
             .as_ref()
             .ok_or_else(|| anyhow::anyhow!("No title found in metadata"))?;
 
-        let year = metadata
-            .year
-            .ok_or_else(|| anyhow::anyhow!("No year found in metadata"))?;
-
         // Get file extension
         let extension = media_file
             .file_path
@@ -253,8 +250,12 @@ impl Organizer {
             .and_then(|ext| ext.to_str())
             .unwrap_or("mkv");
 
-        // Build filename: "Movie Name (Year) Quality Source.ext"
-        let mut filename_parts = vec![title.to_string(), format!("({})", year)];
+        // Build filename with or without year
+        let mut filename_parts = vec![title.to_string()];
+
+        if let Some(year) = metadata.year {
+            filename_parts.push(format!("({})", year));
+        }
 
         // Add quality if available
         if let Some(quality) = &metadata.quality {
@@ -348,8 +349,7 @@ impl Organizer {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::types::{MediaFile, MediaMetadata, ParsingResult, ParsingStrategy};
-    use tempfile::tempdir;
+    use crate::types::{MediaFile, MediaMetadata};
 
     #[test]
     fn test_clean_title_for_directory() {
@@ -373,7 +373,7 @@ mod tests {
     #[test]
     fn test_generate_plex_filename() {
         let organizer = Organizer::new(true, None);
-        let mut media_file = MediaFile {
+        let media_file = MediaFile {
             id: "test".to_string(),
             file_path: PathBuf::from("movie.mkv"),
             file_name: "movie.mkv".to_string(),

@@ -156,6 +156,8 @@ pub struct MovieInfo {
     pub title: String,
     /// Original title (for foreign language movies)
     pub original_title: Option<String>,
+    /// Original language code (e.g., "ja", "zh", "ko")
+    pub original_language: Option<String>,
     /// Release year
     pub year: Option<u32>,
     /// Part number for multi-part movies
@@ -178,6 +180,7 @@ pub struct TmdbMovie {
     pub id: u32,
     pub title: String,
     pub original_title: Option<String>,
+    pub original_language: Option<String>,
     pub release_date: Option<String>,
     pub overview: Option<String>,
     pub poster_path: Option<String>,
