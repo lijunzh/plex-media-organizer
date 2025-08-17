@@ -5,6 +5,11 @@ on:
     branches: [main]
     types: [opened, synchronize, reopened, ready_for_review]
 
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
 jobs:
   pr-analysis:
     runs-on: ubuntu-latest
@@ -25,74 +30,79 @@ jobs:
           rustup component add rustfmt clippy
       
       - name: PR Analysis
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const { data: pr } = await github.rest.pulls.get({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: context.issue.number,
-            });
-            
-            const { data: commits } = await github.rest.pulls.listCommits({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: context.issue.number,
-            });
-            
-            const { data: files } = await github.rest.pulls.listFiles({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: context.issue.number,
-            });
-            
-            // Analyze PR
-            const analysis = {
-              title: pr.title,
-              description: pr.body || 'No description provided',
-              commits: commits.length,
-              filesChanged: files.length,
-              additions: files.reduce((sum, file) => sum + file.additions, 0),
-              deletions: files.reduce((sum, file) => sum + file.deletions, 0),
-              hasTests: files.some(file => file.filename.includes('test')),
-              hasDocs: files.some(file => file.filename.includes('docs/') || file.filename.includes('README')),
-              hasConfig: files.some(file => file.filename.includes('config') || file.filename.includes('Cargo.toml')),
-            };
-            
-            console.log('PR Analysis:', JSON.stringify(analysis, null, 2));
-            
-            // Create analysis comment
-            const analysisComment = `## 🔍 PR Analysis
-            
-            ### 📊 Statistics
-            - **Commits**: ${analysis.commits}
-            - **Files changed**: ${analysis.filesChanged}
-            - **Additions**: +${analysis.additions}
-            - **Deletions**: -${analysis.deletions}
-            
-            ### 📋 Content Analysis
-            - **Tests included**: ${analysis.hasTests ? '✅' : '❌'}
-            - **Documentation updated**: ${analysis.hasDocs ? '✅' : '❌'}
-            - **Configuration changes**: ${analysis.hasConfig ? '✅' : '❌'}
-            
-            ### 💡 Recommendations
-            ${!analysis.hasTests ? '- Consider adding tests for new functionality' : ''}
-            ${!analysis.hasDocs ? '- Consider updating documentation' : ''}
-            ${analysis.description === 'No description provided' ? '- Please add a description to this PR' : ''}
-            ${analysis.commits > 10 ? '- Consider squashing commits for cleaner history' : ''}
-            
-            ### 🎯 Next Steps
-            1. Ensure all CI checks pass
-            2. Request review from maintainers
-            3. Address any feedback
-            4. Merge when approved`;
-            
-            await github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: analysisComment
-            });
+         uses: actions/github-script@v7
+         with:
+           script: |
+             try {
+               const { data: pr } = await github.rest.pulls.get({
+                 owner: context.repo.owner,
+                 repo: context.repo.repo,
+                 pull_number: context.issue.number,
+               });
+               
+               const { data: commits } = await github.rest.pulls.listCommits({
+                 owner: context.repo.owner,
+                 repo: context.repo.repo,
+                 pull_number: context.issue.number,
+               });
+               
+               const { data: files } = await github.rest.pulls.listFiles({
+                 owner: context.repo.owner,
+                 repo: context.repo.repo,
+                 pull_number: context.issue.number,
+               });
+               
+               // Analyze PR
+               const analysis = {
+                 title: pr.title,
+                 description: pr.body || 'No description provided',
+                 commits: commits.length,
+                 filesChanged: files.length,
+                 additions: files.reduce((sum, file) => sum + file.additions, 0),
+                 deletions: files.reduce((sum, file) => sum + file.deletions, 0),
+                 hasTests: files.some(file => file.filename.includes('test')),
+                 hasDocs: files.some(file => file.filename.includes('docs/') || file.filename.includes('README')),
+                 hasConfig: files.some(file => file.filename.includes('config') || file.filename.includes('Cargo.toml')),
+               };
+               
+               console.log('PR Analysis:', JSON.stringify(analysis, null, 2));
+               
+               // Create analysis comment
+               const analysisComment = `## 🔍 PR Analysis
+               
+               ### 📊 Statistics
+               - **Commits**: ${analysis.commits}
+               - **Files changed**: ${analysis.filesChanged}
+               - **Additions**: +${analysis.additions}
+               - **Deletions**: -${analysis.deletions}
+               
+               ### 📋 Content Analysis
+               - **Tests included**: ${analysis.hasTests ? '✅' : '❌'}
+               - **Documentation updated**: ${analysis.hasDocs ? '✅' : '❌'}
+               - **Configuration changes**: ${analysis.hasConfig ? '✅' : '❌'}
+               
+               ### 💡 Recommendations
+               ${!analysis.hasTests ? '- Consider adding tests for new functionality' : ''}
+               ${!analysis.hasDocs ? '- Consider updating documentation' : ''}
+               ${analysis.description === 'No description provided' ? '- Please add a description to this PR' : ''}
+               ${analysis.commits > 10 ? '- Consider squashing commits for cleaner history' : ''}
+               
+               ### 🎯 Next Steps
+               1. Ensure all CI checks pass
+               2. Request review from maintainers
+               3. Address any feedback
+               4. Merge when approved`;
+               
+               await github.rest.issues.createComment({
+                 issue_number: context.issue.number,
+                 owner: context.repo.owner,
+                 repo: context.repo.repo,
+                 body: analysisComment
+               });
+             } catch (error) {
+               console.log('Could not create PR analysis comment:', error.message);
+               console.log('This is expected for forks or when permissions are limited');
+             }
       
       - name: Check Commit Messages
         run: |
