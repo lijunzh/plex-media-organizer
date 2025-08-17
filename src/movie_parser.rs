@@ -83,28 +83,55 @@ impl MovieParser {
         confidence_score += 0.3; // Base confidence from filename parsing
 
         // If we have a TMDB client, try to get additional data
-        if let Some(ref tmdb_client) = self.tmdb_client
-            && let Some(tmdb_movie) = tmdb_client
+        if let Some(ref tmdb_client) = self.tmdb_client {
+            // Try to find movie in TMDB, even if we don't have a year
+            let tmdb_movie = tmdb_client
                 .find_best_match(&movie_info.title, movie_info.year)
-                .await?
-        {
-            // Update movie info with TMDB data
-            let tmdb_info = tmdb_client.tmdb_to_movie_info(&tmdb_movie);
-            movie_info = self.merge_movie_info(movie_info, tmdb_info);
+                .await?;
 
-            // Add external source
-            external_sources.push(ExternalSource {
-                name: "TMDB".to_string(),
-                external_id: tmdb_movie.id.to_string(),
-                url: Some(format!(
-                    "https://www.themoviedb.org/movie/{}",
-                    tmdb_movie.id
-                )),
-                fetched_at: Utc::now(),
-            });
+            if let Some(tmdb_movie) = tmdb_movie {
+                // Update movie info with TMDB data
+                let tmdb_info = tmdb_client.tmdb_to_movie_info(&tmdb_movie);
+                movie_info = self.merge_movie_info(movie_info, tmdb_info);
 
-            parsing_strategy = ParsingStrategy::ExternalApi;
-            confidence_score += 0.5; // High confidence from external API
+                // Add external source
+                external_sources.push(ExternalSource {
+                    name: "TMDB".to_string(),
+                    external_id: tmdb_movie.id.to_string(),
+                    url: Some(format!(
+                        "https://www.themoviedb.org/movie/{}",
+                        tmdb_movie.id
+                    )),
+                    fetched_at: Utc::now(),
+                });
+
+                parsing_strategy = ParsingStrategy::ExternalApi;
+                confidence_score += 0.5; // High confidence from external API
+            } else if movie_info.year.is_none() {
+                // If we don't have a year and TMDB didn't find a match,
+                // try a broader search without year constraint
+                let broader_movie = tmdb_client.find_best_match(&movie_info.title, None).await?;
+
+                if let Some(broader_movie) = broader_movie {
+                    // Update movie info with TMDB data (this will include the year)
+                    let tmdb_info = tmdb_client.tmdb_to_movie_info(&broader_movie);
+                    movie_info = self.merge_movie_info(movie_info, tmdb_info);
+
+                    // Add external source
+                    external_sources.push(ExternalSource {
+                        name: "TMDB".to_string(),
+                        external_id: broader_movie.id.to_string(),
+                        url: Some(format!(
+                            "https://www.themoviedb.org/movie/{}",
+                            broader_movie.id
+                        )),
+                        fetched_at: Utc::now(),
+                    });
+
+                    parsing_strategy = ParsingStrategy::ExternalApi;
+                    confidence_score += 0.4; // Slightly lower confidence for broader match
+                }
+            }
         }
 
         // Create MediaFile and MediaMetadata
@@ -250,7 +277,7 @@ impl MovieParser {
         })
     }
 
-    /// Basic fallback parsing
+    /// Basic fallback parsing with improved handling for simple filenames
     fn parse_basic_fallback(&self, filename: &str) -> Result<MovieInfo> {
         let (quality, source) = self.extract_quality_and_source(filename);
 
@@ -258,7 +285,25 @@ impl MovieParser {
         let year = self.extract_year(filename);
 
         // Clean title by removing common suffixes and quality indicators
-        let title = self.clean_title(filename);
+        let mut title = self.clean_title(filename);
+
+        // For simple filenames like "I.Robot.mkv", try to improve title extraction
+        if title.contains('.') && !title.contains(' ') {
+            // Replace dots with spaces for better readability
+            title = title.replace('.', " ");
+            title = title.trim().to_string();
+        }
+
+        // Remove file extension from title if present
+        if let Some(dot_pos) = title.rfind('.') {
+            let extension = &title[dot_pos + 1..];
+            // Check if it's a common video extension
+            if ["mkv", "mp4", "avi", "mov", "wmv", "flv", "webm"]
+                .contains(&extension.to_lowercase().as_str())
+            {
+                title = title[..dot_pos].to_string();
+            }
+        }
 
         Ok(MovieInfo {
             title,
@@ -288,13 +333,37 @@ impl MovieParser {
         (quality, source)
     }
 
-    /// Extract year from filename
+    /// Extract year from filename with improved detection
     fn extract_year(&self, filename: &str) -> Option<u32> {
-        let year_pattern = Regex::new(r"\b(19|20)\d{2}\b").unwrap();
-        year_pattern
-            .captures(filename)
-            .and_then(|caps| caps.get(0))
-            .and_then(|m| m.as_str().parse::<u32>().ok())
+        // Try multiple year patterns
+        let patterns = [
+            r"\b(19|20)\d{2}\b", // Standard year format
+            r"\[(\d{4})\]",      // Year in brackets
+            r"\((\d{4})\)",      // Year in parentheses
+            r"\.(\d{4})\.",      // Year with dots
+            r"_(\d{4})_",        // Year with underscores
+        ];
+
+        for pattern in &patterns {
+            if let Ok(regex) = Regex::new(pattern)
+                && let Some(captures) = regex.captures(filename)
+            {
+                // Get the first capture group or the full match
+                let year_str = captures
+                    .get(1)
+                    .map(|m| m.as_str())
+                    .unwrap_or_else(|| captures.get(0).unwrap().as_str());
+
+                if let Ok(year) = year_str.parse::<u32>() {
+                    // Validate year range (1900-2030)
+                    if (1900..=2030).contains(&year) {
+                        return Some(year);
+                    }
+                }
+            }
+        }
+
+        None
     }
 
     /// Clean title by removing common suffixes and quality indicators
