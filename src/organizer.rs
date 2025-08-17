@@ -348,8 +348,7 @@ impl Organizer {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::types::{MediaFile, MediaMetadata, ParsingResult, ParsingStrategy};
-    use tempfile::tempdir;
+    use crate::types::{MediaFile, MediaMetadata};
 
     #[test]
     fn test_clean_title_for_directory() {
@@ -373,7 +372,7 @@ mod tests {
     #[test]
     fn test_generate_plex_filename() {
         let organizer = Organizer::new(true, None);
-        let mut media_file = MediaFile {
+        let media_file = MediaFile {
             id: "test".to_string(),
             file_path: PathBuf::from("movie.mkv"),
             file_name: "movie.mkv".to_string(),
