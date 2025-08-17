@@ -144,6 +144,43 @@
 - **✅ CJK Title Configuration** - Configurable Chinese/Japanese/Korean title handling
 - **✅ Documentation Consolidation** - Streamlined docs from 6 files to 4 files
 - **✅ Enhanced GitHub Actions** - PR workflows and quality checks
+- **✅ Simplify Configuration** - Removed unused future features for Iteration 1
+
+## **📋 Iteration 1 Configuration (Current)**
+
+### **Current Simplified Configuration**
+For Iteration 1, we've simplified the configuration to only include features that are actually implemented and used:
+
+```toml
+[apis]
+tmdb_api_key = "your_tmdb_key_here"
+
+[organization.quality]
+preferred_quality = "1080p"
+
+[organization.cjk_titles]
+prefer_original_titles = false
+include_english_subtitle = false
+fallback_to_english_on_error = true
+preserve_original_in_metadata = true
+```
+
+### **What's Included in Iteration 1**
+- **TMDB API Integration**: Movie metadata lookup
+- **Quality Preferences**: Preferred quality setting
+- **CJK Title Handling**: Configurable Chinese/Japanese/Korean title processing
+
+### **What's Planned for Future Iterations**
+- **TVDB Integration**: TV show metadata (Iteration 2)
+- **MusicBrainz Integration**: Music metadata (Iteration 3)
+- **AniDB Integration**: Anime metadata (Iteration 4)
+- **Learning System**: Pattern recognition and user feedback (Iteration 2+)
+- **Database Integration**: Persistent storage and caching (Iteration 2)
+- **Advanced Templates**: Custom naming templates (Iteration 2)
+- **Rate Limiting**: API request management (Iteration 2)
+
+### **Architecture Alignment**
+The full architecture in `docs/ARCHITECTURE.md` shows the complete target system. This simplified configuration represents the **Iteration 1 MVP** that focuses on core movie organization functionality.
 
 ## **📋 Detailed Action List Implementation**
 
@@ -176,14 +213,14 @@
 
 ### **🔥 High Priority Items**
 
-#### **1. Simplify Configuration**
+#### **1. ✅ Simplify Configuration** - **COMPLETED**
 **Goal**: Remove unused future features for Iteration 1
 **Files to modify**: `src/config.rs`, `config_example.toml`
 **Tasks**:
-- [ ] Remove unused configuration options
-- [ ] Keep only essential settings for current functionality
-- [ ] Update configuration documentation
-- [ ] Test configuration loading and validation
+- [x] Remove unused configuration options
+- [x] Keep only essential settings for current functionality
+- [x] Update configuration documentation
+- [x] Test configuration loading and validation
 
 #### **2. Comprehensive Testing Overhaul**
 **Goal**: Add missing tests across all source files
