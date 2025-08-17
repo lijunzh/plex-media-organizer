@@ -60,6 +60,18 @@ jobs:
           cargo test --lib --verbose -- --nocapture
           cargo test --bin plex-media-organizer --verbose -- --nocapture
       
+      - name: Check TMDB API Key
+        run: |
+          if [ -n "$TMDB_API_KEY" ]; then
+            echo "✅ TMDB API key is configured"
+            echo "   Key length: ${#TMDB_API_KEY} characters"
+            echo "   Key preview: ${TMDB_API_KEY:0:8}..."
+          else
+            echo "⚠️  TMDB API key is not configured"
+            echo "   This will skip TMDB integration tests"
+            echo "   To enable TMDB tests, add TMDB_API_KEY to GitHub Secrets"
+          fi
+      
       - name: Run Integration Tests
         env:
           TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
