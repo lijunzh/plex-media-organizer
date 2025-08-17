@@ -7,12 +7,24 @@
 
 | Component | Status | Notes |
 |-----------|--------|-------|
-| **Iteration 1: Movie MVP** | 🔄 In Progress | Code review in progress |
+| **Iteration 1: Movie MVP** | ✅ **COMPLETED** | Successfully merged to main |
 | **GitHub Repository** | ✅ Active | CI/CD configured |
 | **Iteration 2: Movie Enhancement** | 🔄 Ready to Begin | Foundation solid |
 | **Documentation** | ✅ Consolidated | Streamlined structure |
 
 ## 🎯 **Recent Updates**
+
+### **December 2024 - Iteration 1 Completion & PR Merge**
+- **Status**: ✅ **COMPLETED** - Iteration 1 successfully merged to main
+- **Features Delivered**:
+  - ✅ CJK title configuration with 4 configurable options
+  - ✅ Smart CJK character detection and title strategy
+  - ✅ Comprehensive test suite (4 new tests)
+  - ✅ Integration with all CLI commands (scan, test, organize)
+  - ✅ Documentation consolidation (6 files → 4 files)
+  - ✅ Enhanced GitHub Actions for PR workflows
+- **PR**: https://github.com/lijunzh/plex-media-organizer/pull/1
+- **Result**: Production-ready CJK title handling with backward compatibility
 
 ### **December 2024 - Documentation Consolidation**
 - **Action**: Consolidated documentation structure for better organization
@@ -46,45 +58,47 @@
 
 ## 🚀 **Next Steps**
 
-### **Current Focus: File Organization Implementation**
+### **Current Focus: Iteration 2 Planning**
 
-#### **🎯 File Organization Plan (Iteration 1 Core Feature)**
-**Goal**: Add core "organizer" functionality to complete MVP
+#### **🎯 Iteration 1 Achievements**
+**✅ COMPLETED**: Core movie organization with CJK title support
 
-**Implementation Steps:**
-1. **✅ Create organizer module** (`src/organizer.rs`)
+**Delivered Features:**
+1. **✅ File Organization** (`src/organizer.rs`)
    - ✅ File renaming to Plex conventions
    - ✅ Directory creation (Movie Name (Year)/)
    - ✅ Safety checks and validation
 
-2. **✅ Add CLI commands**
+2. **✅ CJK Title Configuration**
+   - ✅ Configurable Chinese/Japanese/Korean title handling
+   - ✅ Smart character detection
+   - ✅ 4 configurable options for user preferences
+   - ✅ Backward compatibility maintained
+
+3. **✅ Enhanced CLI Commands**
    - ✅ `organize` command for file organization
-   - ✅ `preview` command for dry-run mode
+   - ✅ `test` command with organize workflow
    - ✅ Progress reporting and safety confirmations
 
-3. **✅ Implement safety features**
+4. **✅ Safety & Quality Features**
    - ✅ JSON-based rollback capability
    - ✅ Dry-run mode (preview changes)
    - ✅ File existence and permission checks
    - ✅ Conflict resolution
+   - ✅ Enhanced GitHub Actions for PR workflows
 
-4. **✅ Integration with existing code**
-   - ✅ Connect with movie parser for metadata
-   - ✅ Use scanner for file discovery
-   - ✅ Leverage existing CLI framework
+**✅ Result**: Production-ready movie organization with CJK title support
 
-**✅ Expected Deliverable**: Users can organize movie files to Plex conventions with safety features
-
-### **Immediate (Current Sprint)**
+### **Immediate (Next Sprint)**
 1. **✅ Fix GitHub Actions CI/CD** - Rust version compatibility
 2. **✅ Complete Code Review** - Review all source files and identify gaps
 3. **✅ Implement File Organization** - Add core "organizer" functionality (Iteration 1) - **COMPLETED**
-4. **🔄 Simplify Configuration** - Remove unused future features for Iteration 1
-5. **🔄 Enhance TMDB Matching** - Add fuzzy search for better movie matching
-6. **🔄 Improve Debug Visibility** - Better debug formatting for types
-7. **🔄 Improve Library Documentation** - Add comprehensive docs and examples to lib.rs
-8. **🔄 Comprehensive Testing Overhaul** - Add missing tests across all source files
-9. **🔄 Complete Iteration 1: Movie MVP with Organization**
+4. **✅ CJK Title Configuration** - Configurable Chinese/Japanese/Korean title handling - **COMPLETED**
+5. **✅ Documentation Consolidation** - Streamlined docs from 6 files to 4 files - **COMPLETED**
+6. **✅ Enhanced GitHub Actions** - PR workflows and quality checks - **COMPLETED**
+7. **🔄 Plan Iteration 2** - Database integration and enhanced features
+8. **🔄 User Testing** - Validate CJK title configuration with real users
+9. **🔄 Performance Optimization** - Optimize for large media libraries
 
 ### **Iteration 2 Goals**
 - **Database Integration**: SQLite for persistent storage and caching

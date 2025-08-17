@@ -45,8 +45,8 @@ These documents serve as the **planning and design foundation** for the Plex Med
 ## 🚀 Current Status
 
 - **Architecture**: ✅ Complete and documented
-- **Phase 1 Implementation**: ✅ Complete and deployed to GitHub
-- **Development**: 🔄 Active - Phase 2 in progress
+- **Iteration 1 Implementation**: ✅ Complete and merged to main
+- **Development**: 🔄 Active - Iteration 2 planning in progress
 - **GitHub Repository**: ✅ Live at https://github.com/lijunzh/plex-media-organizer
 
 ## 📖 How to Use These Documents
