@@ -7,15 +7,15 @@
 
 | Component | Status | Notes |
 |-----------|--------|-------|
-| **Iteration 1: Movie MVP** | ✅ **COMPLETED** | Successfully merged to main |
+| **Iteration 1: Movie MVP** | 🔄 In Progress | Core features implemented, action list pending |
 | **GitHub Repository** | ✅ Active | CI/CD configured |
 | **Iteration 2: Movie Enhancement** | 🔄 Ready to Begin | Foundation solid |
 | **Documentation** | ✅ Consolidated | Streamlined structure |
 
 ## 🎯 **Recent Updates**
 
-### **December 2024 - Iteration 1 Completion & PR Merge**
-- **Status**: ✅ **COMPLETED** - Iteration 1 successfully merged to main
+### **December 2024 - Core Features Implementation**
+- **Status**: 🔄 **IN PROGRESS** - Core features implemented, action list pending
 - **Features Delivered**:
   - ✅ CJK title configuration with 4 configurable options
   - ✅ Smart CJK character detection and title strategy
@@ -24,7 +24,7 @@
   - ✅ Documentation consolidation (6 files → 4 files)
   - ✅ Enhanced GitHub Actions for PR workflows
 - **PR**: https://github.com/lijunzh/plex-media-organizer/pull/1
-- **Result**: Production-ready CJK title handling with backward compatibility
+- **Result**: Core functionality implemented, action list items remain
 
 ### **December 2024 - Documentation Consolidation**
 - **Action**: Consolidated documentation structure for better organization
@@ -58,10 +58,10 @@
 
 ## 🚀 **Next Steps**
 
-### **Current Focus: Iteration 2 Planning**
+### **Current Focus: Complete Iteration 1 Action List**
 
-#### **🎯 Iteration 1 Achievements**
-**✅ COMPLETED**: Core movie organization with CJK title support
+#### **🎯 Iteration 1 Progress**
+**🔄 IN PROGRESS**: Core features implemented, action list items pending
 
 **Delivered Features:**
 1. **✅ File Organization** (`src/organizer.rs`)
@@ -87,16 +87,16 @@
    - ✅ Conflict resolution
    - ✅ Enhanced GitHub Actions for PR workflows
 
-**✅ Result**: Production-ready movie organization with CJK title support
+**🔄 Status**: Core functionality implemented, action list items remain to be completed
 
-### **Immediate (Next Sprint)**
+### **Immediate (Current Sprint)**
 1. **✅ Fix GitHub Actions CI/CD** - Rust version compatibility
 2. **✅ Complete Code Review** - Review all source files and identify gaps
 3. **✅ Implement File Organization** - Add core "organizer" functionality (Iteration 1) - **COMPLETED**
 4. **✅ CJK Title Configuration** - Configurable Chinese/Japanese/Korean title handling - **COMPLETED**
 5. **✅ Documentation Consolidation** - Streamlined docs from 6 files to 4 files - **COMPLETED**
 6. **✅ Enhanced GitHub Actions** - PR workflows and quality checks - **COMPLETED**
-7. **🔄 Plan Iteration 2** - Database integration and enhanced features
+7. **🔄 Complete Action List Items** - Address remaining Iteration 1 tasks
 8. **🔄 User Testing** - Validate CJK title configuration with real users
 9. **🔄 Performance Optimization** - Optimize for large media libraries
 
