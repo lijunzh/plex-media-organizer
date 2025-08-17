@@ -230,14 +230,14 @@ fn test_performance_large_collection() {
 
     // Performance assertions
     assert!(
-        files_per_second > 10.0,
-        "Performance too slow: {:.1} files/sec. Expected >10 files/sec",
+        files_per_second > 5.0,
+        "Performance too slow: {:.1} files/sec. Expected >5 files/sec (reduced due to TMDB API calls)",
         files_per_second
     );
 
     assert!(
-        duration.as_millis() < 5000,
-        "Test took too long: {:.0}ms. Expected <5000ms",
+        duration.as_millis() < 10000,
+        "Test took too long: {:.0}ms. Expected <10000ms (increased due to TMDB API calls)",
         duration.as_millis()
     );
 
