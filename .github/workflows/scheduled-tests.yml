@@ -45,7 +45,7 @@ jobs:
           echo "⏰ Started at: $(date)"
           
           # Run all tests with verbose output
-          cargo test --verbose --all-features
+          cargo test --verbose --all-features -- --nocapture
           
           echo "✅ All tests completed successfully!"
           echo "⏰ Finished at: $(date)"
