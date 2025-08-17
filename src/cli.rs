@@ -46,11 +46,42 @@ enum Commands {
         path: bool,
     },
 
-    /// Test parsing with a single file
+    /// Test parsing and organization
     Test {
-        /// File to test parsing
-        #[arg(value_name = "FILE")]
-        file: PathBuf,
+        /// File or directory to test
+        #[arg(value_name = "PATH")]
+        path: PathBuf,
+
+        /// Test organization (scan + parse + organize)
+        #[arg(short, long)]
+        organize: bool,
+
+        /// Preview organization changes (dry-run)
+        #[arg(short, long)]
+        preview: bool,
+
+        /// Show detailed output
+        #[arg(short, long)]
+        verbose: bool,
+    },
+
+    /// Organize files to Plex naming conventions
+    Organize {
+        /// Directory to organize
+        #[arg(value_name = "DIRECTORY")]
+        directory: PathBuf,
+
+        /// Preview changes without making them (dry-run)
+        #[arg(short, long)]
+        preview: bool,
+
+        /// Backup directory for rollback files
+        #[arg(short, long, value_name = "BACKUP_DIR")]
+        backup: Option<PathBuf>,
+
+        /// Show detailed output
+        #[arg(short, long)]
+        verbose: bool,
     },
 }
 
@@ -63,7 +94,18 @@ impl Cli {
             Commands::Scan { directory, verbose } => Self::handle_scan(directory, verbose).await,
             Commands::Setup { force } => Self::handle_setup(force).await,
             Commands::Config { path } => Self::handle_config(path).await,
-            Commands::Test { file } => Self::handle_test(file).await,
+            Commands::Test {
+                path,
+                organize,
+                preview,
+                verbose,
+            } => Self::handle_test(path, organize, preview, verbose).await,
+            Commands::Organize {
+                directory,
+                preview,
+                backup,
+                verbose,
+            } => Self::handle_organize(directory, preview, backup, verbose).await,
         }
     }
 
@@ -93,7 +135,8 @@ impl Cli {
         let tmdb_client = config.apis.tmdb_api_key.map(TmdbClient::new);
 
         // Create movie parser and scanner
-        let movie_parser = MovieParser::new(tmdb_client);
+        let movie_parser =
+            MovieParser::with_cjk_config(tmdb_client, config.organization.cjk_titles.clone());
         let scanner = Scanner::new(movie_parser);
 
         // Scan directory
@@ -188,62 +231,148 @@ impl Cli {
     }
 
     /// Handle the test command
-    async fn handle_test(file: PathBuf) -> Result<()> {
-        println!("🧪 Plex Media Organizer - Testing File Parsing");
-        println!("File: {}", file.display());
-        println!();
+    async fn handle_test(
+        path: PathBuf,
+        organize: bool,
+        preview: bool,
+        verbose: bool,
+    ) -> Result<()> {
+        if organize {
+            // Test full workflow: scan + parse + organize
+            println!("🧪 Plex Media Organizer - Testing Full Workflow");
+            println!("Path: {}", path.display());
+            println!(
+                "Mode: {}",
+                if preview {
+                    "Preview (dry-run)"
+                } else {
+                    "Live test"
+                }
+            );
+            println!();
 
-        if !file.exists() {
-            anyhow::bail!("File does not exist: {}", file.display());
-        }
-
-        // Load configuration
-        let config = match AppConfig::load() {
-            Ok(config) => config,
-            Err(_) => {
-                println!("⚠️  No configuration found. Running without TMDB integration.");
-                // Continue without config
-                AppConfig::default()
+            if !path.exists() {
+                anyhow::bail!("Path does not exist: {}", path.display());
             }
-        };
 
-        // Create TMDB client if available
-        let tmdb_client = config.apis.tmdb_api_key.map(TmdbClient::new);
+            // Load configuration
+            let config = match AppConfig::load() {
+                Ok(config) => config,
+                Err(_) => {
+                    println!("⚠️  No configuration found. Running without TMDB integration.");
+                    // Continue without config
+                    AppConfig::default()
+                }
+            };
 
-        // Create movie parser and test parsing
-        let movie_parser = MovieParser::new(tmdb_client);
+            // Create TMDB client if available
+            let tmdb_client = config.apis.tmdb_api_key.map(TmdbClient::new);
 
-        match movie_parser.parse_movie(&file).await {
-            Ok(result) => {
-                println!("✅ Parsing successful!");
-                println!(
-                    "Title: {}",
-                    result.parsed_metadata.title.as_deref().unwrap_or("Unknown")
-                );
-                if let Some(original_title) = &result.parsed_metadata.original_title {
-                    println!("Original Title: {}", original_title);
-                }
-                if let Some(year) = result.parsed_metadata.year {
-                    println!("Year: {}", year);
-                }
-                if let Some(quality) = &result.parsed_metadata.quality {
-                    println!("Quality: {}", quality);
-                }
-                if let Some(source) = &result.parsed_metadata.source {
-                    println!("Source: {}", source);
-                }
-                println!("Confidence: {:.1}%", result.confidence_score * 100.0);
-                println!("Strategy: {:?}", result.parsing_strategy);
+            // Create movie parser and scanner
+            let movie_parser =
+                MovieParser::with_cjk_config(tmdb_client, config.organization.cjk_titles.clone());
+            let scanner = Scanner::new(movie_parser);
 
-                if !result.external_sources.is_empty() {
-                    println!("External Sources:");
-                    for source in &result.external_sources {
-                        println!("  - {}: {}", source.name, source.external_id);
+            // Scan directory
+            println!("📋 Step 1: Scanning directory...");
+            let scan_result = scanner
+                .scan_directory(&path)
+                .await
+                .context("Failed to scan directory")?;
+
+            if scan_result.parsed_files.is_empty() {
+                println!("❌ No media files found to test.");
+                return Ok(());
+            }
+
+            println!("Found {} files to test", scan_result.parsed_files.len());
+
+            // Display scan results
+            if verbose {
+                Self::display_scan_results(&scan_result, verbose);
+            }
+
+            // Test organization
+            println!("\n📋 Step 2: Testing organization...");
+            let organizer = crate::organizer::Organizer::new(preview, None);
+
+            let organization_result = organizer
+                .organize_scan_result(&scan_result)
+                .await
+                .context("Failed to organize files")?;
+
+            println!("\n✅ Full workflow test completed!");
+            println!(
+                "Scan: {} files found and parsed",
+                scan_result.parsed_files.len()
+            );
+            println!(
+                "Organize: {} files processed",
+                organization_result.statistics.total_files
+            );
+            println!(
+                "Success rate: {:.1}%",
+                organization_result.statistics.success_rate * 100.0
+            );
+        } else {
+            // Test single file parsing
+            println!("🧪 Plex Media Organizer - Testing File Parsing");
+            println!("File: {}", path.display());
+            println!();
+
+            if !path.exists() {
+                anyhow::bail!("File does not exist: {}", path.display());
+            }
+
+            // Load configuration
+            let config = match AppConfig::load() {
+                Ok(config) => config,
+                Err(_) => {
+                    println!("⚠️  No configuration found. Running without TMDB integration.");
+                    // Continue without config
+                    AppConfig::default()
+                }
+            };
+
+            // Create TMDB client if available
+            let tmdb_client = config.apis.tmdb_api_key.map(TmdbClient::new);
+
+            // Create movie parser and test parsing
+            let movie_parser =
+                MovieParser::with_cjk_config(tmdb_client, config.organization.cjk_titles.clone());
+
+            match movie_parser.parse_movie(&path).await {
+                Ok(result) => {
+                    println!("✅ Parsing successful!");
+                    println!(
+                        "Title: {}",
+                        result.parsed_metadata.title.as_deref().unwrap_or("Unknown")
+                    );
+                    if let Some(original_title) = &result.parsed_metadata.original_title {
+                        println!("Original Title: {}", original_title);
+                    }
+                    if let Some(year) = result.parsed_metadata.year {
+                        println!("Year: {}", year);
+                    }
+                    if let Some(quality) = &result.parsed_metadata.quality {
+                        println!("Quality: {}", quality);
+                    }
+                    if let Some(source) = &result.parsed_metadata.source {
+                        println!("Source: {}", source);
+                    }
+                    println!("Confidence: {:.1}%", result.confidence_score * 100.0);
+                    println!("Strategy: {:?}", result.parsing_strategy);
+
+                    if !result.external_sources.is_empty() {
+                        println!("External Sources:");
+                        for source in &result.external_sources {
+                            println!("  - {}: {}", source.name, source.external_id);
+                        }
                     }
                 }
-            }
-            Err(e) => {
-                println!("❌ Parsing failed: {}", e);
+                Err(e) => {
+                    println!("❌ Parsing failed: {}", e);
+                }
             }
         }
 
@@ -303,6 +432,90 @@ impl Cli {
 
         println!("✅ Scan completed!");
     }
+
+    /// Handle the organize command
+    async fn handle_organize(
+        directory: PathBuf,
+        preview: bool,
+        backup: Option<PathBuf>,
+        _verbose: bool,
+    ) -> Result<()> {
+        println!("🎬 Plex Media Organizer - File Organization");
+        println!("Directory: {}", directory.display());
+        if preview {
+            println!("Mode: Preview (dry-run)");
+        } else {
+            println!("Mode: Live organization");
+        }
+        if let Some(backup_dir) = &backup {
+            println!("Backup directory: {}", backup_dir.display());
+        }
+        println!();
+
+        // Load configuration
+        let config = match AppConfig::load() {
+            Ok(config) => config,
+            Err(_) => {
+                println!("⚠️  No configuration found. Run 'setup' first.");
+                return Ok(());
+            }
+        };
+
+        // Validate API keys
+        if let Err(e) = config.validate_api_keys() {
+            println!("⚠️  Configuration issue: {}", e);
+            println!("Run 'setup' to configure API keys.");
+            return Ok(());
+        }
+
+        // Create TMDB client
+        let tmdb_client = config.apis.tmdb_api_key.map(TmdbClient::new);
+
+        // Create movie parser and scanner
+        let movie_parser =
+            MovieParser::with_cjk_config(tmdb_client, config.organization.cjk_titles.clone());
+        let scanner = Scanner::new(movie_parser);
+
+        // Scan directory first
+        println!("📋 Scanning directory for media files...");
+        let scan_result = scanner
+            .scan_directory(&directory)
+            .await
+            .context("Failed to scan directory")?;
+
+        if scan_result.parsed_files.is_empty() {
+            println!("❌ No media files found to organize.");
+            return Ok(());
+        }
+
+        println!("Found {} files to organize", scan_result.parsed_files.len());
+
+        // Create organizer
+        let organizer = crate::organizer::Organizer::new(preview, backup);
+
+        // Organize files
+        let organization_result = organizer
+            .organize_scan_result(&scan_result)
+            .await
+            .context("Failed to organize files")?;
+
+        // Save organization result for potential rollback
+        if !preview {
+            let result_file = format!(
+                "organization_result_{}.json",
+                organization_result.operation_id
+            );
+            if let Ok(json) = serde_json::to_string_pretty(&organization_result) {
+                if let Err(e) = std::fs::write(&result_file, json) {
+                    println!("⚠️  Warning: Could not save organization result: {}", e);
+                } else {
+                    println!("📄 Organization result saved to: {}", result_file);
+                }
+            }
+        }
+
+        Ok(())
+    }
 }
 
 #[cfg(test)]
@@ -318,6 +531,50 @@ mod tests {
                 assert!(!verbose);
             }
             _ => panic!("Expected scan command"),
+        }
+    }
+
+    #[test]
+    fn test_test_command_creation() {
+        let cli = Cli::parse_from(&["plex-media-organizer", "test", "/test/file.mkv"]);
+        match cli.command {
+            Commands::Test {
+                path,
+                organize,
+                preview,
+                verbose,
+            } => {
+                assert_eq!(path, PathBuf::from("/test/file.mkv"));
+                assert!(!organize);
+                assert!(!preview);
+                assert!(!verbose);
+            }
+            _ => panic!("Expected test command"),
+        }
+    }
+
+    #[test]
+    fn test_test_organize_command_creation() {
+        let cli = Cli::parse_from(&[
+            "plex-media-organizer",
+            "test",
+            "/test/dir",
+            "--organize",
+            "--preview",
+        ]);
+        match cli.command {
+            Commands::Test {
+                path,
+                organize,
+                preview,
+                verbose,
+            } => {
+                assert_eq!(path, PathBuf::from("/test/dir"));
+                assert!(organize);
+                assert!(preview);
+                assert!(!verbose);
+            }
+            _ => panic!("Expected test organize command"),
         }
     }
 }

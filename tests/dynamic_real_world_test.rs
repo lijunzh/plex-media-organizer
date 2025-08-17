@@ -80,6 +80,58 @@ fn test_movie_directory_dynamic() {
     );
 }
 
+/// Test full workflow (scan + parse + organize) against movie directory
+#[tokio::test]
+async fn test_movie_organization_workflow() {
+    let runner = DynamicTestRunner::new();
+
+    // Test against the actual movie directory tree output
+    let tree_file = Path::new("test_data/movie_directory.txt");
+
+    if !tree_file.exists() {
+        eprintln!(
+            "⚠️  Skipping organization workflow test - movie directory file not found at: {}",
+            tree_file.display()
+        );
+        eprintln!("   Expected location: test_data/movie_directory.txt");
+        return;
+    }
+
+    println!("🎬 DYNAMIC TEST: Movie Organization Workflow");
+    println!("=============================================");
+
+    // Run the dynamic test with organization
+    let results = match runner.test_tree_file_with_organization(tree_file).await {
+        Ok(results) => results,
+        Err(e) => {
+            panic!("Failed to test organization workflow: {}", e);
+        }
+    };
+
+    // Print results summary
+    results.print_summary();
+
+    // Assertions based on expected performance
+    assert!(
+        results.success_rate() > 0.95,
+        "Success rate too low: {:.1}%. Expected >95%",
+        results.success_rate() * 100.0
+    );
+
+    assert!(
+        results.total_files > 100,
+        "Too few files tested: {}. Expected >100 files",
+        results.total_files
+    );
+
+    println!("\n🎉 Organization workflow test completed successfully!");
+    println!(
+        "📊 Tested {} files with {:.1}% success rate",
+        results.total_files,
+        results.success_rate() * 100.0
+    );
+}
+
 /// Test against TV directory if available
 #[test]
 fn test_tv_directory_dynamic() {

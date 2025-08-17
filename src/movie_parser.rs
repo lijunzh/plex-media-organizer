@@ -1,5 +1,6 @@
 //! Movie parsing and organization logic
 
+use crate::config::CJKTitleConfig;
 use crate::tmdb_client::TmdbClient;
 use crate::types::{
     ExternalSource, MediaFile, MediaMetadata, MediaType, MovieInfo, ParsingResult, ParsingStrategy,
@@ -18,12 +19,12 @@ lazy_static! {
 
     // Chinese-English bilingual pattern: 白蛇2：青蛇劫起..Green.Snake.2021
     static ref CHINESE_ENGLISH_PATTERN: Regex = Regex::new(
-        r"^(.+?)(?:\.\.|\.)([A-Za-z\s\.]+?)(?:\s+(\d{4})|\s+\[|\.|$)"
+        r"^(.+?)(?:\.\.|\.)([A-Za-z][A-Za-z\s\.]*?)\.(\d{4})\."
     ).unwrap();
 
     // Bracketed Chinese pattern: [雏菊(导演剪辑版)].Daisy.2006
     static ref BRACKETED_CHINESE_PATTERN: Regex = Regex::new(
-        r"^\[(.+?)\]\s*\.\s*([A-Za-z\s\.]+?)(?:\s+(\d{4})|\s+\[|\.|$)"
+        r"^\[(.+?)\]\s*\.\s*([A-Za-z\s\.]+)\.(\d{4})\."
     ).unwrap();
 
     // Multi-part pattern: Movie Name Part 1, CD1, etc.
@@ -42,14 +43,27 @@ lazy_static! {
 }
 
 /// Movie parser that handles various filename patterns
+#[derive(Clone)]
 pub struct MovieParser {
     tmdb_client: Option<TmdbClient>,
+    cjk_config: CJKTitleConfig,
 }
 
 impl MovieParser {
     /// Create a new movie parser
     pub fn new(tmdb_client: Option<TmdbClient>) -> Self {
-        Self { tmdb_client }
+        Self {
+            tmdb_client,
+            cjk_config: CJKTitleConfig::default(),
+        }
+    }
+
+    /// Create a new movie parser with CJK configuration
+    pub fn with_cjk_config(tmdb_client: Option<TmdbClient>, cjk_config: CJKTitleConfig) -> Self {
+        Self {
+            tmdb_client,
+            cjk_config,
+        }
     }
 
     /// Parse a movie filename and return MovieInfo
@@ -150,7 +164,7 @@ impl MovieParser {
         let (quality, source) = self.extract_quality_and_source(filename);
 
         Ok(MovieInfo {
-            title: self.clean_title(english_title),
+            title: self.clean_title_for_search(english_title),
             original_title: Some(self.clean_title(chinese_title)),
             year,
             part_number: None,
@@ -310,11 +324,39 @@ impl MovieParser {
         cleaned.trim().to_string()
     }
 
+    /// Clean title specifically for TMDB search (convert dots to spaces)
+    fn clean_title_for_search(&self, title: &str) -> String {
+        let mut cleaned = title.to_string();
+
+        // Convert dots to spaces for movie titles (Green.Snake -> Green Snake)
+        cleaned = cleaned.replace('.', " ");
+
+        // Remove quality indicators
+        cleaned = QUALITY_PATTERN.replace_all(&cleaned, "").to_string();
+
+        // Remove source indicators
+        cleaned = SOURCE_PATTERN.replace_all(&cleaned, "").to_string();
+
+        // Remove year patterns
+        cleaned = Regex::new(r"\s*\(\d{4}\)\s*")
+            .unwrap()
+            .replace_all(&cleaned, "")
+            .to_string();
+
+        // Clean up extra whitespace
+        cleaned = cleaned.split_whitespace().collect::<Vec<_>>().join(" ");
+
+        cleaned.trim().to_string()
+    }
+
     /// Merge movie info from different sources
     fn merge_movie_info(&self, base: MovieInfo, tmdb: MovieInfo) -> MovieInfo {
+        // Apply CJK title strategy
+        let (final_title, final_original_title) = self.apply_cjk_title_strategy(&base, &tmdb);
+
         MovieInfo {
-            title: tmdb.title.clone(),
-            original_title: tmdb.original_title.or(base.original_title),
+            title: final_title,
+            original_title: final_original_title,
             year: tmdb.year.or(base.year),
             part_number: base.part_number, // Keep from filename
             is_collection: base.is_collection,
@@ -323,6 +365,71 @@ impl MovieParser {
             source: base.source,   // Keep from filename
             language: tmdb.language.or(base.language),
         }
+    }
+
+    /// Apply CJK title strategy based on configuration
+    fn apply_cjk_title_strategy(
+        &self,
+        base: &MovieInfo,
+        tmdb: &MovieInfo,
+    ) -> (String, Option<String>) {
+        let english_title = tmdb.title.clone();
+        let original_cjk_title = base
+            .original_title
+            .clone()
+            .or_else(|| tmdb.original_title.clone());
+
+        // Detect if we have CJK content
+        let has_cjk_title = original_cjk_title
+            .as_ref()
+            .map(|title| self.contains_cjk_characters(title))
+            .unwrap_or(false);
+
+        if !has_cjk_title {
+            // No CJK content, use standard behavior
+            return (english_title, original_cjk_title);
+        }
+
+        // Apply CJK title strategy
+        match (
+            self.cjk_config.prefer_original_titles,
+            self.cjk_config.include_english_subtitle,
+        ) {
+            (true, true) => {
+                // Original with English subtitle: 英雄 [Hero]
+                let subtitle = format!(" [{}]", english_title);
+                let combined_title = original_cjk_title.clone().unwrap() + &subtitle;
+                (combined_title, Some(english_title))
+            }
+            (true, false) => {
+                // Original title only: 英雄
+                (original_cjk_title.unwrap(), Some(english_title))
+            }
+            (false, true) => {
+                // English with CJK subtitle: Hero [英雄]
+                let subtitle = format!(" [{}]", original_cjk_title.clone().unwrap());
+                let combined_title = english_title.clone() + &subtitle;
+                (combined_title, original_cjk_title)
+            }
+            (false, false) => {
+                // English title (default behavior)
+                (english_title, original_cjk_title)
+            }
+        }
+    }
+
+    /// Check if a string contains CJK characters
+    fn contains_cjk_characters(&self, text: &str) -> bool {
+        text.chars().any(|c| {
+            // Chinese characters (CJK Unified Ideographs)
+            ('\u{4e00}'..='\u{9fff}').contains(&c) ||
+            // Japanese Hiragana
+            ('\u{3040}'..='\u{309f}').contains(&c) ||
+            // Japanese Katakana
+            ('\u{30a0}'..='\u{30ff}').contains(&c) ||
+            // Korean Hangul
+            ('\u{ac00}'..='\u{d7af}').contains(&c)
+        })
     }
 
     /// Create MediaFile from MovieInfo
@@ -410,6 +517,12 @@ mod tests {
         let filename = "白蛇2：青蛇劫起..Green.Snake.2021.1080p.WEB-DL.mkv";
         let result = parser.parse_filename(filename).unwrap();
 
+        println!("Parsed title: '{}'", result.title);
+        println!("Original title: '{:?}'", result.original_title);
+        println!("Year: {:?}", result.year);
+        println!("Quality: {:?}", result.quality);
+        println!("Source: {:?}", result.source);
+
         // For now, test basic functionality - we'll improve regex in next iteration
         assert_eq!(result.quality, Some("1080p".to_string()));
         assert_eq!(result.source, Some("WEB-DL".to_string()));
@@ -446,5 +559,162 @@ mod tests {
         // The clean_title function removes quality, source, and year, but keeps x264
         // This is the current behavior - we'll improve it in next iteration
         assert_eq!(cleaned, "Movie Name.x264");
+    }
+
+    #[test]
+    fn test_cjk_title_strategy_default() {
+        use crate::config::CJKTitleConfig;
+
+        let cjk_config = CJKTitleConfig::default();
+        let parser = MovieParser::with_cjk_config(None, cjk_config);
+
+        // Create test data
+        let base = MovieInfo {
+            title: "Hero".to_string(),
+            original_title: Some("英雄".to_string()),
+            year: Some(2002),
+            part_number: None,
+            is_collection: false,
+            collection_name: None,
+
+            quality: Some("1080p".to_string()),
+            source: Some("BluRay".to_string()),
+            language: Some("zh".to_string()),
+        };
+
+        let tmdb = MovieInfo {
+            title: "Hero".to_string(),
+            original_title: Some("英雄".to_string()),
+            year: Some(2002),
+            part_number: None,
+            is_collection: false,
+            collection_name: None,
+
+            quality: None,
+            source: None,
+            language: Some("zh".to_string()),
+        };
+
+        let result = parser.merge_movie_info(base, tmdb);
+
+        // Default behavior: English title, original preserved
+        assert_eq!(result.title, "Hero");
+        assert_eq!(result.original_title, Some("英雄".to_string()));
+    }
+
+    #[test]
+    fn test_cjk_title_strategy_prefer_original() {
+        use crate::config::CJKTitleConfig;
+
+        let cjk_config = CJKTitleConfig {
+            prefer_original_titles: true,
+            include_english_subtitle: false,
+            fallback_to_english_on_error: true,
+            preserve_original_in_metadata: true,
+        };
+        let parser = MovieParser::with_cjk_config(None, cjk_config);
+
+        // Create test data
+        let base = MovieInfo {
+            title: "Hero".to_string(),
+            original_title: Some("英雄".to_string()),
+            year: Some(2002),
+            part_number: None,
+            is_collection: false,
+            collection_name: None,
+
+            quality: Some("1080p".to_string()),
+            source: Some("BluRay".to_string()),
+            language: Some("zh".to_string()),
+        };
+
+        let tmdb = MovieInfo {
+            title: "Hero".to_string(),
+            original_title: Some("英雄".to_string()),
+            year: Some(2002),
+            part_number: None,
+            is_collection: false,
+            collection_name: None,
+
+            quality: None,
+            source: None,
+            language: Some("zh".to_string()),
+        };
+
+        let result = parser.merge_movie_info(base, tmdb);
+
+        // Should prefer original CJK title
+        assert_eq!(result.title, "英雄");
+        assert_eq!(result.original_title, Some("Hero".to_string()));
+    }
+
+    #[test]
+    fn test_cjk_title_strategy_hybrid() {
+        use crate::config::CJKTitleConfig;
+
+        let cjk_config = CJKTitleConfig {
+            prefer_original_titles: true,
+            include_english_subtitle: true,
+            fallback_to_english_on_error: true,
+            preserve_original_in_metadata: true,
+        };
+        let parser = MovieParser::with_cjk_config(None, cjk_config);
+
+        // Create test data
+        let base = MovieInfo {
+            title: "Hero".to_string(),
+            original_title: Some("英雄".to_string()),
+            year: Some(2002),
+            part_number: None,
+            is_collection: false,
+            collection_name: None,
+
+            quality: Some("1080p".to_string()),
+            source: Some("BluRay".to_string()),
+            language: Some("zh".to_string()),
+        };
+
+        let tmdb = MovieInfo {
+            title: "Hero".to_string(),
+            original_title: Some("英雄".to_string()),
+            year: Some(2002),
+            part_number: None,
+            is_collection: false,
+            collection_name: None,
+
+            quality: None,
+            source: None,
+            language: Some("zh".to_string()),
+        };
+
+        let result = parser.merge_movie_info(base, tmdb);
+
+        // Should combine titles: 英雄 [Hero]
+        assert_eq!(result.title, "英雄 [Hero]");
+        assert_eq!(result.original_title, Some("Hero".to_string()));
+    }
+
+    #[test]
+    fn test_contains_cjk_characters() {
+        let parser = MovieParser::new(None);
+
+        // Test Chinese characters
+        assert!(parser.contains_cjk_characters("英雄"));
+        assert!(parser.contains_cjk_characters("白蛇2：青蛇劫起"));
+
+        // Test Japanese characters
+        assert!(parser.contains_cjk_characters("千と千尋の神隠し"));
+        assert!(parser.contains_cjk_characters("ドラゴンボール"));
+
+        // Test Korean characters
+        assert!(parser.contains_cjk_characters("기생충"));
+
+        // Test English only
+        assert!(!parser.contains_cjk_characters("Hero"));
+        assert!(!parser.contains_cjk_characters("The Matrix"));
+
+        // Test mixed
+        assert!(parser.contains_cjk_characters("Hero英雄"));
+        assert!(parser.contains_cjk_characters("The 英雄 Movie"));
     }
 }

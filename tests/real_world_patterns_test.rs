@@ -58,7 +58,7 @@ fn test_chinese_english_patterns(parser: &MovieParser) {
 
         // Verify Chinese-English pattern
         if filename.contains("白蛇") {
-            assert_eq!(result.title, "Green");
+            assert_eq!(result.title, "Green Snake");
             // Note: Current parser may not extract original title correctly - will be improved in Iteration 2
             assert!(
                 result.original_title.is_some(),

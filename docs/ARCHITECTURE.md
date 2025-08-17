@@ -206,11 +206,35 @@ The system follows Plex's official naming conventions for optimal compatibility:
   - `Avengers Endgame (2019) Extended 4K HDR.mkv`
   - `白蛇2：青蛇劫起 (2021) 1080p WEB-DL.mkv`
 
-#### **TV Shows**
+##### **CJK (Chinese/Japanese/Korean) Title Strategy**
+The system supports flexible title organization for CJK content to address reliability issues with English translations:
+
+**English-First Approach (Default)**:
+- Uses English titles for directory organization when available
+- Preserves original CJK titles in metadata
+- Example: `Hero (2002)/Hero (2002) 1080p BluRay.mkv` with metadata `original_title="英雄"`
+
+**Original-First Approach (Configurable)**:
+- Uses original CJK titles for directory organization
+- Includes English titles in metadata for reference
+- Example: `英雄 (2002)/英雄 (2002) 1080p BluRay.mkv` with metadata `english_title="Hero"`
+
+**Hybrid Approach (Optional)**:
+- Combines both titles in filenames
+- Example: `英雄 [Hero] (2002)/英雄 [Hero] (2002) 1080p BluRay.mkv`
+
+**Rationale**: English titles for CJK movies are often unreliable due to:
+- Marketing adaptations vs literal translations
+- Regional variations (US vs UK vs local markets)
+- Cultural context loss in translation
+- Multiple "correct" English titles for the same film
+
+#### **TV Shows (All Types)**
 - **Format**: `Show Name/Season XX/Show Name SXXEXX Episode Title {Quality} {Source}.ext`
 - **Examples**:
-  - `Breaking Bad/Season 01/Breaking Bad S01E01 Pilot 720p HDTV.mkv`
-  - `Attack on Titan/Season 01/Attack on Titan S01E01 To You, 2,000 Years Ago 1080p.mkv`
+  - **Western TV**: `Breaking Bad/Season 01/Breaking Bad S01E01 Pilot 720p HDTV.mkv`
+  - **Chinese TV**: `琅琊榜/Season 01/琅琊榜 S01E01 琅琊榜 720p.mkv`
+  - **Anime**: `Attack on Titan/Season 01/Attack on Titan S01E01 To You, 2,000 Years Ago 1080p.mkv`
 
 #### **Music**
 - **Format**: `Artist/Album/Track - Title.ext`
@@ -338,6 +362,13 @@ music_template = "{artist}/{album}/{track:02} - {title}"
 prefer_1080p = true
 prefer_4k = false
 minimum_quality = "720p"
+
+[organization.cjk_titles]
+# CJK (Chinese/Japanese/Korean) title handling strategy
+prefer_original_titles = false              # Use original CJK titles for organization
+include_english_subtitle = false            # Add English title in brackets: 英雄 [Hero] (2002)
+fallback_to_english_on_error = true         # Use English if CJK causes file system issues
+preserve_original_in_metadata = true        # Always keep original title in metadata
 ```
 
 ### Learning Configuration
@@ -393,6 +424,167 @@ user_feedback_weight = 0.8
 - **Local Processing**: All media analysis happens locally
 - **Minimal External Data**: Only send necessary information to APIs
 - **User Control**: User decides what data to share or cache
+
+### 🔐 **Secure Methods for API Key Management**
+
+#### **1. GitHub Secrets (Recommended for CI/CD)**
+For automated testing and CI/CD pipelines:
+
+**Setup:**
+1. Go to your GitHub repository
+2. Navigate to **Settings** → **Secrets and variables** → **Actions**
+3. Click **"New repository secret"**
+4. Add your secrets:
+   - **Name**: `TMDB_API_KEY`
+   - **Value**: Your actual TMDB API key
+
+**Security Features:**
+- ✅ **Encrypted at rest** in GitHub's secure storage
+- ✅ **Never logged** in CI output
+- ✅ **Access controlled** - only repository admins can manage
+- ✅ **Automatically masked** in logs
+
+**Usage in CI/CD:**
+```yaml
+env:
+  TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
+```
+
+#### **2. Local Environment Variables (Development)**
+For local development and testing:
+
+**Setup:**
+1. Copy the example file:
+   ```bash
+   cp env.example .env
+   ```
+
+2. Edit `.env` with your actual API keys:
+   ```bash
+   # TMDB API Key (get from https://www.themoviedb.org/settings/api)
+   TMDB_API_KEY=your_actual_tmdb_api_key_here
+   ```
+
+3. The `.env` file is automatically ignored by git
+
+**Security Features:**
+- ✅ **Local only** - never uploaded to git
+- ✅ **Easy to manage** - simple key-value pairs
+- ✅ **Development friendly** - works with any IDE
+
+#### **3. Configuration File (Alternative)**
+For persistent configuration:
+
+**Setup:**
+1. Create a configuration file (e.g., `config.toml`):
+   ```toml
+   [apis]
+   tmdb_api_key = "your_actual_tmdb_api_key_here"
+   ```
+
+2. Add to `.gitignore`:
+   ```
+   config.toml
+   ```
+
+**Security Features:**
+- ✅ **Structured** - TOML format for complex config
+- ✅ **Versionable** - can commit example configs
+- ✅ **Flexible** - supports multiple environments
+
+### 🛡️ **API Key Security Best Practices**
+
+#### **1. Key Rotation**
+- **Rotate keys regularly** (every 90 days)
+- **Use different keys** for development and production
+- **Monitor usage** for unusual activity
+
+#### **2. Access Control**
+- **Limit key permissions** to minimum required
+- **Use read-only keys** when possible
+- **Monitor API usage** and set rate limits
+
+#### **3. Environment Separation**
+- **Development**: Use test API keys or mock services
+- **Staging**: Use limited production keys
+- **Production**: Use full production keys
+
+### 🔍 **Getting API Keys**
+
+#### **TMDB API Key**
+1. Go to [themoviedb.org](https://www.themoviedb.org/)
+2. Create an account or sign in
+3. Go to **Settings** → **API**
+4. Request an API key
+5. Choose **Developer** option for personal use
+
+#### **TVDB API Key** (Future)
+1. Go to [thetvdb.com](https://thetvdb.com/)
+2. Create an account
+3. Go to **Account** → **API Keys**
+4. Generate a new API key
+
+#### **MusicBrainz User Agent** (Future)
+1. Go to [musicbrainz.org](https://musicbrainz.org/)
+2. Create an account
+3. Use format: `YourAppName/1.0 (your_email@example.com)`
+
+### 🚨 **Security Checklist**
+
+Before committing code:
+
+- [ ] **No API keys in source code**
+- [ ] **No API keys in configuration files**
+- [ ] **No API keys in environment files**
+- [ ] **No API keys in documentation**
+- [ ] **No API keys in test files**
+- [ ] **No API keys in logs or output**
+
+### 🔧 **Testing Without API Keys**
+
+The application is designed to work without API keys:
+
+```bash
+# Run tests without API keys
+cargo test
+
+# Run specific tests that don't require API
+cargo test --test dynamic_real_world_test
+
+# Run with API keys (if available)
+TMDB_API_KEY=your_key cargo test
+```
+
+### 📞 **Security Issues**
+
+If you accidentally commit an API key:
+
+1. **Immediately rotate the key** in the service provider
+2. **Remove the key** from git history
+3. **Check for unauthorized usage**
+4. **Report to security team** if applicable
+
+### 🔒 **Additional Security Measures**
+
+#### **Rate Limiting**
+The application includes built-in rate limiting:
+- TMDB: 1000 requests per day
+- TVDB: 1000 requests per day
+- MusicBrainz: 1 request per second
+
+#### **Error Handling**
+- **Graceful degradation** when APIs are unavailable
+- **No sensitive data** in error messages
+- **Secure logging** without API keys
+
+#### **Network Security**
+- **HTTPS only** for API communications
+- **Certificate validation** for all requests
+- **Timeout handling** for network issues
+
+---
+
+**Remember**: Security is everyone's responsibility. When in doubt, err on the side of caution and never expose sensitive credentials.
 
 ## Error Handling Strategy
 
@@ -502,6 +694,125 @@ user_feedback_weight = 0.8
 - **Remote Databases**: Sync learning data across devices
 - **Cloud Storage**: Organize cloud-stored media
 - **Collaborative Organization**: Multi-user media organization
+
+## Development Process & Lessons Learned
+
+### 📚 **Development Lessons**
+
+#### **Lesson 1: Complete Code Review Before Phase Conclusion**
+
+**Date**: December 2024  
+**Context**: Iteration 1 completion review
+
+**What Happened**
+- **Iteration 1 was marked complete** based on parsing functionality
+- **During code review**, discovered major gap: missing file organization
+- **Project name**: "Plex Media Organizer" but only parsed files, didn't organize them
+- **Had to create Iteration 1.5** to address the core value gap
+
+**Root Cause**
+- **Incomplete code review** before marking phase complete
+- **Focus on parsing functionality** overshadowed core project goals
+- **User expectations** not fully validated against implementation
+- **Documentation** didn't reflect actual functionality gaps
+
+**Impact**
+- **Iteration 1 status** had to be corrected from "Complete" to "In Progress"
+- **User value gap** - project doesn't deliver expected functionality
+- **Development timeline** extended to address missing core features
+- **Documentation** required updates to reflect actual state
+
+**Lesson Learned**
+**Never conclude an iteration without a complete code review that validates against project goals and user expectations.**
+
+**Process Improvement**
+##### **Iteration Completion Checklist**
+- [ ] **Complete code review** of all source files
+- [ ] **Validate against project goals** and user expectations
+- [ ] **Test all functionality** end-to-end
+- [ ] **Document any gaps** found during review
+- [ ] **Address gaps** before marking complete
+- [ ] **Update documentation** to reflect actual state
+
+##### **Code Review Requirements**
+- [ ] Review `src/main.rs` - Entry point and initialization
+- [ ] Review `src/cli.rs` - User interface and commands
+- [ ] Review `src/types.rs` - Data structures and types
+- [ ] Review `src/config.rs` - Configuration management
+- [ ] Review `src/movie_parser.rs` - Core parsing logic
+- [ ] Review `src/scanner.rs` - Directory scanning
+- [ ] Review `src/tmdb_client.rs` - External API integration
+- [ ] Review tests - Coverage and quality
+- [ ] Review documentation - Accuracy and completeness
+
+**Prevention Strategy**
+1. **Define clear phase goals** before starting development
+2. **Create completion checklist** based on project requirements
+3. **Perform systematic code review** against checklist
+4. **Validate user expectations** against implemented functionality
+5. **Document gaps** and address before marking complete
+
+**Reference for Future Iterations**
+When concluding any iteration, reference this lesson and ensure:
+- Complete code review has been performed
+- All project goals have been validated
+- User expectations have been met
+- No core functionality gaps exist
+
+### 🚀 **Process Improvements**
+
+#### **Iteration Development Process**
+1. **Planning**: Define clear goals and success criteria
+2. **Development**: Implement functionality
+3. **Code Review**: Systematic review against goals
+4. **Gap Analysis**: Identify and document gaps
+5. **Gap Resolution**: Address gaps before completion
+6. **Validation**: Final validation against user expectations
+7. **Documentation**: Update all documentation
+8. **Completion**: Mark iteration complete
+
+#### **Code Review Template**
+```
+## Iteration [X] Code Review
+
+### Files Reviewed
+- [ ] src/main.rs
+- [ ] src/cli.rs
+- [ ] src/types.rs
+- [ ] src/config.rs
+- [ ] src/movie_parser.rs
+- [ ] src/scanner.rs
+- [ ] src/tmdb_client.rs
+- [ ] tests/
+- [ ] docs/
+
+### Goals Validation
+- [ ] [Goal 1] - [Status]
+- [ ] [Goal 2] - [Status]
+- [ ] [Goal 3] - [Status]
+
+### User Expectations
+- [ ] [Expectation 1] - [Status]
+- [ ] [Expectation 2] - [Status]
+- [ ] [Expectation 3] - [Status]
+
+### Gaps Identified
+- [ ] [Gap 1] - [Action needed]
+- [ ] [Gap 2] - [Action needed]
+
+### Completion Decision
+- [ ] All gaps addressed
+- [ ] All goals met
+- [ ] User expectations satisfied
+- [ ] Documentation updated
+- [ ] Iteration can be marked complete
+```
+
+### 🎯 **Continuous Improvement**
+
+This section should be updated with each new lesson learned to ensure continuous improvement of our development process.
+
+**Remember**: The goal is not to avoid mistakes, but to learn from them and improve our processes.
 
 ## Conclusion
 

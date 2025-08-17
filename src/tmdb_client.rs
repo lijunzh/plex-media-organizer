@@ -6,6 +6,7 @@ use serde::Deserialize;
 use std::time::Duration;
 
 /// TMDB API client
+#[derive(Clone)]
 pub struct TmdbClient {
     api_key: String,
     base_url: String,

@@ -10,6 +10,8 @@ This directory contains the comprehensive documentation for the Plex Media Organ
 - Component breakdown and relationships
 - Data models and processing workflows
 - Configuration examples and performance considerations
+- Security & privacy considerations
+- Development process and lessons learned
 
 ### [IMPLEMENTATION_ROADMAP.md](IMPLEMENTATION_ROADMAP.md)
 **Step-by-step development plan**
@@ -17,6 +19,13 @@ This directory contains the comprehensive documentation for the Plex Media Organ
 - Specific deliverables and success criteria for each phase
 - Development guidelines and testing strategies
 - Risk mitigation and project management
+
+### [CURRENT_STATUS.md](CURRENT_STATUS.md)
+**Live project status and recent updates**
+- Current development status and progress
+- Recent achievements and milestones
+- Areas for improvement and next steps
+- CJK title strategy and implementation status
 
 ## 🎯 Purpose
 

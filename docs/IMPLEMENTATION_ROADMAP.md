@@ -4,6 +4,8 @@
 
 This document outlines an iterative, incremental implementation plan for the Plex Media Organizer. Instead of a rigid waterfall approach, we'll start small with movies, test in small directories, and gradually expand to TV shows and music. This approach allows for faster feedback, learning, and course correction.
 
+**Important**: Before concluding any phase, refer to `docs/DEVELOPMENT_LESSONS.md` for the complete code review checklist and lessons learned.
+
 ## 🎯 **Core Philosophy: Start Small, Iterate Fast**
 
 ### **Why Iterative?**
@@ -21,7 +23,7 @@ This document outlines an iterative, incremental implementation plan for the Ple
 
 ## 🚀 **Iteration 1: Movie MVP (Weeks 1-2)**
 
-### **Goal**: Basic movie parsing that works on small directories
+### **Goal**: Basic movie parsing and organization that works on small directories
 
 #### **1.1 Minimal Project Setup**
 - [ ] Initialize Rust project with essential dependencies
@@ -47,7 +49,15 @@ This document outlines an iterative, incremental implementation plan for the Ple
 - [ ] Simple results display
 - [ ] Configuration setup command
 
-**Deliverable**: Can parse basic movie filenames and get TMDB data
+#### **1.5 File Organization**
+- [ ] Rename files to Plex conventions
+- [ ] Create organized directory structure (Movie Name (Year)/)
+- [ ] Handle naming conflicts
+- [ ] Dry-run mode (preview changes)
+- [ ] JSON-based rollback capability
+- [ ] Safe file operations with error handling
+
+**Deliverable**: Can parse and organize basic movie filenames with TMDB data
 
 **Test**: Use small subset of your movie directory (10-20 files)
 
@@ -55,13 +65,15 @@ This document outlines an iterative, incremental implementation plan for the Ple
 
 ## 🔄 **Iteration 2: Movie Enhancement (Weeks 3-4)**
 
-### **Goal**: Robust movie parsing with learning capabilities
+### **Goal**: Robust movie parsing with learning capabilities and collection support
 
 #### **2.1 Enhanced Movie Parsing**
 - [ ] Handle Chinese-English bilingual titles
 - [ ] Support bracketed Chinese titles
 - [ ] Multi-part movie detection (CD1, CD2, Part 1, Part 2)
 - [ ] Japanese anime movie patterns
+- [ ] Enhanced collection detection (TMDB collection API integration)
+- [ ] Series movie detection (Iron Man 1, 2, 3 patterns)
 
 #### **2.2 Simple SQLite Storage**
 - [ ] Basic database schema for movies
@@ -75,15 +87,15 @@ This document outlines an iterative, incremental implementation plan for the Ple
 - [ ] Basic confidence scoring
 - [ ] Pattern-based fallback parsing
 
-#### **2.4 File Organization**
-- [ ] Rename files to Plex conventions
-- [ ] Create organized directory structure
-- [ ] Handle naming conflicts
-- [ ] Safe file operations with rollback
+#### **2.4 Enhanced Organization**
+- [ ] Database-backed organization history
+- [ ] Learning from user corrections
+- [ ] Advanced rollback and recovery
+- [ ] Performance optimizations for large directories
 
-**Deliverable**: Robust movie organizer that learns and improves
+**Deliverable**: Robust movie organizer that learns and improves with collection awareness
 
-**Test**: Use larger movie directory (100+ files)
+**Test**: Use larger movie directory (100+ files) including series movies
 
 ---
 
@@ -93,9 +105,9 @@ This document outlines an iterative, incremental implementation plan for the Ple
 
 #### **3.1 TV Show Types & Parsing**
 - [ ] `TvShowInfo` struct with season/episode info
-- [ ] Basic TV show filename parsing
+- [ ] Basic TV show filename parsing (S01E01 patterns)
 - [ ] TVDB API integration
-- [ ] Handle anime TV patterns from your tree output
+- [ ] Standard TV show patterns (no anime yet)
 
 #### **3.2 Enhanced Database**
 - [ ] Extend schema for TV shows
@@ -107,7 +119,7 @@ This document outlines an iterative, incremental implementation plan for the Ple
 - [ ] Season folder creation
 - [ ] Episode naming (S01E01 format)
 - [ ] Subtitle file handling
-- [ ] Complex anime pattern support
+- [ ] Standard TV show patterns only
 
 #### **3.4 Unified CLI**
 - [ ] `scan` command for both movies and TV
@@ -115,45 +127,80 @@ This document outlines an iterative, incremental implementation plan for the Ple
 - [ ] Enhanced progress reporting
 - [ ] Better error handling
 
-**Deliverable**: Full movie + TV show organizer
+**Deliverable**: Full movie + TV show organizer (standard TV shows only)
 
-**Test**: Use both movie and TV directories
+**Test**: Use both movie and TV directories (excluding anime)
 
 ---
 
-## 🎵 **Iteration 4: Music (Weeks 7-8)**
+## 🎵 **Iteration 4: TV Intelligence (Weeks 7-8)**
 
-### **Goal**: Add music support while keeping movies and TV working
+### **Goal**: Add comprehensive TV support including Chinese TV and anime with specialized parsing
 
-#### **4.1 Music Types & Parsing**
+#### **4.1 Content Detection & Classification**
+- [ ] Western TV detection (S01E01 patterns)
+- [ ] Chinese TV detection (Chinese characters + episode patterns)
+- [ ] Anime detection (Japanese content + anime patterns)
+- [ ] Content category classification
+
+#### **4.2 Chinese TV Parsing**
+- [ ] Chinese character handling
+- [ ] Chinese TV naming patterns (Episode.001, 第01集)
+- [ ] Chinese title preservation
+- [ ] Episode number extraction
+
+#### **4.3 Anime Intelligence**
+- [ ] AniDB API integration
+- [ ] Japanese title parsing
+- [ ] Episode type detection (TV, OVA, ONA, Movie)
+- [ ] Season name recognition (Shippuden, Brotherhood, etc.)
+
+#### **4.4 Unified TV Organization**
+- [ ] All TV content organized as Plex TV shows
+- [ ] Western TV: Standard S01E01 format
+- [ ] Chinese TV: Converted to S01E01 format
+- [ ] Anime: Converted to S01E01 format with Japanese title preservation
+
+**Deliverable**: Full TV support (Western, Chinese, anime) with intelligent parsing
+
+**Test**: Use mixed TV directories with various content types
+
+---
+
+## 🎵 **Iteration 5: Music (Weeks 9-10)**
+
+### **Goal**: Add music support while keeping movies and TV (all types) working
+
+#### **5.1 Music Types & Parsing**
 - [ ] `MusicInfo` struct with artist/album/track info
 - [ ] Music filename parsing
 - [ ] MusicBrainz API integration
 - [ ] Handle Chinese and English music patterns
 
-#### **4.2 Music Organization**
+#### **5.2 Music Organization**
 - [ ] Artist/Album/Track folder structure
 - [ ] Multi-disc album support
 - [ ] Track numbering and naming
 - [ ] Various music format support
 
-#### **4.3 Enhanced Database**
+#### **5.3 Enhanced Database**
 - [ ] Extend schema for music
 - [ ] Support for complex album structures
 - [ ] Cross-media type queries
-- **4.4 Unified System**
+
+#### **5.4 Unified System**
 - [ ] Single `organize` command for all media types
 - [ ] Intelligent media type detection
 - [ ] Comprehensive reporting
 - [ ] Performance optimizations
 
-**Deliverable**: Complete media organizer for all three types
+**Deliverable**: Complete media organizer for all media types
 
-**Test**: Use all three directories together
+**Test**: Use all directories together (movies, TV, music)
 
 ---
 
-## 🧠 **Iteration 5: Intelligence & Learning (Weeks 9-10)**
+## 🧠 **Iteration 6: Intelligence & Learning (Weeks 11-12)**
 
 ### **Goal**: Make the system smarter and more accurate
 
@@ -187,7 +234,7 @@ This document outlines an iterative, incremental implementation plan for the Ple
 
 ---
 
-## 🎨 **Iteration 6: Polish & Production (Weeks 11-12)**
+## 🎨 **Iteration 7: Polish & Production (Weeks 13-14)**
 
 ### **Goal**: Production-ready application with excellent UX
 
@@ -369,3 +416,40 @@ This iterative approach transforms a complex, long-term project into a series of
 The key is to resist the temptation to build everything at once. Focus on getting movies working well first, then expand to TV shows, then music. Each iteration should deliver real, usable value while building the foundation for the next.
 
 Remember: **Perfect is the enemy of done**. Get something working, test it with real data, learn from the experience, and improve. This approach will get you to a production-ready media organizer much faster than trying to build everything at once.
+
+---
+
+## ✅ **Phase Completion Process**
+
+### **Before Marking Any Phase Complete**
+
+**⚠️ CRITICAL**: Reference `docs/DEVELOPMENT_LESSONS.md` for the complete code review checklist.
+
+#### **Required Steps:**
+1. **Complete Code Review**: Review all source files against phase goals
+2. **Validate User Expectations**: Ensure functionality matches project name and user needs
+3. **Test End-to-End**: Verify all functionality works as expected
+4. **Document Gaps**: Identify and document any missing functionality
+5. **Address Gaps**: Implement missing features before marking complete
+6. **Update Documentation**: Ensure all docs reflect actual state
+7. **Final Validation**: Confirm phase meets all goals and expectations
+
+#### **Code Review Checklist:**
+- [ ] `src/main.rs` - Entry point and initialization
+- [ ] `src/cli.rs` - User interface and commands  
+- [ ] `src/types.rs` - Data structures and types
+- [ ] `src/config.rs` - Configuration management
+- [ ] `src/movie_parser.rs` - Core parsing logic
+- [ ] `src/scanner.rs` - Directory scanning
+- [ ] `src/tmdb_client.rs` - External API integration
+- [ ] `tests/` - Coverage and quality
+- [ ] `docs/` - Accuracy and completeness
+
+#### **Completion Decision:**
+- [ ] All gaps addressed
+- [ ] All goals met
+- [ ] User expectations satisfied
+- [ ] Documentation updated
+- [ ] Phase can be marked complete
+
+**Remember**: It's better to extend a phase than to mark it complete with gaps.

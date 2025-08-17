@@ -1,4 +1,6 @@
 use plex_media_organizer::movie_parser::MovieParser;
+use plex_media_organizer::organizer::Organizer;
+use plex_media_organizer::scanner::Scanner;
 use plex_media_organizer::types::MovieInfo;
 use std::fs;
 use std::path::Path;
@@ -134,6 +136,70 @@ impl DynamicTestRunner {
         println!("📁 Found {} movie files in tree output", filenames.len());
 
         let results = self.run_dynamic_tests(&filenames);
+        Ok(results)
+    }
+
+    /// Test against a tree file with organization workflow
+    pub async fn test_tree_file_with_organization(
+        &self,
+        tree_file_path: &Path,
+    ) -> Result<DynamicTestResults, Box<dyn std::error::Error>> {
+        let content = fs::read_to_string(tree_file_path)?;
+        let filenames = self.extract_filenames_from_tree(&content);
+
+        println!("📁 Found {} movie files in tree output", filenames.len());
+
+        // First, run the parsing tests
+        let mut results = self.run_dynamic_tests(&filenames);
+
+        // Then, test organization workflow
+        println!("🎬 Testing organization workflow...");
+
+        // Create a temporary directory for testing organization
+        let temp_dir = tempfile::tempdir()?;
+        let test_dir = temp_dir.path().join("test_movies");
+
+        // Create test files from the filenames
+        for filename in &filenames {
+            let file_path = test_dir.join(filename);
+            if let Some(parent) = file_path.parent() {
+                std::fs::create_dir_all(parent)?;
+            }
+            std::fs::write(&file_path, b"test content")?;
+        }
+
+        // Create scanner and organizer
+        let scanner = Scanner::new(self.parser.clone());
+        let organizer = Organizer::new(true, None); // Dry-run mode
+
+        // Test the full workflow
+        match scanner.scan_directory(&test_dir).await {
+            Ok(scan_result) => {
+                if !scan_result.parsed_files.is_empty() {
+                    match organizer.organize_scan_result(&scan_result).await {
+                        Ok(org_result) => {
+                            println!("✅ Organization workflow test successful!");
+                            println!(
+                                "   Organized: {} files",
+                                org_result.statistics.organized_files
+                            );
+                            println!("   Failed: {} files", org_result.statistics.failed_files);
+                            println!(
+                                "   Success rate: {:.1}%",
+                                org_result.statistics.success_rate * 100.0
+                            );
+                        }
+                        Err(e) => {
+                            println!("⚠️  Organization workflow test failed: {}", e);
+                        }
+                    }
+                }
+            }
+            Err(e) => {
+                println!("⚠️  Scan workflow test failed: {}", e);
+            }
+        }
+
         Ok(results)
     }
 

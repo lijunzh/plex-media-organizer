@@ -194,10 +194,9 @@ cargo run -- help   # Test CLI
 
 ## 📚 **Documentation**
 
-- **[User Guide](docs/USER_GUIDE.md)** - Complete usage instructions
-- **[Architecture](docs/ARCHITECTURE.md)** - System design and architecture
-- **[Implementation Roadmap](docs/IMPLEMENTATION_ROADMAP.md)** - Development phases
-- **[Phase 1 Summary](docs/PHASE_1_SUMMARY.md)** - Detailed Phase 1 accomplishments
+- **[Architecture](docs/ARCHITECTURE.md)** - Complete system design, security, and development process
+- **[Implementation Roadmap](docs/IMPLEMENTATION_ROADMAP.md)** - Development phases and timeline
+- **[Current Status](docs/CURRENT_STATUS.md)** - Live project status and recent updates
 - **[Contributing](CONTRIBUTING.md)** - How to contribute to the project
 - **[Testing Guide](tests/README.md)** - Comprehensive test suite documentation
 
