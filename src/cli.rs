@@ -196,30 +196,6 @@ impl Cli {
                         "❌ Not set"
                     }
                 );
-                println!(
-                    "TVDB API Key: {}",
-                    if config.apis.tvdb_api_key.is_some() {
-                        "✅ Set"
-                    } else {
-                        "❌ Not set"
-                    }
-                );
-                println!(
-                    "MusicBrainz User Agent: {}",
-                    if config.apis.musicbrainz_user_agent.is_some() {
-                        "✅ Set"
-                    } else {
-                        "❌ Not set"
-                    }
-                );
-                println!(
-                    "AniDB Username: {}",
-                    if config.apis.anidb_username.is_some() {
-                        "✅ Set"
-                    } else {
-                        "❌ Not set"
-                    }
-                );
             }
             Err(e) => {
                 println!("❌ Failed to load configuration: {}", e);
