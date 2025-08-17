@@ -7,12 +7,24 @@
 
 | Component | Status | Notes |
 |-----------|--------|-------|
-| **Iteration 1: Movie MVP** | 🔄 In Progress | Code review in progress |
+| **Iteration 1: Movie MVP** | 🔄 In Progress | Core features implemented, action list pending |
 | **GitHub Repository** | ✅ Active | CI/CD configured |
 | **Iteration 2: Movie Enhancement** | 🔄 Ready to Begin | Foundation solid |
 | **Documentation** | ✅ Consolidated | Streamlined structure |
 
 ## 🎯 **Recent Updates**
+
+### **December 2024 - Core Features Implementation**
+- **Status**: 🔄 **IN PROGRESS** - Core features implemented, action list pending
+- **Features Delivered**:
+  - ✅ CJK title configuration with 4 configurable options
+  - ✅ Smart CJK character detection and title strategy
+  - ✅ Comprehensive test suite (4 new tests)
+  - ✅ Integration with all CLI commands (scan, test, organize)
+  - ✅ Documentation consolidation (6 files → 4 files)
+  - ✅ Enhanced GitHub Actions for PR workflows
+- **PR**: https://github.com/lijunzh/plex-media-organizer/pull/1
+- **Result**: Core functionality implemented, action list items remain
 
 ### **December 2024 - Documentation Consolidation**
 - **Action**: Consolidated documentation structure for better organization
@@ -46,45 +58,193 @@
 
 ## 🚀 **Next Steps**
 
-### **Current Focus: File Organization Implementation**
+### **Current Focus: Complete Iteration 1 Action List**
 
-#### **🎯 File Organization Plan (Iteration 1 Core Feature)**
-**Goal**: Add core "organizer" functionality to complete MVP
+#### **🎯 Iteration 1 Progress**
+**🔄 IN PROGRESS**: Core features implemented, action list items pending
 
-**Implementation Steps:**
-1. **✅ Create organizer module** (`src/organizer.rs`)
+**Delivered Features:**
+1. **✅ File Organization** (`src/organizer.rs`)
    - ✅ File renaming to Plex conventions
    - ✅ Directory creation (Movie Name (Year)/)
    - ✅ Safety checks and validation
 
-2. **✅ Add CLI commands**
+2. **✅ CJK Title Configuration**
+   - ✅ Configurable Chinese/Japanese/Korean title handling
+   - ✅ Smart character detection
+   - ✅ 4 configurable options for user preferences
+   - ✅ Backward compatibility maintained
+
+3. **✅ Enhanced CLI Commands**
    - ✅ `organize` command for file organization
-   - ✅ `preview` command for dry-run mode
+   - ✅ `test` command with organize workflow
    - ✅ Progress reporting and safety confirmations
 
-3. **✅ Implement safety features**
+4. **✅ Safety & Quality Features**
    - ✅ JSON-based rollback capability
    - ✅ Dry-run mode (preview changes)
    - ✅ File existence and permission checks
    - ✅ Conflict resolution
+   - ✅ Enhanced GitHub Actions for PR workflows
 
-4. **✅ Integration with existing code**
-   - ✅ Connect with movie parser for metadata
-   - ✅ Use scanner for file discovery
-   - ✅ Leverage existing CLI framework
+**🔄 Status**: Core functionality implemented, action list items remain to be completed
 
-**✅ Expected Deliverable**: Users can organize movie files to Plex conventions with safety features
+### **🔄 Iteration 1 Action List (Prioritized)**
 
-### **Immediate (Current Sprint)**
-1. **✅ Fix GitHub Actions CI/CD** - Rust version compatibility
-2. **✅ Complete Code Review** - Review all source files and identify gaps
-3. **✅ Implement File Organization** - Add core "organizer" functionality (Iteration 1) - **COMPLETED**
-4. **🔄 Simplify Configuration** - Remove unused future features for Iteration 1
-5. **🔄 Enhance TMDB Matching** - Add fuzzy search for better movie matching
-6. **🔄 Improve Debug Visibility** - Better debug formatting for types
-7. **🔄 Improve Library Documentation** - Add comprehensive docs and examples to lib.rs
-8. **🔄 Comprehensive Testing Overhaul** - Add missing tests across all source files
-9. **🔄 Complete Iteration 1: Movie MVP with Organization**
+#### **🔥 High Priority - Core Functionality**
+1. **🔄 Simplify Configuration** - Remove unused future features for Iteration 1
+   - **Impact**: Reduces complexity, improves maintainability
+   - **Effort**: Low (remove unused code)
+   - **Dependencies**: None
+   - **Status**: Ready to start
+
+2. **🔄 Comprehensive Testing Overhaul** - Add missing tests across all source files
+   - **Impact**: Ensures reliability, prevents regressions
+   - **Effort**: Medium (add tests for CLI, config, edge cases)
+   - **Dependencies**: None
+   - **Status**: Ready to start
+
+#### **⚡ Medium Priority - User Experience**
+3. **🔄 Enhance TMDB Matching** - Add fuzzy search for better movie matching
+   - **Impact**: Improves parsing accuracy, better user experience
+   - **Effort**: Medium (implement fuzzy search algorithm)
+   - **Dependencies**: None
+   - **Status**: Ready to start
+
+4. **🔄 Improve Debug Visibility** - Better debug formatting for types
+   - **Impact**: Easier debugging, better error messages
+   - **Effort**: Low (add debug implementations)
+   - **Dependencies**: None
+   - **Status**: Ready to start
+
+#### **📚 Medium Priority - Documentation & Quality**
+5. **🔄 Improve Library Documentation** - Add comprehensive docs and examples to lib.rs
+   - **Impact**: Better developer experience, easier maintenance
+   - **Effort**: Medium (document public APIs, add examples)
+   - **Dependencies**: None
+   - **Status**: Ready to start
+
+#### **🚀 Lower Priority - Optimization & Validation**
+6. **🔄 User Testing** - Validate CJK title configuration with real users
+   - **Impact**: Validates functionality with real-world data
+   - **Effort**: Low (test with actual Chinese/Japanese movies)
+   - **Dependencies**: CJK title configuration (✅ completed)
+   - **Status**: Ready to start
+
+7. **🔄 Performance Optimization** - Optimize for large media libraries
+   - **Impact**: Better performance for large directories
+   - **Effort**: High (profiling, optimization)
+   - **Dependencies**: Core functionality (✅ completed)
+   - **Status**: Ready to start
+
+### **✅ Completed Items**
+- **✅ Fix GitHub Actions CI/CD** - Rust version compatibility
+- **✅ Complete Code Review** - Review all source files and identify gaps
+- **✅ Implement File Organization** - Add core "organizer" functionality (Iteration 1)
+- **✅ CJK Title Configuration** - Configurable Chinese/Japanese/Korean title handling
+- **✅ Documentation Consolidation** - Streamlined docs from 6 files to 4 files
+- **✅ Enhanced GitHub Actions** - PR workflows and quality checks
+
+## **📋 Detailed Action List Implementation**
+
+### **🎯 Prioritization Rationale**
+
+#### **🔥 High Priority - Why These First?**
+1. **Simplify Configuration**: Reduces technical debt and complexity early
+2. **Comprehensive Testing**: Ensures reliability before adding new features
+
+#### **⚡ Medium Priority - User Experience Focus**
+3. **Enhance TMDB Matching**: Improves core functionality accuracy
+4. **Improve Debug Visibility**: Makes development and troubleshooting easier
+5. **Improve Library Documentation**: Better developer experience
+
+#### **🚀 Lower Priority - Optimization & Validation**
+6. **User Testing**: Validates with real data (can be done in parallel)
+7. **Performance Optimization**: Important but not blocking for Iteration 1 completion
+
+### **📊 Estimated Effort & Timeline**
+- **High Priority**: 2-3 days total
+- **Medium Priority**: 4-5 days total  
+- **Lower Priority**: 3-4 days total
+- **Total Iteration 1 Completion**: 9-12 days
+
+### **🔄 Recommended Execution Order**
+1. **Start with High Priority** (1-2 days)
+2. **Continue with Medium Priority** (3-4 days)
+3. **Finish with Lower Priority** (2-3 days)
+4. **Final validation and Iteration 1 completion**
+
+### **🔥 High Priority Items**
+
+#### **1. Simplify Configuration**
+**Goal**: Remove unused future features for Iteration 1
+**Files to modify**: `src/config.rs`, `config_example.toml`
+**Tasks**:
+- [ ] Remove unused configuration options
+- [ ] Keep only essential settings for current functionality
+- [ ] Update configuration documentation
+- [ ] Test configuration loading and validation
+
+#### **2. Comprehensive Testing Overhaul**
+**Goal**: Add missing tests across all source files
+**Files to modify**: `tests/`, `src/cli.rs`, `src/config.rs`
+**Tasks**:
+- [ ] Add CLI command tests (scan, test, organize)
+- [ ] Add configuration loading and validation tests
+- [ ] Add edge case tests for movie parser
+- [ ] Add integration tests for full workflows
+- [ ] Improve test coverage reporting
+
+### **⚡ Medium Priority Items**
+
+#### **3. Enhance TMDB Matching**
+**Goal**: Add fuzzy search for better movie matching
+**Files to modify**: `src/tmdb_client.rs`, `src/movie_parser.rs`
+**Tasks**:
+- [ ] Implement Levenshtein distance algorithm
+- [ ] Add configurable similarity threshold
+- [ ] Integrate fuzzy search with TMDB API calls
+- [ ] Add tests for fuzzy matching
+- [ ] Update documentation with new features
+
+#### **4. Improve Debug Visibility**
+**Goal**: Better debug formatting for types
+**Files to modify**: `src/types.rs`, `src/movie_parser.rs`, `src/organizer.rs`
+**Tasks**:
+- [ ] Add `#[derive(Debug)]` to all public types
+- [ ] Implement custom debug formatting where needed
+- [ ] Improve error messages with context
+- [ ] Add debug logging for troubleshooting
+
+#### **5. Improve Library Documentation**
+**Goal**: Add comprehensive docs and examples to lib.rs
+**Files to modify**: `src/lib.rs`, `src/types.rs`, `src/movie_parser.rs`
+**Tasks**:
+- [ ] Add comprehensive doc comments to public APIs
+- [ ] Include usage examples in documentation
+- [ ] Add module-level documentation
+- [ ] Generate and verify documentation with `cargo doc`
+
+### **🚀 Lower Priority Items**
+
+#### **6. User Testing**
+**Goal**: Validate CJK title configuration with real users
+**Files to modify**: Test data, documentation
+**Tasks**:
+- [ ] Test with actual Chinese movie files
+- [ ] Test with actual Japanese movie files
+- [ ] Validate configuration options work as expected
+- [ ] Document real-world usage patterns
+
+#### **7. Performance Optimization**
+**Goal**: Optimize for large media libraries
+**Files to modify**: `src/scanner.rs`, `src/movie_parser.rs`, `src/organizer.rs`
+**Tasks**:
+- [ ] Profile performance with large directories
+- [ ] Optimize file scanning algorithms
+- [ ] Improve memory usage patterns
+- [ ] Add performance benchmarks
+- [ ] Document performance characteristics
 
 ### **Iteration 2 Goals**
 - **Database Integration**: SQLite for persistent storage and caching
