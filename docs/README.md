@@ -27,6 +27,13 @@ This directory contains the comprehensive documentation for the Plex Media Organ
 - Areas for improvement and next steps
 - CJK title strategy and implementation status
 
+### [DEVELOPMENT_WORKFLOW.md](DEVELOPMENT_WORKFLOW.md)
+**Development workflow and PR guidelines**
+- PR workflow and best practices
+- Documentation update requirements
+- Quality assurance checklists
+- Iteration workflow and examples
+
 ## 🎯 Purpose
 
 These documents serve as the **planning and design foundation** for the Plex Media Organizer project. They outline:
