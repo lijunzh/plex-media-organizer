@@ -31,6 +31,18 @@ enum Commands {
         /// Show detailed output
         #[arg(short, long)]
         verbose: bool,
+
+        /// Optimize for network drives (SMB, NFS, etc.)
+        #[arg(long)]
+        network_mode: bool,
+
+        /// Maximum number of concurrent operations
+        #[arg(long, default_value = "16")]
+        max_parallel: usize,
+
+        /// Batch size for processing (smaller for network drives)
+        #[arg(long, default_value = "100")]
+        batch_size: usize,
     },
 
     /// Set up configuration interactively
@@ -83,6 +95,18 @@ enum Commands {
         /// Show detailed output
         #[arg(short, long)]
         verbose: bool,
+
+        /// Optimize for network drives (SMB, NFS, etc.)
+        #[arg(long)]
+        network_mode: bool,
+
+        /// Maximum number of concurrent operations
+        #[arg(long, default_value = "16")]
+        max_parallel: usize,
+
+        /// Batch size for processing (smaller for network drives)
+        #[arg(long, default_value = "100")]
+        batch_size: usize,
     },
 
     /// Rollback a previous organization operation
@@ -126,7 +150,15 @@ impl Cli {
         let cli = Cli::parse();
 
         match cli.command {
-            Commands::Scan { directory, verbose } => Self::handle_scan(directory, verbose).await,
+            Commands::Scan {
+                directory,
+                verbose,
+                network_mode,
+                max_parallel,
+                batch_size,
+            } => {
+                Self::handle_scan(directory, verbose, network_mode, max_parallel, batch_size).await
+            }
             Commands::Setup { force } => Self::handle_setup(force).await,
             Commands::Config { path } => Self::handle_config(path).await,
             Commands::Test {
@@ -140,7 +172,21 @@ impl Cli {
                 preview,
                 backup,
                 verbose,
-            } => Self::handle_organize(directory, preview, backup, verbose).await,
+                network_mode,
+                max_parallel,
+                batch_size,
+            } => {
+                Self::handle_organize(
+                    directory,
+                    preview,
+                    backup,
+                    verbose,
+                    network_mode,
+                    max_parallel,
+                    batch_size,
+                )
+                .await
+            }
             Commands::Rollback {
                 operation_file,
                 preview,
@@ -156,7 +202,13 @@ impl Cli {
     }
 
     /// Handle the scan command
-    async fn handle_scan(directory: PathBuf, verbose: bool) -> Result<()> {
+    async fn handle_scan(
+        directory: PathBuf,
+        verbose: bool,
+        network_mode: bool,
+        max_parallel: usize,
+        batch_size: usize,
+    ) -> Result<()> {
         println!("🎬 Plex Media Organizer - Scanning Directory");
         println!("Directory: {}", directory.display());
         println!();
@@ -185,7 +237,22 @@ impl Cli {
             tmdb_client,
             config.organization.original_titles.clone(),
         );
-        let scanner = Scanner::new(movie_parser);
+
+        // Create scanner with network optimizations if requested
+        let mut scanner = if network_mode {
+            Scanner::for_network_drive(movie_parser)
+        } else {
+            Scanner::with_concurrency(movie_parser, max_parallel)
+        };
+
+        // Apply custom settings
+        scanner.set_batch_size(batch_size);
+
+        // Auto-detect network drives if not explicitly set
+        if !network_mode && Scanner::detect_network_drive(&directory) {
+            println!("🌐 Auto-detected network drive - enabling optimizations");
+            scanner.set_network_mode(true);
+        }
 
         // Scan directory
         let scan_result = scanner
@@ -467,6 +534,9 @@ impl Cli {
         preview: bool,
         backup: Option<PathBuf>,
         _verbose: bool,
+        network_mode: bool,
+        max_parallel: usize,
+        batch_size: usize,
     ) -> Result<()> {
         println!("🎬 Plex Media Organizer - File Organization");
         println!("Directory: {}", directory.display());
@@ -504,7 +574,22 @@ impl Cli {
             tmdb_client,
             config.organization.original_titles.clone(),
         );
-        let scanner = Scanner::new(movie_parser);
+
+        // Create scanner with network optimizations if requested
+        let mut scanner = if network_mode {
+            Scanner::for_network_drive(movie_parser)
+        } else {
+            Scanner::with_concurrency(movie_parser, max_parallel)
+        };
+
+        // Apply custom settings
+        scanner.set_batch_size(batch_size);
+
+        // Auto-detect network drives if not explicitly set
+        if !network_mode && Scanner::detect_network_drive(&directory) {
+            println!("🌐 Auto-detected network drive - enabling optimizations");
+            scanner.set_network_mode(true);
+        }
 
         // Scan directory first
         println!("📋 Scanning directory for media files...");
@@ -928,11 +1013,50 @@ mod tests {
     fn test_cli_creation() {
         let cli = Cli::parse_from(&["plex-media-organizer", "scan", "/test/dir"]);
         match cli.command {
-            Commands::Scan { directory, verbose } => {
+            Commands::Scan {
+                directory,
+                verbose,
+                network_mode,
+                max_parallel,
+                batch_size,
+            } => {
                 assert_eq!(directory, PathBuf::from("/test/dir"));
                 assert!(!verbose);
+                assert!(!network_mode);
+                assert_eq!(max_parallel, 16);
+                assert_eq!(batch_size, 100);
             }
             _ => panic!("Expected scan command"),
+        }
+    }
+
+    #[test]
+    fn test_network_mode_scan() {
+        let cli = Cli::parse_from(&[
+            "plex-media-organizer",
+            "scan",
+            "/test/dir",
+            "--network-mode",
+            "--max-parallel",
+            "4",
+            "--batch-size",
+            "25",
+        ]);
+        match cli.command {
+            Commands::Scan {
+                directory,
+                verbose,
+                network_mode,
+                max_parallel,
+                batch_size,
+            } => {
+                assert_eq!(directory, PathBuf::from("/test/dir"));
+                assert!(!verbose);
+                assert!(network_mode);
+                assert_eq!(max_parallel, 4);
+                assert_eq!(batch_size, 25);
+            }
+            _ => panic!("Expected scan command with network mode"),
         }
     }
 

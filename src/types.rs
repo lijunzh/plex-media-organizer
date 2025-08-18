@@ -233,4 +233,6 @@ pub struct ScanStatistics {
     pub average_confidence: f32,
     /// Scan duration in seconds
     pub duration_seconds: f64,
+    /// Files processed per second
+    pub files_per_second: f64,
 }

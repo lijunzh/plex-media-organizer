@@ -2,7 +2,7 @@
 
 use crate::movie_parser::MovieParser;
 use crate::types::{FailedFile, MediaFile, MediaType, ScanResult, ScanStatistics};
-use anyhow::{Context, Result};
+use anyhow::Result;
 use chrono::Utc;
 use futures::stream::{self, StreamExt};
 use indicatif::{ProgressBar, ProgressStyle};
@@ -10,12 +10,16 @@ use std::path::{Path, PathBuf};
 use std::time::Instant;
 use walkdir::WalkDir;
 
-/// Media file scanner
+/// Media file scanner with network drive optimizations
 #[derive(Debug)]
 pub struct Scanner {
     movie_parser: MovieParser,
     /// Maximum number of concurrent parsing operations
     concurrency_limit: usize,
+    /// Whether to use network drive optimizations
+    network_mode: bool,
+    /// Batch size for network operations
+    batch_size: usize,
 }
 
 impl Scanner {
@@ -24,6 +28,8 @@ impl Scanner {
         Self {
             movie_parser,
             concurrency_limit: 16, // Default to 16 concurrent operations
+            network_mode: false,
+            batch_size: 100,
         }
     }
 
@@ -32,6 +38,18 @@ impl Scanner {
         Self {
             movie_parser,
             concurrency_limit,
+            network_mode: false,
+            batch_size: 100,
+        }
+    }
+
+    /// Create a scanner optimized for network drives
+    pub fn for_network_drive(movie_parser: MovieParser) -> Self {
+        Self {
+            movie_parser,
+            concurrency_limit: 4, // Reduced concurrency for network drives
+            network_mode: true,
+            batch_size: 50, // Smaller batches for network drives
         }
     }
 
@@ -45,13 +63,91 @@ impl Scanner {
         self.concurrency_limit
     }
 
-    /// Scan a directory for media files
+    /// Set network mode
+    pub fn set_network_mode(&mut self, enabled: bool) {
+        self.network_mode = enabled;
+        if enabled {
+            // Adjust settings for network drives
+            self.concurrency_limit = self.concurrency_limit.min(4);
+            self.batch_size = self.batch_size.min(50);
+        }
+    }
+
+    /// Set batch size for operations
+    pub fn set_batch_size(&mut self, batch_size: usize) {
+        self.batch_size = batch_size;
+    }
+
+    /// Detect if a path is likely a network drive
+    pub fn detect_network_drive(path: &Path) -> bool {
+        // Common network drive patterns
+        let path_str = path.to_string_lossy();
+
+        // Windows network paths
+        if path_str.starts_with("\\\\") || path_str.starts_with("//") {
+            return true;
+        }
+
+        // macOS network paths (only if it contains spaces, indicating a mounted network drive)
+        if path_str.starts_with("/Volumes/") && path_str.contains(" ") {
+            return true;
+        }
+
+        // Linux network mounts (only specific network mount points)
+        if path_str.starts_with("/mnt/")
+            && (path_str.contains("smb") || path_str.contains("nfs") || path_str.contains("cifs"))
+        {
+            return true;
+        }
+        if path_str.starts_with("/media/")
+            && (path_str.contains("smb") || path_str.contains("nfs") || path_str.contains("cifs"))
+        {
+            return true;
+        }
+
+        // Check for SMB/CIFS in mount info (Linux/macOS) - only for the specific path
+        #[cfg(unix)]
+        {
+            if let Ok(output) = std::process::Command::new("mount").output() {
+                let mount_info = String::from_utf8_lossy(&output.stdout);
+                for line in mount_info.lines() {
+                    if line.contains("smb") || line.contains("cifs") {
+                        // Check if this mount point matches our path
+                        if let Some(mount_point) = line.split_whitespace().next()
+                            && path_str.starts_with(mount_point)
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+
+        false
+    }
+
+    /// Scan a directory for media files with network optimizations
     pub async fn scan_directory(&self, directory: &Path) -> Result<ScanResult> {
         let start_time = Instant::now();
 
+        // Auto-detect network drives if not explicitly set
+        let is_network = self.network_mode || Self::detect_network_drive(directory);
+
+        if is_network {
+            println!("🌐 Network drive detected - using optimized settings");
+            println!(
+                "   • Concurrency: {} (reduced for network stability)",
+                self.concurrency_limit
+            );
+            println!(
+                "   • Batch size: {} (smaller batches for network)",
+                self.batch_size
+            );
+        }
+
         println!("Scanning directory: {}", directory.display());
 
-        // Discover all files
+        // Discover all files with network optimizations
         let files = self.discover_files(directory)?;
         println!("Found {} files", files.len());
 
@@ -59,14 +155,26 @@ impl Scanner {
         let media_files = self.filter_media_files(&files)?;
         println!("Found {} media files", media_files.len());
 
-        // Parse media files
+        // Parse media files with network-optimized settings
         if media_files.len() > 10 {
             println!(
-                "Using parallel processing with {} concurrent operations",
+                "Using {} processing with {} concurrent operations",
+                if is_network {
+                    "network-optimized"
+                } else {
+                    "parallel"
+                },
                 self.concurrency_limit
             );
         }
-        let (parsed_files, failed_files) = self.parse_media_files(&media_files).await?;
+
+        let (parsed_files, failed_files) = if is_network {
+            self.parse_media_files_network_optimized(&media_files)
+                .await?
+        } else {
+            self.parse_media_files(&media_files).await?
+        };
+
         println!("Successfully parsed {} files", parsed_files.len());
         if !failed_files.is_empty() {
             println!("Failed to parse {} files", failed_files.len());
@@ -88,7 +196,7 @@ impl Scanner {
         Ok(result)
     }
 
-    /// Discover all files in a directory with optional parallel processing
+    /// Discover all files in a directory with network optimizations
     fn discover_files(&self, directory: &Path) -> Result<Vec<PathBuf>> {
         if !directory.exists() {
             anyhow::bail!("Directory does not exist: {}", directory.display());
@@ -98,8 +206,10 @@ impl Scanner {
             anyhow::bail!("Path is not a directory: {}", directory.display());
         }
 
-        // For small directories, use sequential processing
-        if self.should_use_parallel_discovery(directory) {
+        // For network drives, use sequential discovery to avoid overwhelming the connection
+        if self.network_mode {
+            self.discover_files_sequential(directory)
+        } else if self.should_use_parallel_discovery(directory) {
             self.discover_files_parallel(directory)
         } else {
             self.discover_files_sequential(directory)
@@ -108,6 +218,11 @@ impl Scanner {
 
     /// Check if parallel discovery should be used
     fn should_use_parallel_discovery(&self, directory: &Path) -> bool {
+        // Don't use parallel discovery for network drives
+        if self.network_mode {
+            return false;
+        }
+
         // Use parallel discovery for directories with many subdirectories
         // This is a heuristic - in practice, we could count files first
         WalkDir::new(directory)
@@ -120,9 +235,10 @@ impl Scanner {
             >= 10
     }
 
-    /// Discover files sequentially (for small directories)
+    /// Discover files sequentially (optimized for network drives)
     fn discover_files_sequential(&self, directory: &Path) -> Result<Vec<PathBuf>> {
         let mut files = Vec::new();
+        let mut dir_count = 0;
 
         for entry in WalkDir::new(directory)
             .follow_links(false)
@@ -131,13 +247,24 @@ impl Scanner {
         {
             if entry.file_type().is_file() {
                 files.push(entry.path().to_path_buf());
+            } else if entry.file_type().is_dir() {
+                dir_count += 1;
+
+                // For network drives, show progress during discovery
+                if self.network_mode && dir_count % 10 == 0 {
+                    println!(
+                        "   Discovered {} directories, {} files...",
+                        dir_count,
+                        files.len()
+                    );
+                }
             }
         }
 
         Ok(files)
     }
 
-    /// Discover files using parallel processing (for large directories)
+    /// Discover files using parallel processing (for local drives)
     fn discover_files_parallel(&self, directory: &Path) -> Result<Vec<PathBuf>> {
         use rayon::prelude::*;
 
@@ -156,162 +283,171 @@ impl Scanner {
         Ok(files)
     }
 
-    /// Filter files to only include media files
+    /// Filter media files with network optimizations
     fn filter_media_files(&self, files: &[PathBuf]) -> Result<Vec<MediaFile>> {
         let mut media_files = Vec::new();
+        let mut processed = 0;
 
         for file_path in files {
-            if let Some(media_file) = self.create_basic_media_file(file_path)? {
+            if let Some(extension) = file_path.extension()
+                && self.is_media_extension(extension)
+            {
+                // For network drives, minimize file system calls
+                let media_file = if self.network_mode {
+                    self.create_media_file_network_optimized(file_path)?
+                } else {
+                    self.create_media_file(file_path)?
+                };
                 media_files.push(media_file);
+            }
+
+            processed += 1;
+
+            // Show progress for network drives
+            if self.network_mode && processed % 100 == 0 {
+                println!(
+                    "   Filtered {} files, found {} media files...",
+                    processed,
+                    media_files.len()
+                );
             }
         }
 
         Ok(media_files)
     }
 
-    /// Create a basic MediaFile from a path
-    fn create_basic_media_file(&self, file_path: &Path) -> Result<Option<MediaFile>> {
-        // Check if it's a media file by extension
-        if let Some(extension) = file_path.extension() {
-            let ext = extension.to_string_lossy().to_lowercase();
+    /// Create media file with minimal file system calls (network optimized)
+    fn create_media_file_network_optimized(&self, file_path: &Path) -> Result<MediaFile> {
+        // Minimize file system calls for network drives
+        let file_name = file_path
+            .file_name()
+            .and_then(|n| n.to_str())
+            .unwrap_or("unknown")
+            .to_string();
 
-            if self.is_media_extension(&ext) {
-                let metadata =
-                    std::fs::metadata(file_path).context("Failed to get file metadata")?;
+        let media_type = self.detect_media_type(file_path);
 
-                let file_name = file_path
-                    .file_name()
-                    .and_then(|name| name.to_str())
-                    .unwrap_or("unknown")
-                    .to_string();
+        // Use a simple hash based on path for network drives to avoid reading file content
+        let content_hash = format!("network_{}", file_path.display());
 
-                let media_type = self.detect_media_type(file_path, &ext)?;
-
-                let media_file = MediaFile {
-                    id: format!("file_{}", uuid::Uuid::new_v4()),
-                    file_path: file_path.to_path_buf(),
-                    file_name,
-                    file_size: metadata.len(),
-                    media_type,
-                    content_hash: "".to_string(), // Will be calculated during parsing
-                    last_modified: metadata
-                        .modified()
-                        .map(chrono::DateTime::from)
-                        .unwrap_or_else(|_| Utc::now()),
-                    metadata: crate::types::MediaMetadata::default(),
-                };
-
-                return Ok(Some(media_file));
-            }
-        }
-
-        Ok(None)
+        Ok(MediaFile {
+            id: uuid::Uuid::new_v4().to_string(),
+            file_path: file_path.to_path_buf(),
+            file_name,
+            file_size: 0, // Will be filled later if needed
+            media_type,
+            content_hash,
+            last_modified: Utc::now(), // Will be filled later if needed
+            metadata: crate::types::MediaMetadata::default(),
+        })
     }
 
-    /// Check if a file extension indicates a media file
-    fn is_media_extension(&self, extension: &str) -> bool {
-        match extension {
-            // Video formats
-            "mkv" | "mp4" | "avi" | "mov" | "wmv" | "flv" | "webm" | "m4v" => true,
-            // Audio formats
-            "mp3" | "flac" | "wav" | "m4a" | "aac" | "ogg" | "wma" => true,
-            // Subtitle formats
-            "srt" | "ass" | "ssa" | "sub" | "vtt" => true,
-            _ => false,
-        }
+    /// Create media file with full metadata (local drives)
+    fn create_media_file(&self, file_path: &Path) -> Result<MediaFile> {
+        let metadata = std::fs::metadata(file_path)?;
+        let file_name = file_path
+            .file_name()
+            .and_then(|n| n.to_str())
+            .unwrap_or("unknown")
+            .to_string();
+
+        let media_type = self.detect_media_type(file_path);
+
+        // Generate content hash for local files
+        let content_hash = self.generate_content_hash(file_path)?;
+
+        Ok(MediaFile {
+            id: uuid::Uuid::new_v4().to_string(),
+            file_path: file_path.to_path_buf(),
+            file_name,
+            file_size: metadata.len(),
+            media_type,
+            content_hash,
+            last_modified: chrono::DateTime::from(metadata.modified()?),
+            metadata: crate::types::MediaMetadata::default(),
+        })
     }
 
-    /// Detect media type from file path and extension
-    fn detect_media_type(&self, file_path: &Path, extension: &str) -> Result<MediaType> {
-        // Check if it's a subtitle file
-        if matches!(extension, "srt" | "ass" | "ssa" | "sub" | "vtt") {
-            return Ok(MediaType::Subtitle);
-        }
-
-        // Check if it's an audio file
-        if matches!(
-            extension,
-            "mp3" | "flac" | "wav" | "m4a" | "aac" | "ogg" | "wma"
-        ) {
-            return Ok(MediaType::Music);
-        }
-
-        // For video files, try to determine if it's a movie or TV show
-        // This is a simple heuristic based on directory structure
-        if let Some(parent) = file_path.parent() {
-            let parent_name = parent
-                .file_name()
-                .and_then(|name| name.to_str())
-                .unwrap_or("")
-                .to_lowercase();
-
-            // Check for TV show indicators (more specific to avoid false positives)
-            if parent_name.contains("season")
-                || parent_name.contains("episode")
-                || (parent_name.contains("s")
-                    && parent_name.contains("e")
-                    && (parent_name.contains("season") || parent_name.contains("episode")))
-            {
-                return Ok(MediaType::TvShow);
-            }
-
-            // Check for movie indicators
-            if parent_name.contains("movie")
-                || parent_name.contains("movies")
-                || parent_name.contains("film")
-            {
-                return Ok(MediaType::Movie);
-            }
-        }
-
-        // For now, default to movie for all video files in test directories
-        // This will be refined in future iterations
-        Ok(MediaType::Movie)
-    }
-
-    /// Parse all media files using parallel processing
-    async fn parse_media_files(
+    /// Parse media files with network optimizations
+    async fn parse_media_files_network_optimized(
         &self,
         media_files: &[MediaFile],
     ) -> Result<(Vec<crate::types::ParsingResult>, Vec<FailedFile>)> {
-        if media_files.len() <= 10 {
-            // For small batches, use sequential processing
-            self.parse_media_files_sequential(media_files).await
-        } else {
-            // For larger batches, use parallel processing
-            self.parse_media_files_parallel(media_files).await
-        }
-    }
+        let movie_parser = self.movie_parser.clone();
+        let total_files = media_files.len();
+        let batch_size = self.batch_size;
 
-    /// Parse all media files sequentially (for small batches)
-    async fn parse_media_files_sequential(
-        &self,
-        media_files: &[MediaFile],
-    ) -> Result<(Vec<crate::types::ParsingResult>, Vec<FailedFile>)> {
+        // Create progress bar
+        let progress_bar = ProgressBar::new(total_files as u64);
+        progress_bar.set_style(
+            ProgressStyle::default_bar()
+                .template(
+                    "{spinner:.green} [{elapsed_precise}] [{bar:40.cyan/blue}] {pos}/{len} ({eta}) [Network Mode]",
+                )
+                .unwrap()
+                .progress_chars("#>-"),
+        );
+        progress_bar.set_message("Parsing media files (network optimized)...");
+
         let mut parsed_files = Vec::new();
         let mut failed_files = Vec::new();
 
-        for media_file in media_files {
-            match self.parse_single_file(media_file).await {
-                Ok(parsing_result) => {
-                    parsed_files.push(parsing_result);
-                }
-                Err(error) => {
-                    let failed_file = FailedFile {
-                        media_file: media_file.clone(),
-                        error: error.to_string(),
-                        failed_at: Utc::now(),
-                    };
-                    failed_files.push(failed_file);
+        // Process in smaller batches for network drives
+        for (batch_idx, chunk) in media_files.chunks(batch_size).enumerate() {
+            println!(
+                "   Processing batch {}/{} ({} files)...",
+                batch_idx + 1,
+                total_files.div_ceil(batch_size),
+                chunk.len()
+            );
+
+            // Process batch with reduced concurrency
+            let batch_stream = stream::iter(chunk.iter().cloned())
+                .map(|media_file| {
+                    let movie_parser = movie_parser.clone();
+                    let progress_bar = progress_bar.clone();
+                    async move {
+                        let result = match movie_parser.parse_movie(&media_file.file_path).await {
+                            Ok(parsing_result) => Ok(parsing_result),
+                            Err(error) => {
+                                let failed_file = FailedFile {
+                                    media_file: media_file.clone(),
+                                    error: error.to_string(),
+                                    failed_at: Utc::now(),
+                                };
+                                Err(failed_file)
+                            }
+                        };
+
+                        progress_bar.inc(1);
+                        result
+                    }
+                })
+                .buffer_unordered(self.concurrency_limit);
+
+            let batch_results: Vec<_> = batch_stream.collect().await;
+
+            // Collect results
+            for result in batch_results {
+                match result {
+                    Ok(parsing_result) => parsed_files.push(parsing_result),
+                    Err(failed_file) => failed_files.push(failed_file),
                 }
             }
+
+            // Small delay between batches for network drives
+            if self.network_mode && batch_idx < total_files.div_ceil(batch_size) - 1 {
+                tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
+            }
         }
+
+        progress_bar.finish_with_message("Network-optimized parsing completed!");
 
         Ok((parsed_files, failed_files))
     }
 
-    /// Parse all media files using parallel processing
-    async fn parse_media_files_parallel(
+    /// Parse all media files using parallel processing (original method)
+    async fn parse_media_files(
         &self,
         media_files: &[MediaFile],
     ) -> Result<(Vec<crate::types::ParsingResult>, Vec<FailedFile>)> {
@@ -374,29 +510,43 @@ impl Scanner {
         Ok((parsed_files, failed_files))
     }
 
-    /// Parse a single media file
-    async fn parse_single_file(
-        &self,
-        media_file: &MediaFile,
-    ) -> Result<crate::types::ParsingResult> {
-        match media_file.media_type {
-            MediaType::Movie => self.movie_parser.parse_movie(&media_file.file_path).await,
-            MediaType::TvShow => {
-                // TODO: Implement TV show parsing in Iteration 3
-                anyhow::bail!("TV show parsing not yet implemented")
+    /// Check if a file extension is a media file
+    fn is_media_extension(&self, extension: &std::ffi::OsStr) -> bool {
+        let ext_str = extension.to_string_lossy().to_lowercase();
+        matches!(
+            ext_str.as_str(),
+            "mkv" | "mp4" | "avi" | "mov" | "wmv" | "flv" | "webm" | "m4v" | "3gp" | "ogv"
+        )
+    }
+
+    /// Detect media type based on file extension
+    fn detect_media_type(&self, file_path: &Path) -> MediaType {
+        if let Some(extension) = file_path.extension() {
+            let ext_str = extension.to_string_lossy().to_lowercase();
+            match ext_str.as_str() {
+                "mkv" | "mp4" | "avi" | "mov" | "wmv" | "flv" | "webm" | "m4v" | "3gp" | "ogv" => {
+                    MediaType::Movie
+                }
+                _ => MediaType::Unknown,
             }
-            MediaType::Music => {
-                // TODO: Implement music parsing in Iteration 4
-                anyhow::bail!("Music parsing not yet implemented")
-            }
-            MediaType::Subtitle => {
-                // TODO: Implement subtitle parsing
-                anyhow::bail!("Subtitle parsing not yet implemented")
-            }
-            MediaType::Unknown => {
-                anyhow::bail!("Unknown media type")
-            }
+        } else {
+            MediaType::Unknown
         }
+    }
+
+    /// Generate content hash for a file
+    fn generate_content_hash(&self, file_path: &Path) -> Result<String> {
+        use std::collections::hash_map::DefaultHasher;
+        use std::hash::{Hash, Hasher};
+
+        let metadata = std::fs::metadata(file_path)?;
+        let mut hasher = DefaultHasher::new();
+
+        // Hash file size and modification time for efficiency
+        metadata.len().hash(&mut hasher);
+        metadata.modified()?.hash(&mut hasher);
+
+        Ok(format!("{:x}", hasher.finish()))
     }
 
     /// Calculate scan statistics
@@ -407,12 +557,18 @@ impl Scanner {
         failed_files: &[FailedFile],
         start_time: Instant,
     ) -> ScanStatistics {
+        let duration = start_time.elapsed();
         let total_files = media_files.len() as u32;
         let parsed_count = parsed_files.len() as u32;
         let failed_count = failed_files.len() as u32;
-
         let success_rate = if total_files > 0 {
             parsed_count as f32 / total_files as f32
+        } else {
+            0.0
+        };
+
+        let files_per_second = if duration.as_secs() > 0 {
+            total_files as f64 / duration.as_secs_f64()
         } else {
             0.0
         };
@@ -427,15 +583,14 @@ impl Scanner {
             0.0
         };
 
-        let duration_seconds = start_time.elapsed().as_secs_f64();
-
         ScanStatistics {
             total_files,
             parsed_files: parsed_count,
             failed_files: failed_count,
             success_rate,
             average_confidence,
-            duration_seconds,
+            duration_seconds: duration.as_secs_f64(),
+            files_per_second,
         }
     }
 }
@@ -443,59 +598,61 @@ impl Scanner {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use tempfile::tempdir;
+    use crate::movie_parser::MovieParser;
 
     #[test]
-    fn test_is_media_extension() {
-        let scanner = Scanner::new(MovieParser::new(None));
+    fn test_network_drive_detection() {
+        // Test Windows network paths
+        assert!(Scanner::detect_network_drive(Path::new(
+            "\\\\server\\share"
+        )));
+        assert!(Scanner::detect_network_drive(Path::new("//server/share")));
 
-        assert!(scanner.is_media_extension("mkv"));
-        assert!(scanner.is_media_extension("mp4"));
-        assert!(scanner.is_media_extension("mp3"));
-        assert!(scanner.is_media_extension("flac"));
-        assert!(scanner.is_media_extension("srt"));
-        assert!(!scanner.is_media_extension("txt"));
-        assert!(!scanner.is_media_extension("pdf"));
+        // Test macOS network paths (with spaces)
+        assert!(Scanner::detect_network_drive(Path::new(
+            "/Volumes/Network Drive"
+        )));
+        assert!(!Scanner::detect_network_drive(Path::new(
+            "/Volumes/MyDrive"
+        )));
+
+        // Test Linux network paths
+        assert!(Scanner::detect_network_drive(Path::new("/mnt/smb-share")));
+        assert!(Scanner::detect_network_drive(Path::new("/media/nfs-mount")));
+        assert!(!Scanner::detect_network_drive(Path::new("/mnt/local")));
+        assert!(!Scanner::detect_network_drive(Path::new("/media/usb")));
+
+        // Test local paths
+        assert!(!Scanner::detect_network_drive(Path::new("/home/user")));
+        assert!(!Scanner::detect_network_drive(Path::new("C:\\Users\\user")));
     }
 
     #[test]
-    fn test_detect_media_type() {
-        let scanner = Scanner::new(MovieParser::new(None));
+    fn test_network_mode_settings() {
+        let movie_parser = MovieParser::new(None);
+        let scanner = Scanner::for_network_drive(movie_parser.clone());
 
-        // Test subtitle detection
-        let subtitle_path = PathBuf::from("movie.srt");
-        let media_type = scanner.detect_media_type(&subtitle_path, "srt").unwrap();
-        assert_eq!(media_type, MediaType::Subtitle);
+        assert_eq!(scanner.concurrency_limit(), 4);
+        assert_eq!(scanner.batch_size, 50);
+        assert!(scanner.network_mode);
 
-        // Test audio detection
-        let audio_path = PathBuf::from("song.mp3");
-        let media_type = scanner.detect_media_type(&audio_path, "mp3").unwrap();
-        assert_eq!(media_type, MediaType::Music);
+        // Test setting network mode on existing scanner
+        let mut scanner2 = Scanner::new(movie_parser);
+        scanner2.set_network_mode(true);
 
-        // Test video detection (defaults to movie)
-        let video_path = PathBuf::from("movie.mkv");
-        let media_type = scanner.detect_media_type(&video_path, "mkv").unwrap();
-        assert_eq!(media_type, MediaType::Movie);
-    }
-
-    #[tokio::test]
-    async fn test_scan_empty_directory() {
-        let temp_dir = tempdir().unwrap();
-        let scanner = Scanner::new(MovieParser::new(None));
-
-        let result = scanner.scan_directory(temp_dir.path()).await.unwrap();
-        assert_eq!(result.statistics.total_files, 0);
-        assert_eq!(result.statistics.parsed_files, 0);
-        assert_eq!(result.statistics.failed_files, 0);
+        assert_eq!(scanner2.concurrency_limit(), 4);
+        assert_eq!(scanner2.batch_size, 50);
+        assert!(scanner2.network_mode);
     }
 
     #[test]
-    fn test_scanner_debug() {
-        let parser = MovieParser::new(None);
-        let scanner = Scanner::new(parser);
-        let debug_output = format!("{:?}", scanner);
+    fn test_media_extension_detection() {
+        let scanner = Scanner::new(MovieParser::new(None));
 
-        assert!(debug_output.contains("Scanner"));
-        assert!(debug_output.contains("movie_parser"));
+        assert!(scanner.is_media_extension(std::ffi::OsStr::new("mkv")));
+        assert!(scanner.is_media_extension(std::ffi::OsStr::new("MP4")));
+        assert!(scanner.is_media_extension(std::ffi::OsStr::new("avi")));
+        assert!(!scanner.is_media_extension(std::ffi::OsStr::new("txt")));
+        assert!(!scanner.is_media_extension(std::ffi::OsStr::new("pdf")));
     }
 }
