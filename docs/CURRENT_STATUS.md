@@ -105,25 +105,15 @@
 
 ### **🔄 Iteration 1 Action List (Prioritized)**
 
-#### **🔥 High Priority - Core Functionality**
-1. **🔄 Simplify Configuration** - Remove unused future features for Iteration 1
-   - **Impact**: Reduces complexity, improves maintainability
-   - **Effort**: Low (remove unused code)
-   - **Dependencies**: None
-   - **Status**: Ready to start
-
 #### **🚀 Lower Priority - Optimization & Validation**
-2. **🔄 User Testing** - Validate CJK title configuration with real users
-   - **Impact**: Validates functionality with real-world data
-   - **Effort**: Low (test with actual Chinese/Japanese movies)
-   - **Dependencies**: CJK title configuration (✅ completed)
-   - **Status**: Ready to start
-
-3. **🔄 Performance Optimization** - Optimize for large media libraries
+1. **🔄 Performance Optimization** - Optimize for large media libraries
    - **Impact**: Better performance for large directories
    - **Effort**: High (profiling, optimization)
    - **Dependencies**: Core functionality (✅ completed)
    - **Status**: Ready to start
+
+### **✅ All High & Medium Priority Items Completed!**
+All major functionality for Iteration 1 has been successfully implemented and tested.
 
 ### **✅ Recently Completed Items**
 - **✅ Comprehensive Testing Overhaul** - Added 13 new tests (+36% coverage), implemented Debug traits, enhanced edge case testing
@@ -137,7 +127,7 @@
 - **✅ Fix GitHub Actions CI/CD** - Rust version compatibility
 - **✅ Complete Code Review** - Review all source files and identify gaps
 - **✅ Implement File Organization** - Add core "organizer" functionality (Iteration 1)
-- **✅ CJK Title Configuration** - Configurable Chinese/Japanese/Korean title handling
+- **✅ Original Language Title Configuration** - Configurable title handling for all original languages (CJK and beyond)
 - **✅ Documentation Consolidation** - Streamlined docs from 6 files to 4 files
 - **✅ Enhanced GitHub Actions** - PR workflows and quality checks
 - **✅ Simplify Configuration** - Removed unused future features for Iteration 1
@@ -159,7 +149,7 @@ tmdb_api_key = "your_tmdb_key_here"
 [organization.quality]
 preferred_quality = "1080p"
 
-[organization.cjk_titles]
+[organization.original_titles]
 prefer_original_titles = false
 include_english_subtitle = false
 fallback_to_english_on_error = true
@@ -169,7 +159,7 @@ preserve_original_in_metadata = true
 ### **What's Included in Iteration 1**
 - **TMDB API Integration**: Movie metadata lookup
 - **Quality Preferences**: Preferred quality setting
-- **CJK Title Handling**: Configurable Chinese/Japanese/Korean title processing
+- **Original Language Title Handling**: Configurable title processing for all original languages
 
 ### **What's Planned for Future Iterations**
 - **TVDB Integration**: TV show metadata (Iteration 2)
