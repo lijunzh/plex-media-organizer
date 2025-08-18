@@ -8,7 +8,6 @@ use serde::Deserialize;
 use std::time::Duration;
 
 /// TMDB API client
-#[derive(Clone, Debug)]
 pub struct TmdbClient {
     api_key: String,
     base_url: String,
@@ -528,11 +527,11 @@ mod tests {
 
     #[tokio::test]
     async fn test_find_best_match_empty_search() {
-        let client = TmdbClient::new("test_key".to_string());
+        let _client = TmdbClient::new("test_key".to_string());
         // This test would require mocking the HTTP client
         // For now, we'll just test that the method exists and can be called
         // In a real implementation, we'd use a mock HTTP client
-        assert_eq!(client.base_url, "https://api.themoviedb.org/3");
+        assert_eq!(_client.base_url, "https://api.themoviedb.org/3");
     }
 
     #[test]
