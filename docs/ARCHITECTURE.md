@@ -186,6 +186,34 @@ The Plex Media Organizer is a database-driven media management system that intel
   - Standard practice in media management tools
   - More reliable and secure approach
 
+#### Enhanced TMDB Integration
+The TMDB client implements advanced matching strategies for improved accuracy:
+
+**Fuzzy Search Integration**
+- **SkimMatcherV2**: High-quality fuzzy matching algorithm for title similarity
+- **Confidence Scoring**: Intelligent scoring system with minimum thresholds
+- **Title Variations**: Handles typos, abbreviations, and naming variations
+
+**Multiple Search Strategies**
+1. **Exact Search with Year**: Direct match with release year for highest accuracy
+2. **Broader Search**: Search without year constraints for flexibility
+3. **Cleaned Title Search**: Remove common suffixes/prefixes for better matching
+4. **Alternative Variations**: Generate title variations for comprehensive coverage
+
+**Title Processing**
+- **Suffix Removal**: `(Director's Cut)`, `(Extended)`, `(Uncut)`, etc.
+- **Prefix Removal**: `The`, `A`, `An` articles
+- **Variation Generation**: Add/remove "The", handle sequels
+- **Number Handling**: Remove sequel numbers for better matching
+
+**Scoring System**
+- **Exact Matches**: 200 points for perfect matches
+- **Fuzzy Matches**: 1.5x boost multiplier for similar titles
+- **Year Proximity**: 100/50/25 points for exact/1yr/3yr matches
+- **Popularity Bonus**: TMDB popularity score integration
+- **Rating Bonus**: Vote average consideration
+- **Confidence Threshold**: Minimum 50.0 points for valid matches
+
 #### Cache System
 - **Unified SQLite Storage**: All cache data stored in single database file
 - **API Response Cache**: Store external data to minimize calls

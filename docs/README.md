@@ -46,6 +46,7 @@ These documents serve as the **planning and design foundation** for the Plex Med
 
 - **Architecture**: ✅ Complete and documented
 - **Iteration 1 Implementation**: 🔄 In Progress - Core features implemented, action list pending
+- **Enhanced TMDB Matching**: ✅ Completed - Fuzzy search and multiple strategies
 - **Development**: 🔄 Active - Completing Iteration 1 action list
 - **GitHub Repository**: ✅ Live at https://github.com/lijunzh/plex-media-organizer
 
