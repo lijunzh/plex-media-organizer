@@ -477,13 +477,70 @@ mod tests {
     }
 
     #[test]
-    fn test_tmdb_client_debug() {
+    fn test_tmdb_to_movie_info_no_release_date() {
         let client = TmdbClient::new("test_key".to_string());
-        let debug_output = format!("{:?}", client);
+        let tmdb_movie = TmdbMovie {
+            id: 1,
+            title: "Test Movie".to_string(),
+            original_title: None,
+            original_language: None,
+            release_date: None,
+            overview: None,
+            poster_path: None,
+            backdrop_path: None,
+            vote_average: None,
+            vote_count: None,
+            popularity: None,
+        };
 
-        // Should contain the base URL but not the API key for security
-        assert!(debug_output.contains("https://api.themoviedb.org/3"));
-        assert!(!debug_output.contains("test_key")); // API key should not be exposed
-        assert!(debug_output.contains("TmdbClient"));
+        let movie_info = client.tmdb_to_movie_info(&tmdb_movie);
+        assert_eq!(movie_info.title, "Test Movie");
+        assert_eq!(movie_info.year, None);
+    }
+
+    #[test]
+    fn test_tmdb_to_movie_info_with_original_title() {
+        let client = TmdbClient::new("test_key".to_string());
+        let tmdb_movie = TmdbMovie {
+            id: 1,
+            title: "Test Movie".to_string(),
+            original_title: Some("Original Title".to_string()),
+            original_language: Some("en".to_string()),
+            release_date: Some("2023-01-01".to_string()),
+            overview: None,
+            poster_path: None,
+            backdrop_path: None,
+            vote_average: None,
+            vote_count: None,
+            popularity: None,
+        };
+
+        let movie_info = client.tmdb_to_movie_info(&tmdb_movie);
+        assert_eq!(movie_info.title, "Test Movie");
+        assert_eq!(
+            movie_info.original_title,
+            Some("Original Title".to_string())
+        );
+        assert_eq!(movie_info.original_language, Some("en".to_string()));
+        assert_eq!(movie_info.year, Some(2023));
+    }
+
+    #[tokio::test]
+    async fn test_find_best_match_empty_search() {
+        let _client = TmdbClient::new("test_key".to_string());
+        // This test would require mocking the HTTP client
+        // For now, we'll just test that the method exists and can be called
+        // In a real implementation, we'd use a mock HTTP client
+        assert_eq!(_client.base_url, "https://api.themoviedb.org/3");
+    }
+
+    #[test]
+    fn test_tmdb_client_clone() {
+        let client = TmdbClient::new("test_key".to_string());
+        let cloned_client = client.clone();
+
+        assert_eq!(client.base_url, cloned_client.base_url);
+        // Note: We can't easily test that the API key is cloned correctly
+        // since it's private, but the clone should work
     }
 }

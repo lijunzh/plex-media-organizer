@@ -69,6 +69,7 @@ pub struct OrganizationStatistics {
 }
 
 /// File organizer for Plex naming conventions
+#[derive(Debug)]
 pub struct Organizer {
     /// Whether to perform dry-run (no actual changes)
     dry_run: bool,
