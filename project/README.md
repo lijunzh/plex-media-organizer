@@ -14,6 +14,7 @@ This directory contains all project management documentation for the Plex Media 
 - **[📋 Planning](planning/)** - Iteration plans, milestones, and detailed planning documents
 - **[🎯 Decisions](decisions/)** - Architecture Decision Records (ADRs) and technical decisions
 - **[📈 Retrospectives](retrospectives/)** - Project retrospectives and lessons learned
+- **[🌐 Network Optimization](network-optimization.md)** - Network drive performance optimizations
 - **[🔒 Security](security.md)** - Security guidelines and API key management
 
 ## 🎯 Project Overview
