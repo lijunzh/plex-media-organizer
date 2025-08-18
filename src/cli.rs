@@ -99,6 +99,25 @@ enum Commands {
         #[arg(short, long)]
         verbose: bool,
     },
+
+    /// Clean up old organization result files
+    Cleanup {
+        /// Keep files newer than this many days (default: 30)
+        #[arg(long, default_value = "30")]
+        keep_days: u32,
+
+        /// Keep at most this many recent files (default: 100)
+        #[arg(long, default_value = "100")]
+        keep_count: usize,
+
+        /// Preview cleanup without making changes (dry-run)
+        #[arg(short, long)]
+        preview: bool,
+
+        /// Show detailed output
+        #[arg(short, long)]
+        verbose: bool,
+    },
 }
 
 impl Cli {
@@ -127,6 +146,12 @@ impl Cli {
                 preview,
                 verbose,
             } => Self::handle_rollback(operation_file, preview, verbose).await,
+            Commands::Cleanup {
+                keep_days,
+                keep_count,
+                preview,
+                verbose,
+            } => Self::handle_cleanup(keep_days, keep_count, preview, verbose).await,
         }
     }
 
@@ -725,6 +750,174 @@ impl Cli {
 
         Ok(())
     }
+
+    /// Handle the cleanup command
+    async fn handle_cleanup(
+        keep_days: u32,
+        keep_count: usize,
+        preview: bool,
+        verbose: bool,
+    ) -> Result<()> {
+        println!("🧹 Plex Media Organizer - Cleanup Old Organization Files");
+        println!("Keep files newer than: {} days", keep_days);
+        println!("Keep at most: {} recent files", keep_count);
+        if preview {
+            println!("Mode: Preview (dry-run)");
+        } else {
+            println!("Mode: Live cleanup");
+        }
+        println!();
+
+        // Find all organization result files
+        let current_dir = std::env::current_dir()?;
+        let mut json_files = Vec::new();
+
+        for entry in std::fs::read_dir(&current_dir)? {
+            let entry = entry?;
+            let file_name = entry.file_name().to_string_lossy().to_string();
+
+            if file_name.starts_with("organization_result_") && file_name.ends_with(".json") {
+                let metadata = entry.metadata()?;
+                let created_time = metadata.created()?.elapsed()?.as_secs() as u32 / 86400; // days
+
+                json_files.push((entry.path(), created_time, metadata));
+            }
+        }
+
+        if json_files.is_empty() {
+            println!("ℹ️  No organization result files found to clean up.");
+            return Ok(());
+        }
+
+        // Sort by creation time (oldest first)
+        json_files.sort_by_key(|(_, days, _)| *days);
+
+        let cutoff_days = keep_days;
+        let mut files_to_delete = Vec::new();
+        let mut files_to_keep = Vec::new();
+
+        // Apply retention policies
+        for (file_path, days_old, metadata) in &json_files {
+            let should_delete = *days_old > cutoff_days || files_to_keep.len() >= keep_count;
+
+            if should_delete {
+                files_to_delete.push((file_path.clone(), *days_old, metadata.len()));
+            } else {
+                files_to_keep.push((file_path.clone(), *days_old, metadata.len()));
+            }
+        }
+
+        // Display cleanup plan
+        println!("📋 Cleanup Plan:");
+        println!(
+            "Files to keep: {} (within {} days, max {})",
+            files_to_keep.len(),
+            keep_days,
+            keep_count
+        );
+        println!(
+            "Files to delete: {} (older than {} days or beyond limit)",
+            files_to_delete.len(),
+            keep_days
+        );
+
+        if verbose && !files_to_keep.is_empty() {
+            println!("\n📁 Files to Keep:");
+            for (file_path, days_old, size) in &files_to_keep {
+                println!(
+                    "  • {} ({} days old, {} bytes)",
+                    file_path.file_name().unwrap().to_string_lossy(),
+                    days_old,
+                    size
+                );
+            }
+        }
+
+        if !files_to_delete.is_empty() {
+            if verbose {
+                println!("\n🗑️  Files to Delete:");
+                for (file_path, days_old, size) in &files_to_delete {
+                    println!(
+                        "  • {} ({} days old, {} bytes)",
+                        file_path.file_name().unwrap().to_string_lossy(),
+                        days_old,
+                        size
+                    );
+                }
+            }
+
+            let total_size: u64 = files_to_delete.iter().map(|(_, _, size)| size).sum();
+            println!(
+                "\n💾 Space to be freed: {} bytes ({:.2} MB)",
+                total_size,
+                total_size as f64 / 1024.0 / 1024.0
+            );
+
+            // Perform cleanup
+            if preview {
+                println!("\n🔍 DRY-RUN COMPLETE: No files were actually deleted");
+                println!("Run without --preview to perform the actual cleanup.");
+            } else {
+                println!("\n🧹 Performing cleanup...");
+                let mut deleted_count = 0;
+                let mut failed_deletions = Vec::new();
+
+                for (file_path, days_old, _) in &files_to_delete {
+                    match std::fs::remove_file(file_path) {
+                        Ok(()) => {
+                            deleted_count += 1;
+                            if verbose {
+                                println!(
+                                    "✅ Deleted: {} ({} days old)",
+                                    file_path.file_name().unwrap().to_string_lossy(),
+                                    days_old
+                                );
+                            }
+                        }
+                        Err(e) => {
+                            failed_deletions.push((file_path.clone(), e.to_string()));
+                            println!(
+                                "❌ Failed to delete {}: {}",
+                                file_path.file_name().unwrap().to_string_lossy(),
+                                e
+                            );
+                        }
+                    }
+                }
+
+                println!("\n📊 Cleanup Results:");
+                println!(
+                    "Successfully deleted: {}/{}",
+                    deleted_count,
+                    files_to_delete.len()
+                );
+
+                if !failed_deletions.is_empty() {
+                    println!("Failed deletions: {}", failed_deletions.len());
+                    if verbose {
+                        println!("\n❌ Failed Deletions:");
+                        for (file_path, error) in failed_deletions {
+                            println!(
+                                "  • {}: {}",
+                                file_path.file_name().unwrap().to_string_lossy(),
+                                error
+                            );
+                        }
+                    }
+                }
+
+                if deleted_count == files_to_delete.len() {
+                    println!("\n✅ Cleanup completed successfully!");
+                } else {
+                    println!("\n⚠️  Cleanup completed with some failures.");
+                }
+            }
+        } else {
+            println!("\n✅ No files need to be cleaned up!");
+        }
+
+        Ok(())
+    }
 }
 
 #[cfg(test)]
@@ -807,6 +1000,34 @@ mod tests {
                 assert!(verbose);
             }
             _ => panic!("Expected rollback command"),
+        }
+    }
+
+    #[test]
+    fn test_cleanup_command_creation() {
+        let cli = Cli::parse_from(&[
+            "plex-media-organizer",
+            "cleanup",
+            "--keep-days",
+            "60",
+            "--keep-count",
+            "50",
+            "--preview",
+            "--verbose",
+        ]);
+        match cli.command {
+            Commands::Cleanup {
+                keep_days,
+                keep_count,
+                preview,
+                verbose,
+            } => {
+                assert_eq!(keep_days, 60);
+                assert_eq!(keep_count, 50);
+                assert!(preview);
+                assert!(verbose);
+            }
+            _ => panic!("Expected cleanup command"),
         }
     }
 }
