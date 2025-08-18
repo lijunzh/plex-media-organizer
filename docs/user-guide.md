@@ -161,6 +161,27 @@ plex-media-organizer organize /path/to/movies --backup
 plex-media-organizer organize /path/to/movies --duplicate-action skip|rename|overwrite
 ```
 
+### rollback - Undo Organization Operations
+
+The `rollback` command allows you to undo a previous organization operation.
+
+```bash
+# Preview what would be rolled back (safe)
+plex-media-organizer rollback operation_result_123.json --preview
+
+# Actually rollback an organization
+plex-media-organizer rollback operation_result_123.json
+
+# Rollback with detailed output
+plex-media-organizer rollback operation_result_123.json --verbose
+```
+
+**How Rollback Works:**
+- Every `organize` operation saves a JSON file with operation details
+- The JSON file contains original and new file paths for all organized files
+- `rollback` moves files back to their original locations
+- Empty directories created during organization are automatically removed
+
 **Example Output:**
 ```
 🎬 Organizing: /Users/you/Movies → /Users/you/Organized

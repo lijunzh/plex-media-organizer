@@ -84,6 +84,21 @@ enum Commands {
         #[arg(short, long)]
         verbose: bool,
     },
+
+    /// Rollback a previous organization operation
+    Rollback {
+        /// Path to the organization result JSON file
+        #[arg(value_name = "OPERATION_FILE")]
+        operation_file: PathBuf,
+
+        /// Preview rollback changes without making them (dry-run)
+        #[arg(short, long)]
+        preview: bool,
+
+        /// Show detailed output
+        #[arg(short, long)]
+        verbose: bool,
+    },
 }
 
 impl Cli {
@@ -107,6 +122,11 @@ impl Cli {
                 backup,
                 verbose,
             } => Self::handle_organize(directory, preview, backup, verbose).await,
+            Commands::Rollback {
+                operation_file,
+                preview,
+                verbose,
+            } => Self::handle_rollback(operation_file, preview, verbose).await,
         }
     }
 
@@ -501,6 +521,210 @@ impl Cli {
 
         Ok(())
     }
+
+    /// Handle the rollback command
+    async fn handle_rollback(operation_file: PathBuf, preview: bool, verbose: bool) -> Result<()> {
+        println!("🔄 Plex Media Organizer - Operation Rollback");
+        println!("Operation file: {}", operation_file.display());
+        if preview {
+            println!("Mode: Preview (dry-run)");
+        } else {
+            println!("Mode: Live rollback");
+        }
+        println!();
+
+        // Check if operation file exists
+        if !operation_file.exists() {
+            anyhow::bail!(
+                "Operation file does not exist: {}",
+                operation_file.display()
+            );
+        }
+
+        // Load the organization result
+        let operation_json = std::fs::read_to_string(&operation_file).with_context(|| {
+            format!(
+                "Failed to read operation file: {}",
+                operation_file.display()
+            )
+        })?;
+
+        let organization_result: crate::organizer::OrganizationResult =
+            serde_json::from_str(&operation_json)
+                .with_context(|| "Failed to parse operation file - invalid JSON format")?;
+
+        println!("📋 Operation Details:");
+        println!("Operation ID: {}", organization_result.operation_id);
+        println!("Timestamp: {}", organization_result.timestamp);
+        println!(
+            "Files organized: {}",
+            organization_result.statistics.organized_files
+        );
+        println!();
+
+        if organization_result.organized_files.is_empty() {
+            println!("ℹ️  No files to rollback - operation had no successful organizations.");
+            return Ok(());
+        }
+
+        // Check if files can be rolled back
+        let mut rollback_plan = Vec::new();
+        let mut cannot_rollback = Vec::new();
+
+        for organized_file in &organization_result.organized_files {
+            if organized_file.dry_run {
+                cannot_rollback.push((organized_file, "Original operation was dry-run"));
+                continue;
+            }
+
+            if !organized_file.new_path.exists() {
+                cannot_rollback.push((organized_file, "Organized file no longer exists"));
+                continue;
+            }
+
+            if organized_file.original_path.exists() {
+                cannot_rollback.push((organized_file, "Original path already exists"));
+                continue;
+            }
+
+            rollback_plan.push(organized_file);
+        }
+
+        // Display rollback plan
+        if !rollback_plan.is_empty() {
+            println!("📋 Rollback Plan ({} files):", rollback_plan.len());
+            for (i, file) in rollback_plan.iter().enumerate() {
+                println!(
+                    "{}. {} ← {}",
+                    i + 1,
+                    file.original_path.display(),
+                    file.new_path.display()
+                );
+                if verbose {
+                    println!(
+                        "   Title: {}",
+                        file.parsed_metadata.title.as_deref().unwrap_or("Unknown")
+                    );
+                    if let Some(year) = file.parsed_metadata.year {
+                        println!("   Year: {}", year);
+                    }
+                }
+            }
+            println!();
+        }
+
+        if !cannot_rollback.is_empty() {
+            println!("⚠️  Cannot Rollback ({} files):", cannot_rollback.len());
+            for (file, reason) in &cannot_rollback {
+                println!("- {}: {}", file.media_file.file_name, reason);
+            }
+            println!();
+        }
+
+        if rollback_plan.is_empty() {
+            println!("❌ No files can be rolled back.");
+            return Ok(());
+        }
+
+        // Perform rollback
+        if preview {
+            println!("🔍 DRY-RUN COMPLETE: No actual changes were made");
+            println!("Run without --preview to perform the actual rollback.");
+        } else {
+            println!("🔄 Performing rollback...");
+            let mut success_count = 0;
+            let mut failed_rollbacks = Vec::new();
+
+            for organized_file in &rollback_plan {
+                match Self::perform_single_rollback(organized_file).await {
+                    Ok(()) => {
+                        success_count += 1;
+                        println!("✅ {}", organized_file.media_file.file_name);
+                    }
+                    Err(e) => {
+                        failed_rollbacks.push((organized_file, e.to_string()));
+                        println!("❌ {}: {}", organized_file.media_file.file_name, e);
+                    }
+                }
+            }
+
+            println!();
+            println!("📊 Rollback Results:");
+            println!(
+                "Successfully rolled back: {}/{}",
+                success_count,
+                rollback_plan.len()
+            );
+
+            if !failed_rollbacks.is_empty() {
+                println!("Failed rollbacks: {}", failed_rollbacks.len());
+                if verbose {
+                    println!("\n❌ Failed Rollbacks:");
+                    for (file, error) in failed_rollbacks {
+                        println!("- {}: {}", file.media_file.file_name, error);
+                    }
+                }
+            }
+
+            if success_count == rollback_plan.len() {
+                println!("\n✅ Rollback completed successfully!");
+
+                // Remove empty directories created during organization
+                for organized_file in &rollback_plan {
+                    if let Some(parent) = organized_file.new_path.parent()
+                        && parent.exists()
+                        && parent
+                            .read_dir()
+                            .is_ok_and(|mut entries| entries.next().is_none())
+                    {
+                        if let Err(e) = std::fs::remove_dir(parent) {
+                            if verbose {
+                                println!(
+                                    "⚠️  Could not remove empty directory {}: {}",
+                                    parent.display(),
+                                    e
+                                );
+                            }
+                        } else if verbose {
+                            println!("🗑️  Removed empty directory: {}", parent.display());
+                        }
+                    }
+                }
+            } else {
+                println!(
+                    "\n⚠️  Rollback completed with some failures. Check the error messages above."
+                );
+            }
+        }
+
+        Ok(())
+    }
+
+    /// Perform rollback for a single file
+    async fn perform_single_rollback(
+        organized_file: &crate::organizer::OrganizedFile,
+    ) -> Result<()> {
+        // Create parent directory for original path if needed
+        if let Some(parent) = organized_file.original_path.parent()
+            && !parent.exists()
+        {
+            std::fs::create_dir_all(parent)
+                .with_context(|| format!("Failed to create directory: {}", parent.display()))?;
+        }
+
+        // Move file back to original location
+        std::fs::rename(&organized_file.new_path, &organized_file.original_path).with_context(
+            || {
+                format!(
+                    "Failed to move file from {} to {}",
+                    organized_file.new_path.display(),
+                    organized_file.original_path.display()
+                )
+            },
+        )?;
+
+        Ok(())
+    }
 }
 
 #[cfg(test)]
@@ -560,6 +784,29 @@ mod tests {
                 assert!(!verbose);
             }
             _ => panic!("Expected test organize command"),
+        }
+    }
+
+    #[test]
+    fn test_rollback_command_creation() {
+        let cli = Cli::parse_from(&[
+            "plex-media-organizer",
+            "rollback",
+            "operation_result_123.json",
+            "--preview",
+            "--verbose",
+        ]);
+        match cli.command {
+            Commands::Rollback {
+                operation_file,
+                preview,
+                verbose,
+            } => {
+                assert_eq!(operation_file, PathBuf::from("operation_result_123.json"));
+                assert!(preview);
+                assert!(verbose);
+            }
+            _ => panic!("Expected rollback command"),
         }
     }
 }
