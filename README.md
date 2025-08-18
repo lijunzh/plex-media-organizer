@@ -17,6 +17,32 @@ A powerful, intelligent media file organizer built in Rust that automatically pa
 - Rust 1.70+ ([install via rustup](https://rustup.rs/))
 - TMDB API key ([get free key](https://www.themoviedb.org/settings/api))
 
+### Configuration
+The application uses a TOML configuration file. You can create one manually or use the setup command:
+
+**Environment Variables (Optional):**
+```bash
+# Copy env.example to .env and fill in your API keys
+TMDB_API_KEY=your_tmdb_api_key_here
+TVDB_API_KEY=your_tvdb_api_key_here  # For future TV support
+MUSICBRAINZ_USER_AGENT=your_app_name/1.0  # For future music support
+```
+
+**Configuration File Example:**
+```toml
+[apis]
+tmdb_api_key = "your_tmdb_api_key_here"
+
+[organization.quality]
+preferred_quality = "1080p"
+
+[organization.original_titles]
+prefer_original_titles = true
+include_english_subtitle = true
+fallback_to_english_on_error = true
+preserve_original_in_metadata = true
+```
+
 ### Installation & Setup
 ```bash
 # Clone and build
