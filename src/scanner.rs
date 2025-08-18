@@ -287,11 +287,19 @@ impl Scanner {
     fn filter_media_files(&self, files: &[PathBuf]) -> Result<Vec<MediaFile>> {
         let mut media_files = Vec::new();
         let mut processed = 0;
+        let mut skipped_extras = 0;
 
         for file_path in files {
             if let Some(extension) = file_path.extension()
                 && self.is_media_extension(extension)
             {
+                // Skip extras content (menus, interviews, trailers, etc.)
+                if self.is_extras_content(file_path) {
+                    skipped_extras += 1;
+                    processed += 1;
+                    continue;
+                }
+
                 // For network drives, minimize file system calls
                 let media_file = if self.network_mode {
                     self.create_media_file_network_optimized(file_path)?
@@ -306,14 +314,145 @@ impl Scanner {
             // Show progress for network drives
             if self.network_mode && processed % 100 == 0 {
                 println!(
-                    "   Filtered {} files, found {} media files...",
+                    "   Filtered {} files, found {} media files, skipped {} extras...",
                     processed,
-                    media_files.len()
+                    media_files.len(),
+                    skipped_extras
                 );
             }
         }
 
+        if skipped_extras > 0 {
+            println!(
+                "   Skipped {} extras files (menus, interviews, trailers, etc.)",
+                skipped_extras
+            );
+        }
+
         Ok(media_files)
+    }
+
+    /// Check if a file is extras content that should be skipped
+    fn is_extras_content(&self, file_path: &Path) -> bool {
+        let file_name = file_path
+            .file_name()
+            .and_then(|n| n.to_str())
+            .unwrap_or("")
+            .to_lowercase();
+
+        let path_str = file_path.to_string_lossy().to_lowercase();
+
+        // Check for extras directory patterns
+        let extras_dirs = [
+            "extras",
+            "bonus",
+            "special",
+            "behind",
+            "making",
+            "interviews",
+            "trailers",
+        ];
+        for dir in &extras_dirs {
+            if path_str.contains(dir) {
+                return true;
+            }
+        }
+
+        // Check for specific extras file patterns
+        let extras_patterns = [
+            // Blu-ray menus
+            "bdmenu",
+            "menu",
+            "bdmv",
+            // Interviews and behind-the-scenes
+            "interview",
+            "interviews",
+            "making",
+            "behind",
+            "featurette",
+            // Chinese/Japanese interview patterns
+            "访谈",
+            "采访",
+            "对谈",
+            "座谈",
+            "访问",
+            // Trailers and promotional content
+            "trailer",
+            "trailers",
+            "pv",
+            "promo",
+            "preview",
+            "teaser",
+            // Sample and short content
+            "sample",
+            "short",
+            "min",
+            "ver",
+            "version",
+            // Making-of and documentaries
+            "making.of",
+            "making-of",
+            "documentary",
+            "docu",
+            // Special features
+            "special",
+            "bonus",
+            "extra",
+            "extras",
+            // Audio commentaries
+            "commentary",
+            "commentaries",
+            // Deleted scenes
+            "deleted",
+            "scenes",
+            "outtakes",
+        ];
+
+        for pattern in &extras_patterns {
+            if file_name.contains(pattern) {
+                return true;
+            }
+        }
+
+        // Check for specific file extensions that are typically extras
+        let extras_extensions = ["ifo", "bup", "vob"]; // DVD/Blu-ray specific
+        if let Some(ext) = file_path.extension()
+            && let Some(ext_str) = ext.to_str()
+            && extras_extensions.contains(&ext_str.to_lowercase().as_str())
+        {
+            return true;
+        }
+
+        // Check for very short files (likely not full movies)
+        if let Ok(metadata) = std::fs::metadata(file_path) {
+            let size_mb = metadata.len() / (1024 * 1024);
+            if size_mb < 50 {
+                // Less than 50MB, likely not a full movie
+                // But only skip if it matches other extras patterns
+                if file_name.contains("sample")
+                    || file_name.contains("trailer")
+                    || file_name.contains("pv")
+                {
+                    return true;
+                }
+            }
+        }
+
+        // Check for specific patterns that indicate extras content
+        let specific_extras_patterns = [
+            "one.more.time",
+            "one.more.chance", // Music video patterns
+            "she.and.her.cat",
+            "5.min", // Short content patterns
+        ];
+
+        for pattern in &specific_extras_patterns {
+            if file_name.contains(pattern) {
+                return true;
+            }
+        }
+
+        false
     }
 
     /// Create media file with minimal file system calls (network optimized)
@@ -654,5 +793,32 @@ mod tests {
         assert!(scanner.is_media_extension(std::ffi::OsStr::new("avi")));
         assert!(!scanner.is_media_extension(std::ffi::OsStr::new("txt")));
         assert!(!scanner.is_media_extension(std::ffi::OsStr::new("pdf")));
+    }
+
+    #[test]
+    fn test_extras_content_detection() {
+        let scanner = Scanner::new(MovieParser::new(None));
+
+        // Should be detected as extras
+        assert!(scanner.is_extras_content(Path::new("/path/to/Extras/BDMenu(JPGLBL).mkv")));
+        assert!(scanner.is_extras_content(Path::new("/path/to/BDMenu(JP).mkv")));
+        assert!(scanner.is_extras_content(Path::new("/path/to/Extras/DVDSP/樱花抄 动画分镜.mkv")));
+        assert!(scanner.is_extras_content(Path::new("/path/to/水桥研二访谈.mkv")));
+        assert!(scanner.is_extras_content(Path::new("/path/to/One.more.time,One.more.chance.mkv")));
+        assert!(scanner.is_extras_content(Path::new("/path/to/She.And.Her.Cat.5.min.ver.mkv")));
+        assert!(scanner.is_extras_content(Path::new("/path/to/PV.mkv")));
+        assert!(scanner.is_extras_content(Path::new("/path/to/Makoto.Shinkai.interview.mkv")));
+        assert!(scanner.is_extras_content(Path::new("/path/to/trailer.mkv")));
+        assert!(scanner.is_extras_content(Path::new("/path/to/sample.mkv")));
+        assert!(scanner.is_extras_content(Path::new("/path/to/making.of.mkv")));
+        assert!(scanner.is_extras_content(Path::new("/path/to/commentary.mkv")));
+
+        // Should NOT be detected as extras (actual movies)
+        assert!(!scanner.is_extras_content(Path::new(
+            "/path/to/5.Centimeters.Per.Second.2007.BluRay.1080p.x265.10bit.DDP.5.1-ted423@FRDS.mkv"
+        )));
+        assert!(!scanner.is_extras_content(Path::new("/path/to/Iron.Man.2008.BluRay.1080p.mkv")));
+        assert!(!scanner.is_extras_content(Path::new("/path/to/The.Matrix.1999.1080p.mkv")));
+        assert!(!scanner.is_extras_content(Path::new("/path/to/Avengers.Endgame.2019.4K.mkv")));
     }
 }

@@ -179,7 +179,7 @@ impl Organizer {
     }
 
     /// Generate Plex-compliant file path
-    fn generate_plex_path(
+    pub fn generate_plex_path(
         &self,
         media_file: &MediaFile,
         metadata: &crate::types::MediaMetadata,
@@ -200,14 +200,12 @@ impl Organizer {
             format!("{} (Unknown Year)", clean_title)
         };
 
-        // Get the parent directory of the original file
-        let parent_dir = media_file
-            .file_path
-            .parent()
-            .ok_or_else(|| anyhow::anyhow!("No parent directory found"))?;
+        // Get the base directory (the directory being organized)
+        // This should be the root of the movie collection, not the release folder
+        let base_dir = self.get_base_directory(&media_file.file_path)?;
 
-        // Create new directory path
-        let new_dir = parent_dir.join(dir_name);
+        // Create new directory path under the base directory
+        let new_dir = base_dir.join(dir_name);
 
         // Generate new filename
         let new_filename = self.generate_plex_filename(media_file, metadata)?;
@@ -216,6 +214,66 @@ impl Organizer {
         let new_path = new_dir.join(new_filename);
 
         Ok(new_path)
+    }
+
+    /// Get the base directory for organization
+    /// This should be the root of the movie collection, not individual release folders
+    fn get_base_directory(&self, file_path: &Path) -> Result<PathBuf> {
+        // Start from the file's parent directory
+        let mut current_dir = file_path
+            .parent()
+            .ok_or_else(|| anyhow::anyhow!("No parent directory found"))?;
+
+        // Walk up the directory tree to find the appropriate base directory
+        // We want to organize at the movie collection level, not preserve release folder structure
+        while let Some(parent) = current_dir.parent() {
+            // Check if this looks like a movie collection directory
+            // Common patterns: "Movies", "movie", "Japanese", "English", etc.
+            let dir_name = current_dir
+                .file_name()
+                .and_then(|name| name.to_str())
+                .unwrap_or("")
+                .to_lowercase();
+
+            // If this looks like a collection directory, use it as the base
+            if self.is_collection_directory(&dir_name) {
+                return Ok(current_dir.to_path_buf());
+            }
+
+            current_dir = parent;
+        }
+
+        // If we can't find a collection directory, use the immediate parent
+        // This is a fallback for edge cases
+        Ok(file_path
+            .parent()
+            .ok_or_else(|| anyhow::anyhow!("No parent directory found"))?
+            .to_path_buf())
+    }
+
+    /// Check if a directory name looks like a movie collection directory
+    fn is_collection_directory(&self, dir_name: &str) -> bool {
+        let collection_patterns = [
+            "movies",
+            "movie",
+            "films",
+            "film",
+            "cinema",
+            "japanese",
+            "english",
+            "chinese",
+            "korean",
+            "anime",
+            "action",
+            "comedy",
+            "drama",
+            "horror",
+            "sci-fi",
+            "documentary",
+            "documentaries",
+        ];
+
+        collection_patterns.contains(&dir_name)
     }
 
     /// Clean title for use in directory name
@@ -438,5 +496,48 @@ mod tests {
         let organizer = Organizer::new(true, None);
         assert!(organizer.dry_run);
         assert!(organizer.backup_dir.is_none());
+    }
+
+    #[test]
+    fn test_is_collection_directory() {
+        let organizer = Organizer::new(true, None);
+
+        // Should be collection directories
+        assert!(organizer.is_collection_directory("movies"));
+        assert!(organizer.is_collection_directory("movie"));
+        assert!(organizer.is_collection_directory("japanese"));
+        assert!(organizer.is_collection_directory("anime"));
+        assert!(organizer.is_collection_directory("action"));
+
+        // Should not be collection directories
+        assert!(
+            !organizer
+                .is_collection_directory("5.Centimeters.Per.Second.2007.BluRay.1080p-ted423@FRDS")
+        );
+        assert!(!organizer.is_collection_directory("Extras"));
+        assert!(!organizer.is_collection_directory("Sample"));
+        assert!(!organizer.is_collection_directory("random_folder"));
+    }
+
+    #[test]
+    fn test_get_base_directory() {
+        let organizer = Organizer::new(true, None);
+
+        // Test with a typical movie collection structure
+        let file_path = PathBuf::from(
+            "/Volumes/media/movie/Japanese/5.Centimeters.Per.Second.2007.BluRay.1080p-ted423@FRDS/movie.mkv",
+        );
+        let base_dir = organizer.get_base_directory(&file_path).unwrap();
+        assert_eq!(base_dir, PathBuf::from("/Volumes/media/movie/Japanese"));
+
+        // Test with a simpler structure
+        let file_path = PathBuf::from("/Movies/Action/Iron.Man.2008.BluRay.1080p/movie.mkv");
+        let base_dir = organizer.get_base_directory(&file_path).unwrap();
+        assert_eq!(base_dir, PathBuf::from("/Movies/Action"));
+
+        // Test with no collection directory found
+        let file_path = PathBuf::from("/random/path/to/movie.mkv");
+        let base_dir = organizer.get_base_directory(&file_path).unwrap();
+        assert_eq!(base_dir, PathBuf::from("/random/path/to"));
     }
 }
