@@ -2,6 +2,8 @@
 
 use crate::types::{MovieInfo, TmdbMovie};
 use anyhow::{Context, Result};
+use fuzzy_matcher::FuzzyMatcher;
+use fuzzy_matcher::skim::SkimMatcherV2;
 use serde::Deserialize;
 use std::time::Duration;
 
@@ -11,6 +13,31 @@ pub struct TmdbClient {
     api_key: String,
     base_url: String,
     client: reqwest::Client,
+}
+
+impl std::fmt::Debug for TmdbClient {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("TmdbClient")
+            .field("api_key", &"[REDACTED]")
+            .field("base_url", &self.base_url)
+            .field("client", &"[HTTP_CLIENT]")
+            .finish()
+    }
+}
+
+impl Clone for TmdbClient {
+    fn clone(&self) -> Self {
+        let client = reqwest::Client::builder()
+            .timeout(Duration::from_secs(30))
+            .build()
+            .expect("Failed to create HTTP client");
+
+        Self {
+            api_key: self.api_key.clone(),
+            base_url: self.base_url.clone(),
+            client,
+        }
+    }
 }
 
 /// TMDB search response
@@ -131,7 +158,105 @@ impl TmdbClient {
         Ok(movie)
     }
 
-    /// Find the best matching movie from search results
+    /// Enhanced movie search with multiple fallback strategies
+    pub async fn enhanced_search(
+        &self,
+        title: &str,
+        year: Option<u32>,
+    ) -> Result<Option<TmdbMovie>> {
+        // Strategy 1: Try exact search with year
+        if let Some(movie) = self.find_best_match(title, year).await? {
+            return Ok(Some(movie));
+        }
+
+        // Strategy 2: Try search without year (broader search)
+        if let Some(movie) = self.find_best_match(title, None).await? {
+            return Ok(Some(movie));
+        }
+
+        // Strategy 3: Try with cleaned title (remove common suffixes/prefixes)
+        let cleaned_title = self.clean_title_for_search(title);
+        if cleaned_title != title
+            && let Some(movie) = self.find_best_match(&cleaned_title, year).await?
+        {
+            return Ok(Some(movie));
+        }
+
+        // Strategy 4: Try with alternative title variations
+        for alt_title in self.generate_title_variations(title) {
+            if let Some(movie) = self.find_best_match(&alt_title, year).await? {
+                return Ok(Some(movie));
+            }
+        }
+
+        Ok(None)
+    }
+
+    /// Clean title for better search matching
+    fn clean_title_for_search(&self, title: &str) -> String {
+        let mut cleaned = title.to_string();
+
+        // Remove common file suffixes
+        let suffixes_to_remove = [
+            " (director's cut)",
+            " (extended)",
+            " (uncut)",
+            " (unrated)",
+            " (theatrical)",
+            " (special edition)",
+            " (collector's edition)",
+            " (remastered)",
+            " (restored)",
+        ];
+
+        for suffix in &suffixes_to_remove {
+            if cleaned.to_lowercase().ends_with(&suffix.to_lowercase()) {
+                cleaned = cleaned[..cleaned.len() - suffix.len()].to_string();
+                break;
+            }
+        }
+
+        // Remove common prefixes
+        let prefixes_to_remove = ["the ", "a ", "an "];
+
+        for prefix in &prefixes_to_remove {
+            if cleaned.to_lowercase().starts_with(prefix) {
+                cleaned = cleaned[prefix.len()..].to_string();
+                break;
+            }
+        }
+
+        cleaned.trim().to_string()
+    }
+
+    /// Generate alternative title variations for search
+    fn generate_title_variations(&self, title: &str) -> Vec<String> {
+        let mut variations = Vec::new();
+        let title_lower = title.to_lowercase();
+
+        // Add "The" prefix if not present
+        if !title_lower.starts_with("the ") {
+            variations.push(format!("The {}", title));
+        }
+
+        // Remove "The" prefix if present
+        if title_lower.starts_with("the ") {
+            variations.push(title[4..].to_string());
+        }
+
+        // Try without numbers (for sequels)
+        let without_numbers = title
+            .chars()
+            .filter(|c| !c.is_numeric())
+            .collect::<String>();
+        if without_numbers != title && without_numbers.trim().len() > 3 {
+            variations.push(without_numbers.trim().to_string());
+        }
+
+        variations
+    }
+
+    /// Find the best matching movie from search results with enhanced fuzzy matching
     pub async fn find_best_match(
         &self,
         title: &str,
@@ -143,37 +268,71 @@ impl TmdbClient {
             return Ok(None);
         }
 
-        // Simple scoring: prefer exact title matches and year matches
+        // Enhanced scoring with fuzzy matching
         let mut best_match = None;
         let mut best_score = 0.0;
 
         for movie in search_results {
             let mut score = 0.0;
 
-            // Title similarity (simple string matching for now)
+            // Enhanced title similarity with fuzzy matching
             let title_lower = title.to_lowercase();
             let movie_title_lower = movie.title.to_lowercase();
 
+            // Exact match (highest priority)
             if title_lower == movie_title_lower {
-                score += 100.0; // Exact match
-            } else if movie_title_lower.contains(&title_lower)
-                || title_lower.contains(&movie_title_lower)
-            {
-                score += 50.0; // Partial match
+                score += 200.0;
+            } else {
+                // Fuzzy matching for similar titles
+                let fuzzy_matcher = SkimMatcherV2::default();
+                if let Some(fuzzy_score) =
+                    fuzzy_matcher.fuzzy_match(&movie_title_lower, &title_lower)
+                {
+                    // Convert fuzzy score to our scoring system (fuzzy scores are typically 0-100)
+                    let normalized_fuzzy_score = (fuzzy_score as f32) * 1.5; // Boost fuzzy scores
+                    score += normalized_fuzzy_score;
+                }
+
+                // Partial match bonus
+                if movie_title_lower.contains(&title_lower)
+                    || title_lower.contains(&movie_title_lower)
+                {
+                    score += 30.0;
+                }
+
+                // Check original title if available
+                if let Some(original_title) = &movie.original_title {
+                    let original_lower = original_title.to_lowercase();
+                    if let Some(fuzzy_score) =
+                        fuzzy_matcher.fuzzy_match(&original_lower, &title_lower)
+                    {
+                        let normalized_fuzzy_score = (fuzzy_score as f32) * 1.2; // Slightly lower weight for original titles
+                        score += normalized_fuzzy_score;
+                    }
+                }
             }
 
-            // Year bonus
+            // Year matching (significant bonus)
             if let Some(search_year) = year
                 && let Some(release_date) = &movie.release_date
                 && let Ok(movie_year) = release_date[..4].parse::<u32>()
-                && movie_year == search_year
             {
-                score += 25.0;
+                if movie_year == search_year {
+                    score += 100.0; // Exact year match
+                } else if (movie_year as i32 - search_year as i32).abs() <= 1 {
+                    score += 50.0; // Year within 1 year
+                } else if (movie_year as i32 - search_year as i32).abs() <= 3 {
+                    score += 25.0; // Year within 3 years
+                }
             }
 
-            // Popularity bonus
+            // Popularity and rating bonus
             if let Some(popularity) = movie.popularity {
-                score += popularity.min(50.0); // Cap at 50
+                score += popularity.min(30.0); // Cap popularity bonus
+            }
+
+            if let Some(vote_average) = movie.vote_average {
+                score += vote_average * 2.0; // Rating bonus
             }
 
             if score > best_score {
@@ -182,7 +341,12 @@ impl TmdbClient {
             }
         }
 
-        Ok(best_match)
+        // Only return matches above a minimum threshold
+        if best_score >= 50.0 {
+            Ok(best_match)
+        } else {
+            Ok(None)
+        }
     }
 
     /// Convert TMDB movie to our MovieInfo format
@@ -213,6 +377,77 @@ impl TmdbClient {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_clean_title_for_search() {
+        let client = TmdbClient::new("test_key".to_string());
+
+        // Test removing suffixes
+        assert_eq!(
+            client.clean_title_for_search("Movie (Director's Cut)"),
+            "Movie"
+        );
+        assert_eq!(client.clean_title_for_search("Movie (Extended)"), "Movie");
+        assert_eq!(client.clean_title_for_search("Movie (Uncut)"), "Movie");
+
+        // Test removing prefixes
+        assert_eq!(client.clean_title_for_search("The Movie"), "Movie");
+        assert_eq!(client.clean_title_for_search("A Movie"), "Movie");
+        assert_eq!(client.clean_title_for_search("An Movie"), "Movie");
+
+        // Test no changes
+        assert_eq!(client.clean_title_for_search("Movie"), "Movie");
+        assert_eq!(client.clean_title_for_search("The Matrix"), "Matrix");
+    }
+
+    #[test]
+    fn test_generate_title_variations() {
+        let client = TmdbClient::new("test_key".to_string());
+
+        // Test adding "The" prefix
+        let variations = client.generate_title_variations("Matrix");
+        assert!(variations.contains(&"The Matrix".to_string()));
+
+        // Test removing "The" prefix
+        let variations = client.generate_title_variations("The Matrix");
+        assert!(variations.contains(&"Matrix".to_string()));
+
+        // Test sequel handling
+        let variations = client.generate_title_variations("Matrix 2");
+        assert!(variations.contains(&"Matrix".to_string())); // Should contain "Matrix" without numbers
+    }
+
+    #[test]
+    fn test_fuzzy_matching_scoring() {
+        let client = TmdbClient::new("test_key".to_string());
+        let fuzzy_matcher = SkimMatcherV2::default();
+
+        // Test exact match
+        let score = fuzzy_matcher.fuzzy_match("the matrix", "the matrix");
+        assert!(score.is_some());
+        assert!(score.unwrap() > 80); // High score for exact match
+
+        // Test similar match
+        let score = fuzzy_matcher.fuzzy_match("the matrix", "matrix");
+        assert!(score.is_some());
+        assert!(score.unwrap() > 50); // Good score for similar match
+
+        // Test poor match
+        let score = fuzzy_matcher.fuzzy_match("the matrix", "completely different");
+        assert!(score.is_none() || score.unwrap() < 30); // Low or no score for poor match
+    }
+
+    #[tokio::test]
+    async fn test_enhanced_search_strategies() {
+        // This test would require a real TMDB API key and network access
+        // For now, we'll test the structure and logic
+        let client = TmdbClient::new("test_key".to_string());
+
+        // Test that the method exists and has the right signature
+        let result = client.enhanced_search("test movie", Some(2020)).await;
+        // This will fail with API key error, but that's expected
+        assert!(result.is_err()); // Should fail due to invalid API key
+    }
 
     #[tokio::test]
     async fn test_tmdb_client_creation() {

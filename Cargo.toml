@@ -43,6 +43,9 @@ dirs = "5.0"
 lazy_static = "1.4"
 uuid = { version = "1.0", features = ["v4"] }
 
+# Fuzzy search for better TMDB matching
+fuzzy-matcher = "0.3"
+
 [dev-dependencies]
 tempfile = "3.6"
 assert_fs = "1.0"

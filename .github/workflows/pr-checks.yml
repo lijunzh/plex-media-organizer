@@ -30,8 +30,8 @@ jobs:
           rustup component add rustfmt clippy
       
       - name: PR Analysis
-         uses: actions/github-script@v7
-         with:
+        uses: actions/github-script@v7
+        with:
            script: |
              try {
                const { data: pr } = await github.rest.pulls.get({

@@ -336,4 +336,14 @@ mod tests {
         assert_eq!(result.statistics.parsed_files, 0);
         assert_eq!(result.statistics.failed_files, 0);
     }
+
+    #[test]
+    fn test_scanner_debug() {
+        let parser = MovieParser::new(None);
+        let scanner = Scanner::new(parser);
+        let debug_output = format!("{:?}", scanner);
+
+        assert!(debug_output.contains("Scanner"));
+        assert!(debug_output.contains("movie_parser"));
+    }
 }

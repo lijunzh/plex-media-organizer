@@ -92,9 +92,9 @@ impl MovieParser {
 
         // If we have a TMDB client, try to get additional data
         if let Some(ref tmdb_client) = self.tmdb_client {
-            // Try to find movie in TMDB, even if we don't have a year
+            // Use enhanced search with multiple fallback strategies
             let tmdb_movie = tmdb_client
-                .find_best_match(&movie_info.title, movie_info.year)
+                .enhanced_search(&movie_info.title, movie_info.year)
                 .await?;
 
             if let Some(tmdb_movie) = tmdb_movie {
@@ -115,30 +115,6 @@ impl MovieParser {
 
                 parsing_strategy = ParsingStrategy::ExternalApi;
                 confidence_score += 0.5; // High confidence from external API
-            } else if movie_info.year.is_none() {
-                // If we don't have a year and TMDB didn't find a match,
-                // try a broader search without year constraint
-                let broader_movie = tmdb_client.find_best_match(&movie_info.title, None).await?;
-
-                if let Some(broader_movie) = broader_movie {
-                    // Update movie info with TMDB data (this will include the year)
-                    let tmdb_info = tmdb_client.tmdb_to_movie_info(&broader_movie);
-                    movie_info = self.merge_movie_info(movie_info, tmdb_info);
-
-                    // Add external source
-                    external_sources.push(ExternalSource {
-                        name: "TMDB".to_string(),
-                        external_id: broader_movie.id.to_string(),
-                        url: Some(format!(
-                            "https://www.themoviedb.org/movie/{}",
-                            broader_movie.id
-                        )),
-                        fetched_at: Utc::now(),
-                    });
-
-                    parsing_strategy = ParsingStrategy::ExternalApi;
-                    confidence_score += 0.4; // Slightly lower confidence for broader match
-                }
             }
         }
 
