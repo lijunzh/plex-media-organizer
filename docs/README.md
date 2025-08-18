@@ -1,91 +1,67 @@
-# Plex Media Organizer - Documentation
+# Documentation Directory
 
-This directory contains the comprehensive documentation for the Plex Media Organizer project.
+This directory is intended for **user and developer documentation** (API docs, user guides, examples).
 
-## 📚 Available Documents
+## 📚 Current Status
 
-### [ARCHITECTURE.md](ARCHITECTURE.md)
-**Complete system architecture and design documentation**
-- System overview and design philosophy
-- Component breakdown and relationships
-- Data models and processing workflows
-- Configuration examples and performance considerations
-- Security & privacy considerations
-- Development process and lessons learned
+**Note**: Project management documentation has been moved to the `project/` directory for better organization.
 
-### [IMPLEMENTATION_ROADMAP.md](IMPLEMENTATION_ROADMAP.md)
-**Step-by-step development plan**
-- 20-week development timeline broken into 10 phases
-- Specific deliverables and success criteria for each phase
-- Development guidelines and testing strategies
-- Risk mitigation and project management
+## 📁 Documentation Structure
 
-### [CURRENT_STATUS.md](CURRENT_STATUS.md)
-**Live project status and recent updates**
-- Current development status and progress
-- Recent achievements and milestones
-- Areas for improvement and next steps
-- CJK title strategy and implementation status
+### **Project Management** (in `project/` directory)
+- **[📋 Project Status](../project/status.md)** - Current project status and progress
+- **[🏗️ Architecture](../project/architecture.md)** - System design and technical details
+- **[🗺️ Roadmap](../project/roadmap.md)** - Development phases and timeline
+- **[📖 Project Management](../project/README.md)** - Project management overview
 
-### [CONTRIBUTING.md](../CONTRIBUTING.md)
-**Development workflow and contribution guidelines**
-- PR workflow and best practices
-- Documentation update requirements
-- Quality assurance checklists
-- Commit message conventions
+### **User & Developer Documentation** (planned for this directory)
+- **user-guide.md** - Installation, configuration, and usage guide
+- **api-reference.md** - Library API documentation
+- **examples/** - Code examples and tutorials
+- **troubleshooting.md** - Common issues and solutions
 
-## 🎯 Purpose
+## 🚀 Future Plans
 
-These documents serve as the **planning and design foundation** for the Plex Media Organizer project. They outline:
+This directory will contain:
 
-1. **What** we're building (Architecture)
-2. **How** we'll build it (Roadmap)
-3. **When** we'll build each component (Timeline)
+### **User Documentation**
+- Installation and setup guides
+- Configuration examples
+- Usage tutorials
+- Troubleshooting guides
 
-## 🚀 Current Status
+### **Developer Documentation**
+- API reference documentation
+- Code examples
+- Integration guides
+- Contributing guidelines
 
-- **Architecture**: ✅ Complete and documented
-- **Iteration 1 Implementation**: ✅ Complete - Movie parsing and organization
-- **Enhanced TMDB Matching**: ✅ Completed - Fuzzy search and multiple strategies
-- **Performance Optimization**: ✅ Completed - Parallel processing, caching, enhanced UX
-- **Testing**: ✅ Comprehensive test suite (417 movie files, 100% success rate)
-- **Test Organization**: ✅ Moved to `tests/test_data/` for better structure
-- **Scope**: ✅ Focused on movies only - TV and music planned for future iterations
-- **GitHub Repository**: ✅ Live at https://github.com/lijunzh/plex-media-organizer
+### **Examples**
+- Basic usage examples
+- Advanced configuration examples
+- Integration examples
+- Custom parser examples
 
-## 📖 How to Use These Documents
+## 📖 How to Use
 
-### For Planning
-- Review the architecture to understand the system design
-- Use the roadmap to estimate development time and resources
-- Identify dependencies and critical path items
+### **For Users**
+- Check the main [README.md](../README.md) for quick start
+- Use the user guide for detailed instructions
+- Check troubleshooting for common issues
 
-### For Development
-- Follow the roadmap phases sequentially
-- Use the architecture as a reference during implementation
-- Update documents as design decisions evolve
+### **For Developers**
+- Review API reference for library usage
+- Check examples for integration patterns
+- Use contributing guidelines for development
 
-### For Review
-- Validate the architecture against requirements
-- Assess the roadmap for feasibility and completeness
-- Provide feedback on design decisions and timeline
+## 🔄 Maintenance
 
-## 🔄 Document Maintenance
-
-These documents are **living documents** that should be updated as:
-- Design decisions evolve during development
-- New requirements are discovered
-- Implementation challenges arise
-- User feedback influences the design
-
-## 📞 Questions or Feedback?
-
-If you have questions about the architecture or roadmap, or if you'd like to provide feedback on the design, please:
-
-1. Review the relevant document thoroughly
-2. Note specific sections or decisions you'd like to discuss
-3. Provide constructive feedback with alternatives if possible
+This documentation should be updated when:
+- New features are added
+- API changes occur
+- User feedback indicates gaps
+- Examples need updating
 
 ---
 
-**Note**: These documents are separate from the implementation code to allow for planning and review before development begins.
+**Note**: Project management documentation is now in the `project/` directory for better organization and discoverability.

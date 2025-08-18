@@ -88,10 +88,10 @@ plex-media-organizer --help
 
 For detailed information about the project:
 
-- **[📋 Current Status](docs/CURRENT_STATUS.md)** - Project progress and recent updates
-- **[🏗️ Architecture](docs/ARCHITECTURE.md)** - System design and technical details
-- **[🗺️ Roadmap](docs/IMPLEMENTATION_ROADMAP.md)** - Development phases and timeline
-- **[📖 Documentation Overview](docs/README.md)** - Complete documentation guide
+- **[📋 Project Status](project/status.md)** - Current project status and progress metrics
+- **[🏗️ Architecture](project/architecture.md)** - System design and technical details
+- **[🗺️ Roadmap](project/roadmap.md)** - Development phases and timeline
+- **[📖 Project Management](project/README.md)** - Project management documentation overview
 
 ## 🧪 Testing
 
