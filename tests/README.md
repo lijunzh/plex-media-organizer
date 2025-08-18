@@ -13,7 +13,7 @@ This directory contains the comprehensive test suite for the Plex Media Organize
 
 ### **Integration Tests**
 - **`dynamic_real_world_test.rs`** - Dynamic integration tests using actual tree files
-  - Tests against real directory tree outputs from `test_data/`
+  - Tests against real directory tree outputs from `tests/test_data/`
   - Validates performance and success rates
   - Uses actual media server directory structures
   - Comprehensive real-world validation
@@ -27,11 +27,11 @@ This directory contains the comprehensive test suite for the Plex Media Organize
 
 ## 🎯 **Test Data**
 
-Test data is stored in `test_data/` directory (at project root):
+Test data is stored in `tests/test_data/` directory:
 
-- **`movie_directory.txt`** - Real movie directory tree output
-- **`tv_directory.txt`** - Real TV show directory tree output  
-- **`music_directory.txt`** - Real music directory tree output
+- **`movie_directory.txt`** - Real movie directory tree output (✅ actively used)
+- **`tv_directory.txt`** - Real TV show directory tree output (⏸️ for future iterations)
+- **`music_directory.txt`** - Real music directory tree output (⏸️ for future iterations)
 
 ### **Why Test Data is at Root Level:**
 - **Standard practice** for large data files (1.7MB+)
@@ -75,8 +75,8 @@ cargo test -- --nocapture
 
 ### **Dynamic Tests (`dynamic_real_world_test.rs`)**
 - ✅ Real-world movie directory validation
-- ✅ Real-world TV directory validation
-- ✅ Real-world music directory validation
+- ⏸️ Real-world TV directory validation (not in scope for iteration 1)
+- ⏸️ Real-world music directory validation (not in scope for iteration 1)
 - ✅ Performance benchmarking
 - ✅ Success rate validation
 - ✅ Pattern distribution analysis
@@ -126,7 +126,7 @@ The dynamic tests validate:
 - Bug fixes require new test cases
 
 ### **Test Data Updates**
-- Update `test_data/` files when directory structures change
+- Update `tests/test_data/` files when directory structures change
 - Regenerate tree outputs after significant reorganization
 - Validate test data reflects current naming conventions
 

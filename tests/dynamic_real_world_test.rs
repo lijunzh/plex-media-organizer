@@ -9,14 +9,14 @@ fn test_movie_directory_dynamic() {
     let runner = DynamicTestRunner::new();
 
     // Test against the actual movie directory tree output
-    let tree_file = Path::new("test_data/movie_directory.txt");
+    let tree_file = Path::new("tests/test_data/movie_directory.txt");
 
     if !tree_file.exists() {
         eprintln!(
             "⚠️  Skipping dynamic test - movie directory file not found at: {}",
             tree_file.display()
         );
-        eprintln!("   Expected location: test_data/movie_directory.txt");
+        eprintln!("   Expected location: tests/test_data/movie_directory.txt");
         return;
     }
 
@@ -86,14 +86,14 @@ async fn test_movie_organization_workflow() {
     let runner = DynamicTestRunner::new();
 
     // Test against the actual movie directory tree output
-    let tree_file = Path::new("test_data/movie_directory.txt");
+    let tree_file = Path::new("tests/test_data/movie_directory.txt");
 
     if !tree_file.exists() {
         eprintln!(
             "⚠️  Skipping organization workflow test - movie directory file not found at: {}",
             tree_file.display()
         );
-        eprintln!("   Expected location: test_data/movie_directory.txt");
+        eprintln!("   Expected location: tests/test_data/movie_directory.txt");
         return;
     }
 
@@ -132,77 +132,15 @@ async fn test_movie_organization_workflow() {
     );
 }
 
-/// Test against TV directory if available
-#[test]
-#[ignore = "TV parsing not yet implemented - would take too long with 5774 files"]
-fn test_tv_directory_dynamic() {
-    let runner = DynamicTestRunner::new();
-
-    let tree_file = Path::new("test_data/tv_directory.txt");
-
-    if !tree_file.exists() {
-        eprintln!(
-            "⚠️  Skipping TV directory test - file not found at: {}",
-            tree_file.display()
-        );
-        return;
-    }
-
-    println!("📺 DYNAMIC TEST: TV Directory Analysis");
-    println!("======================================");
-
-    let results = match runner.test_tree_file(tree_file) {
-        Ok(results) => results,
-        Err(e) => {
-            eprintln!("Failed to test TV tree file: {}", e);
-            return;
-        }
-    };
-
-    results.print_summary();
-
-    // Note: TV parsing is not yet implemented, so we expect lower success rates
-    println!("📝 Note: TV parsing is not yet implemented in current MVP");
-}
-
-/// Test against music directory if available
-#[test]
-fn test_music_directory_dynamic() {
-    let runner = DynamicTestRunner::new();
-
-    let tree_file = Path::new("test_data/music_directory.txt");
-
-    if !tree_file.exists() {
-        eprintln!(
-            "⚠️  Skipping music directory test - file not found at: {}",
-            tree_file.display()
-        );
-        return;
-    }
-
-    println!("🎵 DYNAMIC TEST: Music Directory Analysis");
-    println!("=========================================");
-
-    let results = match runner.test_tree_file(tree_file) {
-        Ok(results) => results,
-        Err(e) => {
-            eprintln!("Failed to test music tree file: {}", e);
-            return;
-        }
-    };
-
-    results.print_summary();
-
-    // Note: Music parsing is not yet implemented, so we expect lower success rates
-    println!("📝 Note: Music parsing is not yet implemented in current MVP");
-}
+// TV and Music tests removed - not in scope for iteration 1
+// These will be re-implemented when TV and music parsing are added in future iterations
 
 /// Performance test with large collections
 #[test]
 fn test_performance_large_collection() {
     let runner = DynamicTestRunner::new();
 
-    let tree_file = Path::new("test_data/movie_directory.txt");
+    let tree_file = Path::new("tests/test_data/movie_directory.txt");
 
     if !tree_file.exists() {
         eprintln!("⚠️  Skipping performance test - movie directory file not found");

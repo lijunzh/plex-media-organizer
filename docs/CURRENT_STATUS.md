@@ -168,13 +168,19 @@ preserve_original_in_metadata = true
 - **Advanced Templates**: Custom naming templates (Iteration 2)
 - **Rate Limiting**: API request management (Iteration 2)
 
+### **Current Test Scope (Iteration 1)**
+- **✅ Movie Tests**: Active and comprehensive (417 files, 100% success rate)
+- **⏸️ TV Tests**: Paused - not in scope for iteration 1
+- **⏸️ Music Tests**: Paused - not in scope for iteration 1
+- **Test Data**: Moved to `tests/test_data/` for better organization
+
 ### **Architecture Alignment**
 The full architecture in `docs/ARCHITECTURE.md` shows the complete target system. This simplified configuration represents the **Iteration 1 MVP** that focuses on core movie organization functionality.
 
 ## **🧪 Real-World Testing Results**
 
 ### **📊 Comprehensive Test Statistics (417 files)**
-Based on testing with real-world movie directory patterns from `test_data/movie_directory.txt`:
+Based on testing with real-world movie directory patterns from `tests/test_data/movie_directory.txt`:
 
 | **Metric** | **Result** |
 |------------|------------|
@@ -398,7 +404,7 @@ Based on testing with real-world movie directory patterns from `test_data/movie_
 ## 📈 **Performance Metrics**
 
 ### **Phase 1 Achievements**
-- **Success Rate**: 100% (417 movies, 5,774+ TV episodes)
+- **Success Rate**: 100% (417 movies tested)
 - **Parsing Speed**: 445+ files/second
 - **Memory Efficiency**: Minimal footprint
 - **Test Coverage**: 100% (20 tests, all passing)

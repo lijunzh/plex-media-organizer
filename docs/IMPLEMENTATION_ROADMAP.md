@@ -6,6 +6,8 @@ This document outlines an iterative, incremental implementation plan for the Ple
 
 **Important**: Before concluding any phase, refer to `docs/DEVELOPMENT_LESSONS.md` for the complete code review checklist and lessons learned.
 
+**Current Status**: Iteration 1 is focused on movie parsing and organization only. TV and music functionality will be added in future iterations.
+
 ## 🎯 **Core Philosophy: Start Small, Iterate Fast**
 
 ### **Why Iterative?**
@@ -60,6 +62,12 @@ This document outlines an iterative, incremental implementation plan for the Ple
 **Deliverable**: Can parse and organize basic movie filenames with TMDB data
 
 **Test**: Use small subset of your movie directory (10-20 files)
+
+**Current Test Scope**: 
+- ✅ **Movie Tests**: Active and comprehensive (417 files, 100% success rate)
+- ⏸️ **TV Tests**: Paused - not in scope for iteration 1
+- ⏸️ **Music Tests**: Paused - not in scope for iteration 1
+- 📁 **Test Data**: Organized in `tests/test_data/` directory
 
 ---
 
