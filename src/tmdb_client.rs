@@ -5,13 +5,24 @@ use anyhow::{Context, Result};
 use fuzzy_matcher::FuzzyMatcher;
 use fuzzy_matcher::skim::SkimMatcherV2;
 use serde::Deserialize;
-use std::time::Duration;
+use std::collections::HashMap;
+use std::sync::Mutex;
+use std::time::{Duration, Instant};
 
-/// TMDB API client
+/// Cache entry for TMDB search results
+#[derive(Clone)]
+struct CacheEntry {
+    results: Vec<TmdbMovie>,
+    expires_at: Instant,
+}
+
+/// TMDB API client with caching
 pub struct TmdbClient {
     api_key: String,
     base_url: String,
     client: reqwest::Client,
+    cache: Mutex<HashMap<String, CacheEntry>>,
+    cache_ttl: Duration,
 }
 
 impl std::fmt::Debug for TmdbClient {
@@ -35,6 +46,8 @@ impl Clone for TmdbClient {
             api_key: self.api_key.clone(),
             base_url: self.base_url.clone(),
             client,
+            cache: Mutex::new(HashMap::new()), // Start with empty cache
+            cache_ttl: self.cache_ttl,
         }
     }
 }
@@ -66,7 +79,7 @@ struct TmdbMovieResponse {
 }
 
 impl TmdbClient {
-    /// Create a new TMDB client
+    /// Create a new TMDB client with default cache TTL (1 hour)
     pub fn new(api_key: String) -> Self {
         let client = reqwest::Client::builder()
             .timeout(Duration::from_secs(30))
@@ -77,11 +90,75 @@ impl TmdbClient {
             api_key,
             base_url: "https://api.themoviedb.org/3".to_string(),
             client,
+            cache: Mutex::new(HashMap::new()),
+            cache_ttl: Duration::from_secs(3600), // 1 hour default
         }
     }
 
-    /// Search for a movie by title
+    /// Create a new TMDB client with custom cache TTL
+    pub fn with_cache_ttl(api_key: String, cache_ttl: Duration) -> Self {
+        let client = reqwest::Client::builder()
+            .timeout(Duration::from_secs(30))
+            .build()
+            .expect("Failed to create HTTP client");
+
+        Self {
+            api_key,
+            base_url: "https://api.themoviedb.org/3".to_string(),
+            client,
+            cache: Mutex::new(HashMap::new()),
+            cache_ttl,
+        }
+    }
+
+    /// Get cache statistics
+    pub fn cache_stats(&self) -> (usize, Duration) {
+        let cache = self.cache.lock().unwrap();
+        (cache.len(), self.cache_ttl)
+    }
+
+    /// Clear the cache
+    pub fn clear_cache(&self) {
+        let mut cache = self.cache.lock().unwrap();
+        cache.clear();
+    }
+
+    /// Get a cached result if available and not expired
+    fn get_cached_result(&self, cache_key: &str) -> Option<Vec<TmdbMovie>> {
+        let mut cache = self.cache.lock().unwrap();
+
+        if let Some(entry) = cache.get(cache_key) {
+            if entry.expires_at > Instant::now() {
+                return Some(entry.results.clone());
+            } else {
+                // Remove expired entry
+                cache.remove(cache_key);
+            }
+        }
+
+        None
+    }
+
+    /// Store a result in the cache
+    fn store_cached_result(&self, cache_key: String, results: Vec<TmdbMovie>) {
+        let mut cache = self.cache.lock().unwrap();
+        let entry = CacheEntry {
+            results,
+            expires_at: Instant::now() + self.cache_ttl,
+        };
+        cache.insert(cache_key, entry);
+    }
+
+    /// Search for a movie by title with caching
     pub async fn search_movie(&self, title: &str, year: Option<u32>) -> Result<Vec<TmdbMovie>> {
+        // Create cache key
+        let cache_key = format!("{}:{}", title, year.unwrap_or(0));
+
+        // Check cache first
+        if let Some(cached_results) = self.get_cached_result(&cache_key) {
+            return Ok(cached_results);
+        }
+
         let url = format!("{}/search/movie", self.base_url);
         let mut query_params = vec![
             ("api_key", self.api_key.as_str()),
@@ -115,7 +192,12 @@ impl TmdbClient {
             .await
             .context("Failed to parse TMDB search response")?;
 
-        Ok(search_response.results)
+        let results = search_response.results;
+
+        // Store results in cache
+        self.store_cached_result(cache_key, results.clone());
+
+        Ok(results)
     }
 
     /// Get movie details by TMDB ID
@@ -542,5 +624,23 @@ mod tests {
         assert_eq!(client.base_url, cloned_client.base_url);
         // Note: We can't easily test that the API key is cloned correctly
         // since it's private, but the clone should work
+    }
+
+    #[test]
+    fn test_cache_stats() {
+        let client = TmdbClient::new("test_key".to_string());
+        let (cache_size, ttl) = client.cache_stats();
+
+        assert_eq!(cache_size, 0); // Cache should be empty initially
+        assert_eq!(ttl, Duration::from_secs(3600)); // Default 1 hour TTL
+    }
+
+    #[test]
+    fn test_clear_cache() {
+        let client = TmdbClient::new("test_key".to_string());
+        client.clear_cache();
+
+        let (cache_size, _) = client.cache_stats();
+        assert_eq!(cache_size, 0);
     }
 }

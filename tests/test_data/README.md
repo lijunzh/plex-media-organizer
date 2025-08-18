@@ -1,6 +1,6 @@
 # Test Data - Media Directory Tree Outputs
 
-**Location**: `test_data/` (at project root level)
+**Location**: `tests/test_data/` (within tests directory)
 
 This directory contains real-world media directory structures captured using the `tree` command. These files serve as valuable test data for developing and validating the Plex Media Organizer.
 
@@ -99,8 +99,8 @@ These files should be updated when:
 - **Accuracy**: Captured directly from your media server using `tree` command
 - **Completeness**: Represents the full scope of your media collection
 - **Maintenance**: Keep synchronized with actual directory changes
-- **Location**: `test_data/` at project root (follows Rust naming conventions)
-- **Size**: 1.7MB+ total (kept at root for better git performance)
+- **Location**: `tests/test_data/` within tests directory (follows Rust naming conventions)
+- **Size**: 1.7MB+ total (co-located with test code for better organization)
 
 ---
 

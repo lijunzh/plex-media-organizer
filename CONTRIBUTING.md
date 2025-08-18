@@ -100,6 +100,54 @@ We follow [Conventional Commits](https://www.conventionalcommits.org/):
 
 ### Examples
 ```
+feat: add fuzzy search for better movie matching
+fix: resolve TMDB API timeout issues
+docs: update architecture for database integration
+test: add comprehensive test suite for organizer
+```
+
+## 📚 Documentation Requirements
+
+### **Mandatory Documentation Updates**
+For every feature PR, you **must** update:
+- [ ] `docs/CURRENT_STATUS.md` - Add new features to "Recent Updates" section
+- [ ] `docs/CURRENT_STATUS.md` - Update component status if needed
+- [ ] `docs/CURRENT_STATUS.md` - Update "Next Steps" section
+- [ ] `docs/CURRENT_STATUS.md` - Add performance metrics if applicable
+
+### **Optional Documentation Updates**
+- [ ] `docs/ARCHITECTURE.md` - For design changes
+- [ ] `docs/IMPLEMENTATION_ROADMAP.md` - For plan updates
+- [ ] `README.md` - For user-facing features
+- [ ] `config_example.toml` - For new configuration options
+
+**Remember**: Documentation is part of the feature, not a separate task!
+
+## 🔧 Quality Assurance
+
+### **Pre-PR Checklist**
+- [ ] All tests pass (`cargo test`)
+- [ ] Code formatting correct (`cargo fmt`)
+- [ ] No clippy warnings (`cargo clippy`)
+- [ ] Documentation updated (see above)
+- [ ] Commit messages follow convention
+- [ ] Feature branch is up to date with main
+
+### **CI/CD Requirements**
+- [ ] GitHub Actions pass
+- [ ] Code coverage maintained
+- [ ] Performance benchmarks pass
+- [ ] Security checks pass
+
+## 🚫 What NOT to Do
+
+- ❌ **Never push directly to main**
+- ❌ **Never create separate PRs for documentation** (unless it's a pure docs PR)
+- ❌ **Never merge features without documentation updates**
+- ❌ **Never skip the PR review process**
+
+### Examples
+```
 feat(parser): add support for new filename pattern
 fix(tmdb): resolve API rate limiting issue
 docs: update README with new usage examples

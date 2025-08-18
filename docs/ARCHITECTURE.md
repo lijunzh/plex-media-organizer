@@ -10,6 +10,14 @@ The Plex Media Organizer is a database-driven media management system that intel
 - **Unified Storage**: Single SQLite database for all data and cache
 - **Plex Compliance**: Strict adherence to official Plex naming conventions
 
+### **Current Implementation Status (Iteration 1)**
+- **✅ Movie Parsing**: Complete with TMDB integration and fuzzy matching
+- **✅ File Organization**: Plex naming conventions with dry-run and rollback
+- **✅ CLI Interface**: Full subcommand support with progress reporting
+- **✅ Testing**: Comprehensive test suite with real-world validation (417 files, 100% success rate)
+- **⏸️ TV Support**: Planned for Iteration 2
+- **⏸️ Music Support**: Planned for Iteration 3
+
 ## Core Design Philosophy
 
 ### 1. **Intelligence Over Rules**
@@ -136,6 +144,8 @@ The Plex Media Organizer is a database-driven media management system that intel
 - **Content Analysis**: Analyze file headers and metadata
 - **Context Analysis**: Use directory structure for classification
 - **Confidence Scoring**: Rate classification confidence
+
+**Current Scope (Iteration 1)**: Focused on movie detection and parsing only
 
 #### Parser Component
 - **Multi-Strategy Parsing**: Try different parsing approaches
