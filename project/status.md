@@ -412,10 +412,11 @@ Based on testing with real-world movie directory patterns from `tests/test_data/
 
 ### **Current Capabilities**
 - **Movie Parsing**: Complete with TMDB integration
-- **CLI Interface**: Full subcommand support
+- **CLI Interface**: Full subcommand support (scan, setup, config, test, organize, rollback, cleanup)
 - **Error Handling**: Robust with graceful failure modes
 - **Configuration**: Platform-specific config management
 - **Testing**: Comprehensive test suite with real-world validation
+- **File Management**: Complete rollback and cleanup capabilities
 
 ## 🔧 **Technical Stack**
 

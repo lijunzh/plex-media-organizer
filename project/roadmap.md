@@ -28,40 +28,42 @@ This document outlines an iterative, incremental implementation plan for the Ple
 ### **Goal**: Basic movie parsing and organization that works on small directories
 
 #### **1.1 Minimal Project Setup**
-- [ ] Initialize Rust project with essential dependencies
-- [ ] Basic project structure (lib.rs, main.rs, types.rs)
-- [ ] Simple configuration file (just TMDB API key)
-- [ ] Basic error handling with anyhow
+- [x] Initialize Rust project with essential dependencies
+- [x] Basic project structure (lib.rs, main.rs, types.rs)
+- [x] Simple configuration file (just TMDB API key)
+- [x] Basic error handling with anyhow
 
 #### **1.2 Core Movie Types**
-- [ ] `MovieInfo` struct with essential fields
-- [ ] Basic parsing result types
-- [ ] Simple error types
-- [ ] Unit tests for data structures
+- [x] `MovieInfo` struct with essential fields
+- [x] Basic parsing result types
+- [x] Simple error types
+- [x] Unit tests for data structures
 
 #### **1.3 Basic Movie Parser**
-- [ ] Simple filename parsing (title, year, quality)
-- [ ] Basic TMDB API integration
-- [ ] Fallback to filename parsing when API fails
-- [ ] Handle common movie patterns from your tree output
+- [x] Simple filename parsing (title, year, quality)
+- [x] Enhanced TMDB API integration with fuzzy search
+- [x] Fallback to filename parsing when API fails
+- [x] Handle common movie patterns from your tree output
 
 #### **1.4 Simple CLI**
-- [ ] `scan` command for movie directories
-- [ ] Basic progress reporting
-- [ ] Simple results display
-- [ ] Configuration setup command
+- [x] `scan` command for movie directories
+- [x] Basic progress reporting
+- [x] Simple results display
+- [x] Configuration setup command
 
 #### **1.5 File Organization**
-- [ ] Rename files to Plex conventions
-- [ ] Create organized directory structure (Movie Name (Year)/)
-- [ ] Handle naming conflicts
-- [ ] Dry-run mode (preview changes)
-- [ ] JSON-based rollback capability
-- [ ] Safe file operations with error handling
+- [x] Rename files to Plex conventions
+- [x] Create organized directory structure (Movie Name (Year)/)
+- [x] Handle naming conflicts
+- [x] Dry-run mode (preview changes)
+- [x] JSON-based rollback capability
+- [x] Safe file operations with error handling
+- [x] Complete rollback CLI command
+- [x] Cleanup command for organization history management
 
-**Deliverable**: Can parse and organize basic movie filenames with TMDB data
+**Deliverable**: ✅ **COMPLETED** - Can parse and organize basic movie filenames with TMDB data
 
-**Test**: Use small subset of your movie directory (10-20 files)
+**Test**: ✅ **COMPLETED** - Successfully tested with 417 real-world files (100% success rate)
 
 **Current Test Scope**: 
 - ✅ **Movie Tests**: Active and comprehensive (417 files, 100% success rate)
