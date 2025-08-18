@@ -48,7 +48,7 @@ lazy_static! {
 }
 
 /// Movie parser that handles various filename patterns
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct MovieParser {
     tmdb_client: Option<TmdbClient>,
     original_title_config: OriginalTitleConfig,
@@ -1000,5 +1000,15 @@ mod tests {
         // Test mixed
         assert!(parser.contains_cjk_characters("Hero英雄"));
         assert!(parser.contains_cjk_characters("The 英雄 Movie"));
+    }
+
+    #[test]
+    fn test_movie_parser_debug() {
+        let parser = MovieParser::new(None);
+        let debug_output = format!("{:?}", parser);
+
+        assert!(debug_output.contains("MovieParser"));
+        assert!(debug_output.contains("tmdb_client"));
+        assert!(debug_output.contains("original_title_config"));
     }
 }

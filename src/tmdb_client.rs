@@ -14,6 +14,16 @@ pub struct TmdbClient {
     client: reqwest::Client,
 }
 
+impl std::fmt::Debug for TmdbClient {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("TmdbClient")
+            .field("api_key", &"[REDACTED]")
+            .field("base_url", &self.base_url)
+            .field("client", &"[HTTP_CLIENT]")
+            .finish()
+    }
+}
+
 impl Clone for TmdbClient {
     fn clone(&self) -> Self {
         let client = reqwest::Client::builder()
@@ -464,5 +474,16 @@ mod tests {
         let movie_info = client.tmdb_to_movie_info(&tmdb_movie);
         assert_eq!(movie_info.title, "Test Movie");
         assert_eq!(movie_info.year, Some(2023));
+    }
+
+    #[test]
+    fn test_tmdb_client_debug() {
+        let client = TmdbClient::new("test_key".to_string());
+        let debug_output = format!("{:?}", client);
+
+        // Should contain the base URL but not the API key for security
+        assert!(debug_output.contains("https://api.themoviedb.org/3"));
+        assert!(!debug_output.contains("test_key")); // API key should not be exposed
+        assert!(debug_output.contains("TmdbClient"));
     }
 }
