@@ -9,6 +9,7 @@ use std::time::Instant;
 use walkdir::WalkDir;
 
 /// Media file scanner
+#[derive(Debug)]
 pub struct Scanner {
     movie_parser: MovieParser,
 }

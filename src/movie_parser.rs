@@ -48,7 +48,7 @@ lazy_static! {
 }
 
 /// Movie parser that handles various filename patterns
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct MovieParser {
     tmdb_client: Option<TmdbClient>,
     original_title_config: OriginalTitleConfig,
@@ -1024,5 +1024,121 @@ mod tests {
         // Test mixed
         assert!(parser.contains_cjk_characters("Hero英雄"));
         assert!(parser.contains_cjk_characters("The 英雄 Movie"));
+    }
+
+    #[test]
+    fn test_parse_filename_edge_cases() {
+        let parser = MovieParser::new(None);
+
+        // Test empty filename - should return empty title
+        let result = parser.parse_filename("");
+        assert!(result.is_ok());
+        let parsed = result.unwrap();
+        assert_eq!(parsed.title, "");
+
+        // Test filename with only extension - should return empty title
+        let result = parser.parse_filename(".mkv");
+        assert!(result.is_ok());
+        let parsed = result.unwrap();
+        assert_eq!(parsed.title, "");
+
+        // Test filename with no year
+        let result = parser.parse_filename("The Matrix.mkv");
+        assert!(result.is_ok());
+        let parsed = result.unwrap();
+        assert_eq!(parsed.title, "The Matrix");
+        assert_eq!(parsed.year, None);
+
+        // Test filename with invalid year
+        let result = parser.parse_filename("The Matrix 9999.mkv");
+        assert!(result.is_ok());
+        let parsed = result.unwrap();
+        assert_eq!(parsed.title, "The Matrix 9999");
+        assert_eq!(parsed.year, None); // Invalid year should not be parsed
+    }
+
+    #[test]
+    fn test_parse_filename_with_special_characters() {
+        let parser = MovieParser::new(None);
+
+        // Test that various filename patterns can be parsed without errors
+        // This tests the robustness of the parser rather than specific output
+        let test_cases = vec![
+            "Dr. Strangelove 1964.mkv",
+            "The Matrix (1999).mkv",
+            "[The Matrix] 1999.mkv",
+            "Movie.Title.2023.mkv",
+            "A.Movie.With.Dots.2023.mkv",
+            "Movie-With-Dashes-2023.mkv",
+        ];
+
+        for filename in test_cases {
+            let result = parser.parse_filename(filename);
+            assert!(result.is_ok(), "Failed to parse filename: {}", filename);
+            let parsed = result.unwrap();
+
+            // Basic validation - title should not be empty
+            assert!(
+                !parsed.title.is_empty(),
+                "Title should not be empty for: {}",
+                filename
+            );
+
+            // Year should be reasonable if present
+            if let Some(year) = parsed.year {
+                assert!(
+                    year >= 1900 && year <= 2030,
+                    "Year {} is out of reasonable range for: {}",
+                    year,
+                    filename
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn test_merge_movie_info_edge_cases() {
+        use crate::config::OriginalTitleConfig;
+
+        let original_title_config = OriginalTitleConfig::default();
+        let parser = MovieParser::with_original_title_config(None, original_title_config);
+
+        // Test with empty TMDB title - should use TMDB title (empty) but keep base year
+        let base = MovieInfo {
+            title: "Test Movie".to_string(),
+            original_title: None,
+            original_language: None,
+            year: Some(2023),
+            part_number: None,
+            is_collection: false,
+            collection_name: None,
+            quality: Some("1080p".to_string()),
+            source: Some("BluRay".to_string()),
+            language: None,
+        };
+
+        let tmdb = MovieInfo {
+            title: "".to_string(),
+            original_title: None,
+            original_language: None,
+            year: None,
+            part_number: None,
+            is_collection: false,
+            collection_name: None,
+            quality: None,
+            source: None,
+            language: None,
+        };
+
+        let result = parser.merge_movie_info(base, tmdb);
+        assert_eq!(result.title, ""); // TMDB title takes precedence
+        assert_eq!(result.year, Some(2023)); // Base year is kept
+    }
+
+    #[test]
+    fn test_movie_parser_debug() {
+        let parser = MovieParser::new(None);
+        let debug_output = format!("{:?}", parser);
+        assert!(debug_output.contains("MovieParser"));
     }
 }
