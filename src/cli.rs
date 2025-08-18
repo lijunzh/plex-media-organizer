@@ -14,12 +14,13 @@ use crate::tmdb_client::TmdbClient;
 #[command(name = "plex-media-organizer")]
 #[command(about = "Intelligent media file organizer following Plex naming conventions")]
 #[command(version = "0.1.0")]
+#[derive(Debug)]
 pub struct Cli {
     #[command(subcommand)]
     command: Commands,
 }
 
-#[derive(Subcommand)]
+#[derive(Debug, Subcommand)]
 enum Commands {
     /// Scan a directory for media files
     Scan {
