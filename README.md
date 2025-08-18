@@ -13,85 +13,42 @@ A powerful, intelligent media file organizer built in Rust that automatically pa
 
 ## 🚀 Quick Start
 
-### Prerequisites
-- Rust 1.70+ ([install via rustup](https://rustup.rs/))
-- TMDB API key ([get free key](https://www.themoviedb.org/settings/api))
-
-### Configuration
-The application uses a TOML configuration file. You can create one manually or use the setup command:
-
-**Environment Variables (Optional):**
 ```bash
-# Copy env.example to .env and fill in your API keys
-TMDB_API_KEY=your_tmdb_api_key_here
-TVDB_API_KEY=your_tvdb_api_key_here  # For future TV support
-MUSICBRAINZ_USER_AGENT=your_app_name/1.0  # For future music support
-```
+# 1. Install Rust and get TMDB API key
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+# Get free TMDB API key: https://www.themoviedb.org/settings/api
 
-**Configuration File Example:**
-```toml
-[apis]
-tmdb_api_key = "your_tmdb_api_key_here"
-
-[organization.quality]
-preferred_quality = "1080p"
-
-[organization.original_titles]
-prefer_original_titles = true
-include_english_subtitle = true
-fallback_to_english_on_error = true
-preserve_original_in_metadata = true
-```
-
-### Installation & Setup
-```bash
-# Clone and build
+# 2. Clone and build
 git clone https://github.com/lijunzh/plex-media-organizer.git
 cd plex-media-organizer
 cargo build --release
 
-# Setup configuration
-./target/release/plex-media-organizer setup
-
-# Test with a sample file
-./target/release/plex-media-organizer test "Movie.Name.2023.1080p.BluRay.mkv"
-
-# Scan a directory
-./target/release/plex-media-organizer scan /path/to/your/movies
+# 3. Test it works
+TMDB_API_KEY=your_key ./target/release/plex-media-organizer test "Movie.Name.2023.1080p.BluRay.mkv"
 ```
 
-## 📖 Usage
+**Result:** `✅ Successfully parsed: Movie Name (2023) 1080p BluRay`
 
-### Basic Commands
-```bash
-# Scan and parse movies in a directory
-plex-media-organizer scan /path/to/movies
-
-# Test individual file parsing
-plex-media-organizer test "filename.mkv"
-
-# View configuration
-plex-media-organizer config
-
-# Get help
-plex-media-organizer --help
-```
-
-### Example Output
-```
-✅ Successfully parsed: 417 files
-📊 Performance: 181 files/second
-🎯 TMDB matches: 95% accuracy
-```
+📚 **Need more help?** See the [complete setup guide](docs/quick-start.md) or [installation options](docs/installation.md).
 
 ## 📚 Documentation
 
-For detailed information about the project:
+### **For Users**
+- **[🚀 Quick Start Guide](docs/quick-start.md)** - Complete setup and first use
+- **[📖 User Guide](docs/user-guide.md)** - Comprehensive usage tutorial
+- **[⚙️ Configuration](docs/configuration.md)** - All configuration options
+- **[💡 Examples](docs/examples/)** - Real-world usage examples
+- **[🔧 Troubleshooting](docs/troubleshooting.md)** - Common issues and solutions
 
-- **[📋 Project Status](project/status.md)** - Current project status and progress metrics
-- **[🏗️ Architecture](project/architecture.md)** - System design and technical details
-- **[🗺️ Roadmap](project/roadmap.md)** - Development phases and timeline
-- **[📖 Project Management](project/README.md)** - Project management documentation overview
+### **For Developers** 
+- **[🏗️ Code Architecture](docs/development/code-architecture.md)** - Understanding the codebase
+- **[📋 API Reference](docs/development/api-reference.md)** - Library API documentation
+- **[🔨 Adding Features](docs/development/adding-features.md)** - How to extend the system
+
+### **Project Management**
+- **[📊 Current Status](project/status.md)** - Development progress and metrics
+- **[🏛️ Architecture Design](project/architecture.md)** - System design philosophy
+- **[🗺️ Roadmap](project/roadmap.md)** - Development timeline and planning
 
 ## 🧪 Testing
 
@@ -123,4 +80,6 @@ MIT License - see [LICENSE](LICENSE) for details.
 
 ---
 
-**Need help?** Check the [documentation](docs/) or [open an issue](https://github.com/lijunzh/plex-media-organizer/issues).
+💬 **Need help?** Check the [documentation](docs/) or [open an issue](https://github.com/lijunzh/plex-media-organizer/issues).
+
+⭐ **Like this project?** Give it a star on GitHub!
