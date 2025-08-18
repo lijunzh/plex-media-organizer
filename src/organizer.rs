@@ -300,8 +300,44 @@ impl Organizer {
             fs::create_dir_all(parent).context("Failed to create directory")?;
         }
 
-        // Move the file
+        // Move the main media file
         fs::rename(original_path, new_path).context("Failed to move file")?;
+
+        // Handle metadata files (like .nfo files)
+        self.move_metadata_files(original_path, new_path)?;
+
+        Ok(())
+    }
+
+    /// Move metadata files associated with the media file
+    fn move_metadata_files(&self, original_path: &Path, new_path: &Path) -> Result<()> {
+        use crate::metadata_extractor::MetadataExtractor;
+
+        // Get metadata files that should be moved
+        let metadata_files = MetadataExtractor::get_metadata_files_to_move(original_path)?;
+
+        for metadata_file in metadata_files {
+            if metadata_file.exists() {
+                // Create new path for metadata file
+                let new_metadata_path =
+                    new_path.with_extension(metadata_file.extension().unwrap_or_default());
+
+                // Move the metadata file
+                if let Err(e) = fs::rename(&metadata_file, &new_metadata_path) {
+                    eprintln!(
+                        "Warning: Failed to move metadata file {}: {}",
+                        metadata_file.display(),
+                        e
+                    );
+                } else {
+                    println!(
+                        "  📄 Moved metadata file: {} -> {}",
+                        metadata_file.display(),
+                        new_metadata_path.display()
+                    );
+                }
+            }
+        }
 
         Ok(())
     }
