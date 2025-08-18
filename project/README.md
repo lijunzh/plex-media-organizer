@@ -8,6 +8,7 @@ This directory contains all project management documentation for the Plex Media 
 - **[📋 Status](status.md)** - Current project status, progress metrics, and recent updates
 - **[🗺️ Roadmap](roadmap.md)** - Development phases, iterations, and timeline
 - **[🏗️ Architecture](architecture.md)** - System design, technical decisions, and architecture
+- **[🌐 Network Optimization](network-optimization.md)** - Network drive performance optimizations
 
 ### **Planning & Decisions**
 - **[📋 Planning](planning/)** - Iteration plans, milestones, and detailed planning documents
