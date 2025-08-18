@@ -28,7 +28,8 @@ rustc --version
 git clone https://github.com/lijunzh/plex-media-organizer.git
 cd plex-media-organizer
 
-# Build the project
+# Build the project (release version for best performance)
+# Note: Release builds are 3-5x faster than debug builds
 cargo build --release
 
 # The binary will be at: ./target/release/plex-media-organizer

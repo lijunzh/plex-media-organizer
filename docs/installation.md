@@ -4,6 +4,20 @@ Complete guide for installing Plex Media Organizer on any system.
 
 ## 🚀 Quick Install (Recommended)
 
+### Build Types
+
+**Release Build (Recommended)**
+- **Performance**: 3-5x faster than debug builds
+- **Binary Size**: Smaller, optimized executable
+- **Use Case**: Production use, real file processing
+- **Command**: `cargo build --release`
+
+**Debug Build (Development)**
+- **Performance**: Slower, includes debug information
+- **Binary Size**: Larger, includes debug symbols
+- **Use Case**: Development, debugging, testing
+- **Command**: `cargo build`
+
 ### From Source (Most Up-to-Date)
 ```bash
 # Prerequisites: Rust 1.70+
