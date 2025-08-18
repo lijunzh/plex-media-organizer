@@ -4,6 +4,8 @@ use crate::movie_parser::MovieParser;
 use crate::types::{FailedFile, MediaFile, MediaType, ScanResult, ScanStatistics};
 use anyhow::{Context, Result};
 use chrono::Utc;
+use futures::stream::{self, StreamExt};
+use indicatif::{ProgressBar, ProgressStyle};
 use std::path::{Path, PathBuf};
 use std::time::Instant;
 use walkdir::WalkDir;
@@ -12,12 +14,35 @@ use walkdir::WalkDir;
 #[derive(Debug)]
 pub struct Scanner {
     movie_parser: MovieParser,
+    /// Maximum number of concurrent parsing operations
+    concurrency_limit: usize,
 }
 
 impl Scanner {
-    /// Create a new scanner
+    /// Create a new scanner with default concurrency limit
     pub fn new(movie_parser: MovieParser) -> Self {
-        Self { movie_parser }
+        Self {
+            movie_parser,
+            concurrency_limit: 16, // Default to 16 concurrent operations
+        }
+    }
+
+    /// Create a new scanner with custom concurrency limit
+    pub fn with_concurrency(movie_parser: MovieParser, concurrency_limit: usize) -> Self {
+        Self {
+            movie_parser,
+            concurrency_limit,
+        }
+    }
+
+    /// Set the concurrency limit for parallel processing
+    pub fn set_concurrency_limit(&mut self, limit: usize) {
+        self.concurrency_limit = limit;
+    }
+
+    /// Get the current concurrency limit
+    pub fn concurrency_limit(&self) -> usize {
+        self.concurrency_limit
     }
 
     /// Scan a directory for media files
@@ -35,6 +60,12 @@ impl Scanner {
         println!("Found {} media files", media_files.len());
 
         // Parse media files
+        if media_files.len() > 10 {
+            println!(
+                "Using parallel processing with {} concurrent operations",
+                self.concurrency_limit
+            );
+        }
         let (parsed_files, failed_files) = self.parse_media_files(&media_files).await?;
         println!("Successfully parsed {} files", parsed_files.len());
         if !failed_files.is_empty() {
@@ -57,7 +88,7 @@ impl Scanner {
         Ok(result)
     }
 
-    /// Discover all files in a directory
+    /// Discover all files in a directory with optional parallel processing
     fn discover_files(&self, directory: &Path) -> Result<Vec<PathBuf>> {
         if !directory.exists() {
             anyhow::bail!("Directory does not exist: {}", directory.display());
@@ -67,6 +98,30 @@ impl Scanner {
             anyhow::bail!("Path is not a directory: {}", directory.display());
         }
 
+        // For small directories, use sequential processing
+        if self.should_use_parallel_discovery(directory) {
+            self.discover_files_parallel(directory)
+        } else {
+            self.discover_files_sequential(directory)
+        }
+    }
+
+    /// Check if parallel discovery should be used
+    fn should_use_parallel_discovery(&self, directory: &Path) -> bool {
+        // Use parallel discovery for directories with many subdirectories
+        // This is a heuristic - in practice, we could count files first
+        WalkDir::new(directory)
+            .follow_links(false)
+            .into_iter()
+            .filter_map(|e| e.ok())
+            .filter(|e| e.file_type().is_dir())
+            .take(10) // If we have 10+ subdirectories, use parallel
+            .count()
+            >= 10
+    }
+
+    /// Discover files sequentially (for small directories)
+    fn discover_files_sequential(&self, directory: &Path) -> Result<Vec<PathBuf>> {
         let mut files = Vec::new();
 
         for entry in WalkDir::new(directory)
@@ -78,6 +133,25 @@ impl Scanner {
                 files.push(entry.path().to_path_buf());
             }
         }
+
+        Ok(files)
+    }
+
+    /// Discover files using parallel processing (for large directories)
+    fn discover_files_parallel(&self, directory: &Path) -> Result<Vec<PathBuf>> {
+        use rayon::prelude::*;
+
+        let entries: Vec<_> = WalkDir::new(directory)
+            .follow_links(false)
+            .into_iter()
+            .filter_map(|e| e.ok())
+            .collect();
+
+        let files: Vec<PathBuf> = entries
+            .par_iter()
+            .filter(|entry| entry.file_type().is_file())
+            .map(|entry| entry.path().to_path_buf())
+            .collect();
 
         Ok(files)
     }
@@ -195,8 +269,22 @@ impl Scanner {
         Ok(MediaType::Movie)
     }
 
-    /// Parse all media files
+    /// Parse all media files using parallel processing
     async fn parse_media_files(
+        &self,
+        media_files: &[MediaFile],
+    ) -> Result<(Vec<crate::types::ParsingResult>, Vec<FailedFile>)> {
+        if media_files.len() <= 10 {
+            // For small batches, use sequential processing
+            self.parse_media_files_sequential(media_files).await
+        } else {
+            // For larger batches, use parallel processing
+            self.parse_media_files_parallel(media_files).await
+        }
+    }
+
+    /// Parse all media files sequentially (for small batches)
+    async fn parse_media_files_sequential(
         &self,
         media_files: &[MediaFile],
     ) -> Result<(Vec<crate::types::ParsingResult>, Vec<FailedFile>)> {
@@ -216,6 +304,70 @@ impl Scanner {
                     };
                     failed_files.push(failed_file);
                 }
+            }
+        }
+
+        Ok((parsed_files, failed_files))
+    }
+
+    /// Parse all media files using parallel processing
+    async fn parse_media_files_parallel(
+        &self,
+        media_files: &[MediaFile],
+    ) -> Result<(Vec<crate::types::ParsingResult>, Vec<FailedFile>)> {
+        let movie_parser = self.movie_parser.clone();
+        let total_files = media_files.len();
+
+        // Create progress bar
+        let progress_bar = ProgressBar::new(total_files as u64);
+        progress_bar.set_style(
+            ProgressStyle::default_bar()
+                .template(
+                    "{spinner:.green} [{elapsed_precise}] [{bar:40.cyan/blue}] {pos}/{len} ({eta})",
+                )
+                .unwrap()
+                .progress_chars("#>-"),
+        );
+        progress_bar.set_message("Parsing media files...");
+
+        // Create a stream of parsing operations
+        let parsing_stream = stream::iter(media_files.iter().cloned())
+            .map(|media_file| {
+                let movie_parser = movie_parser.clone();
+                let progress_bar = progress_bar.clone();
+                async move {
+                    let result = match movie_parser.parse_movie(&media_file.file_path).await {
+                        Ok(parsing_result) => Ok(parsing_result),
+                        Err(error) => {
+                            let failed_file = FailedFile {
+                                media_file: media_file.clone(),
+                                error: error.to_string(),
+                                failed_at: Utc::now(),
+                            };
+                            Err(failed_file)
+                        }
+                    };
+
+                    // Update progress
+                    progress_bar.inc(1);
+                    result
+                }
+            })
+            .buffer_unordered(self.concurrency_limit);
+
+        // Collect results
+        let results: Vec<_> = parsing_stream.collect().await;
+
+        // Finish progress bar
+        progress_bar.finish_with_message("Parsing completed!");
+
+        let mut parsed_files = Vec::new();
+        let mut failed_files = Vec::new();
+
+        for result in results {
+            match result {
+                Ok(parsing_result) => parsed_files.push(parsing_result),
+                Err(failed_file) => failed_files.push(failed_file),
             }
         }
 
