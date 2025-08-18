@@ -92,6 +92,55 @@ TMDB_API_KEY=YOUR_API_KEY ./target/release/plex-media-organizer scan /path/to/yo
   • 0 failures
 ```
 
+## 🎯 Organize Your Movies (1 minute)
+
+Now let's organize your movies with Plex naming conventions:
+
+```bash
+# Preview organization (safe - won't change anything)
+TMDB_API_KEY=YOUR_API_KEY ./target/release/plex-media-organizer organize /path/to/your/movies --preview
+
+# If preview looks good, organize for real
+TMDB_API_KEY=YOUR_API_KEY ./target/release/plex-media-organizer organize /path/to/your/movies
+```
+
+**Example Output:**
+```
+🎬 Organizing: /Users/you/Movies
+📁 Found: 25 movie files
+⚡ Processing...
+
+✅ Organized: 25/25 files (100%)
+📊 Success rate: 100%
+⏱️  Total time: 1.2 seconds
+
+📄 Organization result saved to: organization_result_abc123.json
+```
+
+## 🔄 Rollback (If Needed)
+
+If you need to undo an organization:
+
+```bash
+# Preview rollback (safe)
+./target/release/plex-media-organizer rollback organization_result_abc123.json --preview
+
+# Actually rollback
+./target/release/plex-media-organizer rollback organization_result_abc123.json
+```
+
+## 🧹 Cleanup (Optional)
+
+Manage old organization files:
+
+```bash
+# Preview cleanup (safe)
+./target/release/plex-media-organizer cleanup --preview
+
+# Clean up files older than 30 days
+./target/release/plex-media-organizer cleanup
+```
+
 ## ⚙️ Configuration (Optional)
 
 For persistent configuration, create a config file:

@@ -63,6 +63,12 @@ plex-media-organizer organize /movies --dry-run
 
 # Full organization with backup
 plex-media-organizer organize /movies --backup
+
+# Rollback previous operation
+plex-media-organizer rollback operation_result_123.json
+
+# Clean up old organization files
+plex-media-organizer cleanup --preview
 ```
 
 ### **Common Issues**

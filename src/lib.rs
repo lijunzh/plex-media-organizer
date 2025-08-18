@@ -9,7 +9,7 @@
 //! - **🔍 Enhanced TMDB Integration**: Fuzzy search and multiple fallback strategies for accurate movie matching
 //! - **🌏 CJK Support**: Chinese, Japanese, and Korean title handling with configurable strategies
 //! - **📁 File Organization**: Automatic organization following Plex naming conventions
-//! - **🛡️ Safety**: Dry-run mode, rollback capabilities, and comprehensive error handling
+//! - **🛡️ Safety**: Dry-run mode, complete rollback functionality, and comprehensive error handling
 //!
 //! ## Quick Start
 //!

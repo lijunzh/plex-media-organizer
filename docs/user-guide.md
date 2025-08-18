@@ -161,6 +161,51 @@ plex-media-organizer organize /path/to/movies --backup
 plex-media-organizer organize /path/to/movies --duplicate-action skip|rename|overwrite
 ```
 
+### rollback - Undo Organization Operations
+
+The `rollback` command allows you to undo a previous organization operation.
+
+```bash
+# Preview what would be rolled back (safe)
+plex-media-organizer rollback operation_result_123.json --preview
+
+# Actually rollback an organization
+plex-media-organizer rollback operation_result_123.json
+
+# Rollback with detailed output
+plex-media-organizer rollback operation_result_123.json --verbose
+```
+
+**How Rollback Works:**
+- Every `organize` operation saves a JSON file with operation details
+- The JSON file contains original and new file paths for all organized files
+- `rollback` moves files back to their original locations
+- Empty directories created during organization are automatically removed
+
+### cleanup - Manage Organization History
+
+The `cleanup` command helps manage old organization result files to prevent disk space issues.
+
+```bash
+# Preview cleanup (safe, shows what would be deleted)
+plex-media-organizer cleanup --preview
+
+# Clean up files older than 30 days (default)
+plex-media-organizer cleanup
+
+# Keep files newer than 60 days, max 50 files
+plex-media-organizer cleanup --keep-days 60 --keep-count 50
+
+# Cleanup with detailed output
+plex-media-organizer cleanup --verbose
+```
+
+**Cleanup Policies:**
+- **Time-based**: Keep files newer than specified days (default: 30 days)
+- **Count-based**: Keep at most specified number of recent files (default: 100 files)
+- **Combined**: Both policies are applied (whichever is more restrictive)
+- **Safe**: Always use `--preview` first to see what will be deleted
+
 **Example Output:**
 ```
 🎬 Organizing: /Users/you/Movies → /Users/you/Organized

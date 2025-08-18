@@ -93,10 +93,11 @@ The Plex Media Organizer is a database-driven media management system that intel
 ### 1. **User Interface Layer**
 
 #### Command Line Interface
-- **Subcommands**: `scan`, `organize`, `learn`, `report`, `config`
+- **Subcommands**: `scan`, `setup`, `config`, `test`, `organize`, `rollback`, `cleanup`
 - **Interactive Mode**: Guided setup and configuration
 - **Batch Mode**: Process entire directories non-interactively
 - **Progress Display**: Real-time progress bars and status updates
+- **Safety Features**: Dry-run mode, rollback capability, cleanup management
 - **Single Binary**: All functionality in one executable for simplicity
 
 #### Configuration Management
