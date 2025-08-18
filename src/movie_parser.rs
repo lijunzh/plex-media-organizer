@@ -737,30 +737,22 @@ impl MovieParser {
         })
     }
 
-    /// Calculate content hash for change detection
+    /// Calculate content hash for change detection (efficient version)
     fn calculate_content_hash(&self, file_path: &Path) -> Result<String> {
         use std::collections::hash_map::DefaultHasher;
-        use std::fs::File;
         use std::hash::{Hash, Hasher};
-        use std::io::{BufReader, Read};
 
-        let file = File::open(file_path).context("Failed to open file for hashing")?;
-        let mut reader = BufReader::new(file);
+        let metadata = std::fs::metadata(file_path).context("Failed to get file metadata")?;
 
         let mut hasher = DefaultHasher::new();
-        let mut buffer = [0; 8192];
 
-        loop {
-            let bytes_read = reader
-                .read(&mut buffer)
-                .context("Failed to read file for hashing")?;
+        // Hash file size and modification time for efficiency
+        // This avoids reading the entire file content
+        metadata.len().hash(&mut hasher);
+        metadata.modified()?.hash(&mut hasher);
 
-            if bytes_read == 0 {
-                break;
-            }
-
-            buffer[..bytes_read].hash(&mut hasher);
-        }
+        // Also hash the file path for uniqueness
+        file_path.to_string_lossy().hash(&mut hasher);
 
         Ok(format!("{:x}", hasher.finish()))
     }

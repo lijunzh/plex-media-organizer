@@ -195,6 +195,7 @@
 
 pub mod cli;
 pub mod config;
+pub mod metadata_extractor;
 pub mod movie_parser;
 pub mod organizer;
 pub mod scanner;
@@ -203,6 +204,7 @@ pub mod types;
 
 pub use cli::*;
 pub use config::*;
+pub use metadata_extractor::*;
 pub use movie_parser::*;
 pub use organizer::*;
 pub use scanner::*;

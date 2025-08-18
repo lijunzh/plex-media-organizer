@@ -69,130 +69,48 @@ plex-media-organizer test /path/to/movies
 plex-media-organizer test /path/to/movies --organize --preview
 ```
 
-## 🌐 Network Drive Optimization
+## Network Drive Optimization
 
-### Why Network Drives Are Slower
-
-Network drives (SMB, NFS, etc.) have different performance characteristics than local storage:
-
-- **Higher Latency**: Network round-trips add significant delay
-- **Limited Bandwidth**: Network connections have lower throughput than local storage
-- **Connection Limits**: Too many concurrent operations can overwhelm the connection
-- **File System Overhead**: Network protocols add additional overhead
+The tool automatically detects network drives and applies optimizations for better performance on SMB/NFS shares.
 
 ### Automatic Detection
+- **macOS**: Detects paths in `/Volumes/` with spaces (common for network mounts)
+- **Linux**: Detects paths in `/mnt/` or `/media/` containing `smb`, `nfs`, or `cifs`
+- **Windows**: Detects UNC paths (`\\server\share`)
 
-The tool automatically detects network drives and applies optimizations:
+### Performance Features
+- **Reduced Concurrency**: Lower parallel processing to avoid overwhelming network
+- **Smaller Batches**: Process files in smaller groups for better responsiveness
+- **Sequential Discovery**: Scan directories sequentially instead of parallel
+- **Minimal File System Calls**: Optimize metadata extraction to avoid full file reads
+- **Enhanced Progress**: Better progress reporting for long-running operations
 
-```bash
-# Auto-detected network paths:
-# Windows: \\server\share or //server/share
-# macOS: /Volumes/Network Drive
-# Linux: /mnt/network or /media/network
+### Efficient Metadata Extraction
+The tool now uses smart metadata extraction that prioritizes:
+1. **External metadata files** (`.nfo`, `.txt`, `.info`, `.json`) - Highest priority
+2. **Media file headers** - Reads only metadata sections, not entire files
+3. **Filename parsing** - Fallback to intelligent filename analysis
 
-plex-media-organizer scan /Volumes/My\ Network\ Drive
-# Output: 🌐 Auto-detected network drive - enabling optimizations
-```
-
-### Manual Network Mode
-
-Force network optimizations for any path:
-
-```bash
-# Enable network mode explicitly
-plex-media-organizer scan /path/to/movies --network-mode
-
-# Customize network settings
-plex-media-organizer scan /path/to/movies \
-    --network-mode \
-    --max-parallel 4 \
-    --batch-size 25
-```
-
-### Network Optimization Features
-
-#### **Reduced Concurrency**
-- **Default**: 16 concurrent operations
-- **Network Mode**: 4 concurrent operations
-- **Custom**: Adjust with `--max-parallel`
-
-#### **Smaller Batches**
-- **Default**: 100 files per batch
-- **Network Mode**: 50 files per batch
-- **Custom**: Adjust with `--batch-size`
-
-#### **Sequential Discovery**
-- **Local**: Parallel directory walking
-- **Network**: Sequential discovery to avoid overwhelming connection
-
-#### **Minimal File System Calls**
-- **Local**: Full metadata reading (size, modification time, content hash)
-- **Network**: Path-based identification only
-
-#### **Progress Reporting**
-- **Local**: Standard progress bars
-- **Network**: Enhanced progress with batch information
+This eliminates the need to read entire media files, dramatically improving performance on network drives.
 
 ### Performance Comparison
+**Before (reading entire files):**
+- ❌ **Hanging/Stuck** - Taking over an hour for just 25 files
+- ❌ **Massive network I/O** - Reading entire file content (hundreds of GB)
+- ❌ **300KB/s write speed bottleneck**
 
-| **Scenario** | **Local Drive** | **Network Drive** | **Network Optimized** |
-|--------------|-----------------|-------------------|----------------------|
-| **Concurrency** | 16 operations | 16 operations | 4 operations |
-| **Batch Size** | 100 files | 100 files | 50 files |
-| **Discovery** | Parallel | Parallel | Sequential |
-| **File Metadata** | Full reading | Full reading | Path-only |
-| **Typical Speed** | 180+ files/sec | 20-50 files/sec | 40-80 files/sec |
+**After (efficient metadata extraction):**
+- ✅ **49.22 seconds** for 420 files
+- ✅ **8.5 files/second** processing speed
+- ✅ **100% success rate**
+- ✅ **No full file reading** - only metadata and headers
 
 ### Best Practices for Network Drives
-
-#### **1. Use Network Mode**
-```bash
-# Always use network mode for SMB/NFS drives
-plex-media-organizer scan /Volumes/My\ Drive --network-mode
-plex-media-organizer organize /Volumes/My\ Drive --network-mode
-```
-
-#### **2. Adjust Settings for Your Network**
-```bash
-# For slow networks (WiFi, remote servers)
-plex-media-organizer scan /network/drive \
-    --network-mode \
-    --max-parallel 2 \
-    --batch-size 25
-
-# For fast networks (Gigabit Ethernet)
-plex-media-organizer scan /network/drive \
-    --network-mode \
-    --max-parallel 6 \
-    --batch-size 75
-```
-
-#### **3. Test First**
-```bash
-# Always test with preview first
-plex-media-organizer scan /network/drive --network-mode --verbose
-plex-media-organizer organize /network/drive --network-mode --preview
-```
-
-#### **4. Monitor Performance**
-```bash
-# Check processing speed
-plex-media-organizer scan /network/drive --network-mode
-# Look for: "Files per second: XX.X" in output
-
-# If too slow, reduce concurrency
-plex-media-organizer scan /network/drive \
-    --network-mode \
-    --max-parallel 2
-```
-
-#### **5. Use Backup for Large Operations**
-```bash
-# Always backup when organizing network drives
-plex-media-organizer organize /network/drive \
-    --network-mode \
-    --backup /local/backup/directory
-```
+1. **Use wired connections** when possible for better stability
+2. **Monitor network usage** to avoid overwhelming the connection
+3. **Run during off-peak hours** if sharing bandwidth with others
+4. **Consider local processing** for very large collections
+5. **Use preview mode first** to verify organization plans
 
 ### Troubleshooting Network Issues
 

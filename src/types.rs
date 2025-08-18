@@ -150,7 +150,7 @@ pub struct UserCorrection {
 }
 
 /// Movie-specific information
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct MovieInfo {
     /// Movie title
     pub title: String,
