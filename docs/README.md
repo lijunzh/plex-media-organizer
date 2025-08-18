@@ -27,12 +27,12 @@ This directory contains the comprehensive documentation for the Plex Media Organ
 - Areas for improvement and next steps
 - CJK title strategy and implementation status
 
-### [DEVELOPMENT_WORKFLOW.md](DEVELOPMENT_WORKFLOW.md)
-**Development workflow and PR guidelines**
+### [CONTRIBUTING.md](../CONTRIBUTING.md)
+**Development workflow and contribution guidelines**
 - PR workflow and best practices
 - Documentation update requirements
 - Quality assurance checklists
-- Iteration workflow and examples
+- Commit message conventions
 
 ## 🎯 Purpose
 
@@ -45,9 +45,10 @@ These documents serve as the **planning and design foundation** for the Plex Med
 ## 🚀 Current Status
 
 - **Architecture**: ✅ Complete and documented
-- **Iteration 1 Implementation**: 🔄 In Progress - Core features implemented, action list pending
+- **Iteration 1 Implementation**: ✅ Complete - All major features implemented
 - **Enhanced TMDB Matching**: ✅ Completed - Fuzzy search and multiple strategies
-- **Development**: 🔄 Active - Completing Iteration 1 action list
+- **Performance Optimization**: ✅ Completed - Parallel processing, caching, enhanced UX
+- **Development**: ✅ Iteration 1 complete - Ready for Iteration 2
 - **GitHub Repository**: ✅ Live at https://github.com/lijunzh/plex-media-organizer
 
 ## 📖 How to Use These Documents
