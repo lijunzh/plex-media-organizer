@@ -99,10 +99,29 @@ impl Organizer {
             println!("🔍 DRY-RUN MODE: No actual changes will be made");
         }
 
+        // Detect and handle duplicate destinations before organizing
+        let (files_to_organize, duplicate_failures) =
+            self.detect_duplicate_destinations(&scan_result.parsed_files)?;
+
+        if !duplicate_failures.is_empty() {
+            println!(
+                "⚠️  Found {} files that would create duplicate destinations - skipping them",
+                duplicate_failures.len()
+            );
+            for failure in &duplicate_failures {
+                println!("   • {} -> {}", failure.media_file.file_name, failure.error);
+            }
+            println!();
+        }
+
         let mut organized_files = Vec::new();
         let mut failed_files = Vec::new();
 
-        for parsing_result in &scan_result.parsed_files {
+        // Add duplicate failures to failed files
+        failed_files.extend(duplicate_failures);
+
+        // Organize the remaining files
+        for parsing_result in &files_to_organize {
             match self.organize_single_file(parsing_result).await {
                 Ok(organized_file) => {
                     organized_files.push(organized_file);
@@ -362,6 +381,82 @@ impl Organizer {
         let full_filename = format!("{}.{}", filename, extension);
 
         Ok(full_filename)
+    }
+
+    /// Detect files that would create duplicate destinations
+    pub fn detect_duplicate_destinations<'a>(
+        &self,
+        parsed_files: &'a [crate::types::ParsingResult],
+    ) -> Result<(
+        Vec<&'a crate::types::ParsingResult>,
+        Vec<FailedOrganization>,
+    )> {
+        let mut destination_map: std::collections::HashMap<
+            PathBuf,
+            Vec<&'a crate::types::ParsingResult>,
+        > = std::collections::HashMap::new();
+        let mut files_to_organize = Vec::new();
+        let mut duplicate_failures = Vec::new();
+
+        // Generate destination paths for all files
+        for parsing_result in parsed_files {
+            match self
+                .generate_plex_path(&parsing_result.media_file, &parsing_result.parsed_metadata)
+            {
+                Ok(destination_path) => {
+                    destination_map
+                        .entry(destination_path)
+                        .or_default()
+                        .push(parsing_result);
+                }
+                Err(e) => {
+                    // If we can't generate a path, skip this file
+                    let failed_org = FailedOrganization {
+                        media_file: parsing_result.media_file.clone(),
+                        error: format!("Failed to generate destination path: {}", e),
+                        failed_at: Utc::now(),
+                    };
+                    duplicate_failures.push(failed_org);
+                }
+            }
+        }
+
+        // Check for duplicates and handle them
+        for (destination_path, files) in destination_map {
+            if files.len() == 1 {
+                // No duplicate, safe to organize
+                files_to_organize.push(files[0]);
+            } else {
+                // Multiple files would go to the same destination
+                println!(
+                    "⚠️  Duplicate destination detected: {} files would be organized to:",
+                    files.len()
+                );
+                println!("   {}", destination_path.display());
+
+                // Show the conflicting files
+                for (i, file) in files.iter().enumerate() {
+                    println!("   {}. {}", i + 1, file.media_file.file_name);
+                }
+
+                // Skip all files that would create duplicates
+                let files_len = files.len();
+                for file in files {
+                    let failed_org = FailedOrganization {
+                        media_file: file.media_file.clone(),
+                        error: format!(
+                            "Would create duplicate destination: {} ({} other files would go to same location)",
+                            destination_path.display(),
+                            files_len - 1
+                        ),
+                        failed_at: Utc::now(),
+                    };
+                    duplicate_failures.push(failed_org);
+                }
+            }
+        }
+
+        Ok((files_to_organize, duplicate_failures))
     }
 
     /// Create backup of original file
