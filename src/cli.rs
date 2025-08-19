@@ -9,6 +9,14 @@ use crate::movie_parser::MovieParser;
 use crate::scanner::Scanner;
 use crate::tmdb_client::TmdbClient;
 
+/// Confidence filtering settings
+#[derive(Debug, Clone)]
+struct ConfidenceSettings {
+    min_confidence: f32,
+    skip_unmatched: bool,
+    no_warnings: bool,
+}
+
 /// Plex Media Organizer - Intelligent media file organization
 #[derive(Parser)]
 #[command(name = "plex-media-organizer")]
@@ -43,6 +51,18 @@ enum Commands {
         /// Batch size for processing (smaller for network drives)
         #[arg(long, default_value = "100")]
         batch_size: usize,
+
+        /// Minimum confidence threshold (0.0-1.0) for organizing movies
+        #[arg(long, default_value = "0.3")]
+        min_confidence: f32,
+
+        /// Skip movies with no TMDB match instead of using fallback data
+        #[arg(long)]
+        skip_unmatched: bool,
+
+        /// Skip warnings for low confidence matches
+        #[arg(long)]
+        no_warnings: bool,
     },
 
     /// Set up configuration interactively
@@ -107,6 +127,18 @@ enum Commands {
         /// Batch size for processing (smaller for network drives)
         #[arg(long, default_value = "100")]
         batch_size: usize,
+
+        /// Minimum confidence threshold (0.0-1.0) for organizing movies
+        #[arg(long, default_value = "0.3")]
+        min_confidence: f32,
+
+        /// Skip movies with no TMDB match instead of using fallback data
+        #[arg(long)]
+        skip_unmatched: bool,
+
+        /// Skip warnings for low confidence matches
+        #[arg(long)]
+        no_warnings: bool,
     },
 
     /// Rollback a previous organization operation
@@ -156,8 +188,24 @@ impl Cli {
                 network_mode,
                 max_parallel,
                 batch_size,
+                min_confidence,
+                skip_unmatched,
+                no_warnings,
             } => {
-                Self::handle_scan(directory, verbose, network_mode, max_parallel, batch_size).await
+                let confidence_settings = ConfidenceSettings {
+                    min_confidence,
+                    skip_unmatched,
+                    no_warnings,
+                };
+                Self::handle_scan(
+                    directory,
+                    verbose,
+                    network_mode,
+                    max_parallel,
+                    batch_size,
+                    confidence_settings,
+                )
+                .await
             }
             Commands::Setup { force } => Self::handle_setup(force).await,
             Commands::Config { path } => Self::handle_config(path).await,
@@ -175,7 +223,15 @@ impl Cli {
                 network_mode,
                 max_parallel,
                 batch_size,
+                min_confidence,
+                skip_unmatched,
+                no_warnings,
             } => {
+                let confidence_settings = ConfidenceSettings {
+                    min_confidence,
+                    skip_unmatched,
+                    no_warnings,
+                };
                 Self::handle_organize(
                     directory,
                     preview,
@@ -184,6 +240,7 @@ impl Cli {
                     network_mode,
                     max_parallel,
                     batch_size,
+                    confidence_settings,
                 )
                 .await
             }
@@ -202,12 +259,14 @@ impl Cli {
     }
 
     /// Handle the scan command
+    #[allow(clippy::too_many_arguments)]
     async fn handle_scan(
         directory: PathBuf,
         verbose: bool,
         network_mode: bool,
         max_parallel: usize,
         batch_size: usize,
+        confidence_settings: ConfidenceSettings,
     ) -> Result<()> {
         println!("🎬 Plex Media Organizer - Scanning Directory");
         println!("Directory: {}", directory.display());
@@ -247,6 +306,17 @@ impl Cli {
 
         // Apply custom settings
         scanner.set_batch_size(batch_size);
+
+        // Override confidence settings from CLI arguments
+        scanner
+            .config
+            .organization
+            .matching
+            .min_confidence_threshold = confidence_settings.min_confidence;
+        scanner.config.organization.matching.skip_unmatched_movies =
+            confidence_settings.skip_unmatched;
+        scanner.config.organization.matching.warn_on_low_confidence =
+            !confidence_settings.no_warnings;
 
         // Auto-detect network drives if not explicitly set
         if !network_mode && Scanner::detect_network_drive(&directory) {
@@ -529,6 +599,7 @@ impl Cli {
     }
 
     /// Handle the organize command
+    #[allow(clippy::too_many_arguments)]
     async fn handle_organize(
         directory: PathBuf,
         preview: bool,
@@ -537,6 +608,7 @@ impl Cli {
         network_mode: bool,
         max_parallel: usize,
         batch_size: usize,
+        confidence_settings: ConfidenceSettings,
     ) -> Result<()> {
         println!("🎬 Plex Media Organizer - File Organization");
         println!("Directory: {}", directory.display());
@@ -584,6 +656,17 @@ impl Cli {
 
         // Apply custom settings
         scanner.set_batch_size(batch_size);
+
+        // Override confidence settings from CLI arguments
+        scanner
+            .config
+            .organization
+            .matching
+            .min_confidence_threshold = confidence_settings.min_confidence;
+        scanner.config.organization.matching.skip_unmatched_movies =
+            confidence_settings.skip_unmatched;
+        scanner.config.organization.matching.warn_on_low_confidence =
+            !confidence_settings.no_warnings;
 
         // Auto-detect network drives if not explicitly set
         if !network_mode && Scanner::detect_network_drive(&directory) {
@@ -1019,12 +1102,18 @@ mod tests {
                 network_mode,
                 max_parallel,
                 batch_size,
+                min_confidence,
+                skip_unmatched,
+                no_warnings,
             } => {
                 assert_eq!(directory, PathBuf::from("/test/dir"));
                 assert!(!verbose);
                 assert!(!network_mode);
                 assert_eq!(max_parallel, 16);
                 assert_eq!(batch_size, 100);
+                assert_eq!(min_confidence, 0.3);
+                assert!(!skip_unmatched);
+                assert!(!no_warnings);
             }
             _ => panic!("Expected scan command"),
         }
@@ -1049,12 +1138,18 @@ mod tests {
                 network_mode,
                 max_parallel,
                 batch_size,
+                min_confidence,
+                skip_unmatched,
+                no_warnings,
             } => {
                 assert_eq!(directory, PathBuf::from("/test/dir"));
                 assert!(!verbose);
                 assert!(network_mode);
                 assert_eq!(max_parallel, 4);
                 assert_eq!(batch_size, 25);
+                assert_eq!(min_confidence, 0.3);
+                assert!(!skip_unmatched);
+                assert!(!no_warnings);
             }
             _ => panic!("Expected scan command with network mode"),
         }

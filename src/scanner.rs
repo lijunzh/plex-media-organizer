@@ -1,5 +1,6 @@
 //! Directory scanning and file discovery
 
+use crate::config::AppConfig;
 use crate::movie_parser::MovieParser;
 use crate::types::{FailedFile, MediaFile, MediaType, ScanResult, ScanStatistics};
 use anyhow::Result;
@@ -14,6 +15,8 @@ use walkdir::WalkDir;
 #[derive(Debug)]
 pub struct Scanner {
     movie_parser: MovieParser,
+    /// Application configuration
+    pub config: AppConfig,
     /// Maximum number of concurrent parsing operations
     concurrency_limit: usize,
     /// Whether to use network drive optimizations
@@ -25,8 +28,10 @@ pub struct Scanner {
 impl Scanner {
     /// Create a new scanner with default concurrency limit
     pub fn new(movie_parser: MovieParser) -> Self {
+        let config = AppConfig::load().unwrap_or_default();
         Self {
             movie_parser,
+            config,
             concurrency_limit: 16, // Default to 16 concurrent operations
             network_mode: false,
             batch_size: 100,
@@ -35,8 +40,10 @@ impl Scanner {
 
     /// Create a new scanner with custom concurrency limit
     pub fn with_concurrency(movie_parser: MovieParser, concurrency_limit: usize) -> Self {
+        let config = AppConfig::load().unwrap_or_default();
         Self {
             movie_parser,
+            config,
             concurrency_limit,
             network_mode: false,
             batch_size: 100,
@@ -45,8 +52,10 @@ impl Scanner {
 
     /// Create a scanner optimized for network drives
     pub fn for_network_drive(movie_parser: MovieParser) -> Self {
+        let config = AppConfig::load().unwrap_or_default();
         Self {
             movie_parser,
+            config,
             concurrency_limit: 4, // Reduced concurrency for network drives
             network_mode: true,
             batch_size: 50, // Smaller batches for network drives
@@ -168,7 +177,7 @@ impl Scanner {
             );
         }
 
-        let (parsed_files, failed_files) = if is_network {
+        let (parsed_files, parse_failed_files) = if is_network {
             self.parse_media_files_network_optimized(&media_files)
                 .await?
         } else {
@@ -176,19 +185,35 @@ impl Scanner {
         };
 
         println!("Successfully parsed {} files", parsed_files.len());
-        if !failed_files.is_empty() {
-            println!("Failed to parse {} files", failed_files.len());
+        if !parse_failed_files.is_empty() {
+            println!("Failed to parse {} files", parse_failed_files.len());
+        }
+
+        // Apply confidence filtering
+        let (filtered_files, confidence_failed_files) = self.filter_by_confidence(parsed_files);
+        let mut all_failed_files = parse_failed_files;
+        all_failed_files.extend(confidence_failed_files.clone());
+
+        println!(
+            "After confidence filtering: {} files ready for organization",
+            filtered_files.len()
+        );
+        if !confidence_failed_files.is_empty() {
+            println!(
+                "Skipped {} files due to low confidence or no TMDB match",
+                confidence_failed_files.len()
+            );
         }
 
         // Calculate statistics
         let statistics =
-            self.calculate_statistics(&media_files, &parsed_files, &failed_files, start_time);
+            self.calculate_statistics(&media_files, &filtered_files, &all_failed_files, start_time);
 
         let result = ScanResult {
             directory: directory.to_path_buf(),
             files: media_files,
-            parsed_files,
-            failed_files,
+            parsed_files: filtered_files,
+            failed_files: all_failed_files,
             statistics,
             scanned_at: Utc::now(),
         };
@@ -647,6 +672,75 @@ impl Scanner {
         }
 
         Ok((parsed_files, failed_files))
+    }
+
+    /// Filter parsing results based on confidence threshold
+    fn filter_by_confidence(
+        &self,
+        parsed_files: Vec<crate::types::ParsingResult>,
+    ) -> (Vec<crate::types::ParsingResult>, Vec<FailedFile>) {
+        let mut filtered_files = Vec::new();
+        let mut skipped_files = Vec::new();
+        let threshold = self.config.organization.matching.min_confidence_threshold;
+        let skip_unmatched = self.config.organization.matching.skip_unmatched_movies;
+        let warn_on_low_confidence = self.config.organization.matching.warn_on_low_confidence;
+
+        for parsing_result in parsed_files {
+            let confidence = parsing_result.confidence_score;
+            let has_tmdb_match = !parsing_result.external_sources.is_empty();
+
+            // Check if we should skip this file
+            let should_skip = if skip_unmatched && !has_tmdb_match {
+                // Skip unmatched movies if configured
+                true
+            } else if confidence < threshold {
+                // Skip low confidence matches
+                true
+            } else {
+                false
+            };
+
+            if should_skip {
+                let failed_file = FailedFile {
+                    media_file: parsing_result.media_file.clone(),
+                    error: if !has_tmdb_match {
+                        format!("No TMDB match found (confidence: {:.2})", confidence)
+                    } else {
+                        format!(
+                            "Low confidence match (confidence: {:.2} < {:.2})",
+                            confidence, threshold
+                        )
+                    },
+                    failed_at: Utc::now(),
+                };
+                skipped_files.push(failed_file);
+
+                // Show warning if configured
+                if warn_on_low_confidence {
+                    let filename = parsing_result.media_file.file_name.clone();
+                    if !has_tmdb_match {
+                        println!("⚠️  Skipped: {} - No TMDB match found", filename);
+                    } else {
+                        println!(
+                            "⚠️  Skipped: {} - Low confidence ({:.2} < {:.2})",
+                            filename, confidence, threshold
+                        );
+                    }
+                }
+            } else {
+                // Keep the file but show warning for low confidence
+                if warn_on_low_confidence && confidence < 0.7 {
+                    let filename = parsing_result.media_file.file_name.clone();
+                    println!(
+                        "⚠️  Low confidence: {} (confidence: {:.2})",
+                        filename, confidence
+                    );
+                }
+                filtered_files.push(parsing_result);
+            }
+        }
+
+        (filtered_files, skipped_files)
     }
 
     /// Check if a file extension is a media file

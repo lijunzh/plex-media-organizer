@@ -111,7 +111,7 @@
 //! The library supports configurable behavior through `AppConfig`:
 //!
 //! ```rust
-//! use plex_media_organizer::{AppConfig, ApiConfig, OrganizationConfig, QualityConfig, OriginalTitleConfig};
+//! use plex_media_organizer::{AppConfig, ApiConfig, OrganizationConfig, QualityConfig, OriginalTitleConfig, MatchingConfig};
 //!
 //! let config = AppConfig {
 //!     apis: ApiConfig {
@@ -126,6 +126,12 @@
 //!             include_english_subtitle: true,
 //!             fallback_to_english_on_error: true,
 //!             preserve_original_in_metadata: true,
+//!         },
+//!         matching: MatchingConfig {
+//!             min_confidence_threshold: 0.3,
+//!             skip_unmatched_movies: false,
+//!             warn_on_low_confidence: true,
+//!             allow_unknown_year: true,
 //!         },
 //!     },
 //! };
