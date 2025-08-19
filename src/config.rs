@@ -76,7 +76,7 @@ impl Default for OriginalTitleConfig {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MatchingConfig {
     /// Minimum confidence score required to organize a movie (0.0-1.0)
-    pub min_confidence_threshold: f32,
+    pub min_confidence_threshold: f32, // Default: 0.5 (higher threshold to avoid wrong matches)
     /// Skip movies with no TMDB match instead of using fallback data
     pub skip_unmatched_movies: bool,
     /// Show warnings for low confidence matches
@@ -88,8 +88,8 @@ pub struct MatchingConfig {
 impl Default for MatchingConfig {
     fn default() -> Self {
         Self {
-            min_confidence_threshold: 0.3, // Require at least filename parsing confidence
-            skip_unmatched_movies: false,  // Default: organize with fallback data
+            min_confidence_threshold: 0.7, // Very high threshold to avoid wrong matches // Require at least filename parsing confidence
+            skip_unmatched_movies: true,   // Default: skip files with no TMDB match
             warn_on_low_confidence: true,  // Warn about low confidence matches
             allow_unknown_year: true,      // Allow "Unknown Year" directories
         }

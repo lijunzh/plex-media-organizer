@@ -187,6 +187,15 @@ impl Scanner {
         println!("Successfully parsed {} files", parsed_files.len());
         if !parse_failed_files.is_empty() {
             println!("Failed to parse {} files", parse_failed_files.len());
+            // Debug: Show first few parse failures
+            for (i, failed) in parse_failed_files.iter().take(3).enumerate() {
+                println!(
+                    "  Parse failed {}: {} - {}",
+                    i + 1,
+                    failed.media_file.file_name,
+                    failed.error
+                );
+            }
         }
 
         // Apply confidence filtering
@@ -203,6 +212,15 @@ impl Scanner {
                 "Skipped {} files due to low confidence or no TMDB match",
                 confidence_failed_files.len()
             );
+            // Debug: Show first few failed files
+            for (i, failed) in confidence_failed_files.iter().take(3).enumerate() {
+                println!(
+                    "  Failed {}: {} - {}",
+                    i + 1,
+                    failed.media_file.file_name,
+                    failed.error
+                );
+            }
         }
 
         // Calculate statistics

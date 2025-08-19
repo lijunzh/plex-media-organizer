@@ -174,6 +174,15 @@ pub struct MovieInfo {
     pub language: Option<String>,
 }
 
+/// TMDB movie match result with score
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct TmdbMatchResult {
+    /// The matched movie
+    pub movie: TmdbMovie,
+    /// The confidence score (0.0 to 1.0)
+    pub confidence_score: f32,
+}
+
 /// TMDB movie data
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TmdbMovie {

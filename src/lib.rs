@@ -128,8 +128,8 @@
 //!             preserve_original_in_metadata: true,
 //!         },
 //!         matching: MatchingConfig {
-//!             min_confidence_threshold: 0.3,
-//!             skip_unmatched_movies: false,
+//!             min_confidence_threshold: 0.7,
+//!             skip_unmatched_movies: true,
 //!             warn_on_low_confidence: true,
 //!             allow_unknown_year: true,
 //!         },
@@ -201,6 +201,7 @@
 
 pub mod cli;
 pub mod config;
+pub mod filename_parser;
 pub mod metadata_extractor;
 pub mod movie_parser;
 pub mod organizer;

@@ -53,11 +53,11 @@ enum Commands {
         batch_size: usize,
 
         /// Minimum confidence threshold (0.0-1.0) for organizing movies
-        #[arg(long, default_value = "0.3")]
+        #[arg(long, default_value = "0.7")]
         min_confidence: f32,
 
         /// Skip movies with no TMDB match instead of using fallback data
-        #[arg(long)]
+        #[arg(long, default_value = "true")]
         skip_unmatched: bool,
 
         /// Skip warnings for low confidence matches
@@ -129,11 +129,11 @@ enum Commands {
         batch_size: usize,
 
         /// Minimum confidence threshold (0.0-1.0) for organizing movies
-        #[arg(long, default_value = "0.3")]
+        #[arg(long, default_value = "0.7")]
         min_confidence: f32,
 
         /// Skip movies with no TMDB match instead of using fallback data
-        #[arg(long)]
+        #[arg(long, default_value = "true")]
         skip_unmatched: bool,
 
         /// Skip warnings for low confidence matches
@@ -1111,8 +1111,8 @@ mod tests {
                 assert!(!network_mode);
                 assert_eq!(max_parallel, 16);
                 assert_eq!(batch_size, 100);
-                assert_eq!(min_confidence, 0.3);
-                assert!(!skip_unmatched);
+                assert_eq!(min_confidence, 0.7);
+                assert!(skip_unmatched);
                 assert!(!no_warnings);
             }
             _ => panic!("Expected scan command"),
@@ -1147,8 +1147,8 @@ mod tests {
                 assert!(network_mode);
                 assert_eq!(max_parallel, 4);
                 assert_eq!(batch_size, 25);
-                assert_eq!(min_confidence, 0.3);
-                assert!(!skip_unmatched);
+                assert_eq!(min_confidence, 0.7);
+                assert!(skip_unmatched);
                 assert!(!no_warnings);
             }
             _ => panic!("Expected scan command with network mode"),

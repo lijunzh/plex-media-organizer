@@ -14,19 +14,19 @@
 
 ## 🎯 **Recent Updates**
 
-### **August 2025 - Enhanced TMDB Matching Implementation**
-- **Status**: ✅ **COMPLETED** - Enhanced TMDB matching with fuzzy search and multiple strategies
-- **Features Delivered**:
-  - ✅ Fuzzy search integration with `fuzzy-matcher` dependency
-  - ✅ Multiple search strategies (4 fallback approaches)
-  - ✅ Title cleaning and variation generation
-  - ✅ Improved scoring system with confidence thresholds
-  - ✅ Enhanced movie parser integration
-  - ✅ Comprehensive test coverage (26/26 tests passing)
-  - ✅ 100% parsing success rate on 417 real-world files
-  - ✅ 185+ files/second processing speed
-- **Branch**: `feature/enhance-tmdb-matching`
-- **Result**: Significantly improved movie matching accuracy and robustness
+### **August 2025 - TMDB Matching Challenges Resolution**
+- **Status**: ✅ **COMPLETED** - Resolved TMDB matching challenges with general solutions
+- **Challenges Addressed**:
+  - ✅ Extras content misidentification (Making of, Production Report, etc.)
+  - ✅ Generic title matching (short titles matching wrong movies)
+  - ✅ Multilingual title complexity (Chinese/Japanese filename parsing)
+- **Solutions Implemented**:
+  - ✅ Content type penalties for problematic content patterns
+  - ✅ Enhanced confidence scoring using TMDB's sophisticated algorithms
+  - ✅ Improved title extraction for complex multilingual filenames
+  - ✅ Configurable confidence thresholds (default: 0.7, skip unmatched: true)
+- **Documentation**: Created `project/tmdb_matching_challenges.md` with comprehensive analysis
+- **Result**: Problematic files now properly skipped instead of incorrectly organized
 
 ### **August 2025 - Core Features Implementation**
 - **Status**: 🔄 **IN PROGRESS** - Core features implemented, action list pending
