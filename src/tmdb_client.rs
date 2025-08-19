@@ -244,29 +244,31 @@ impl TmdbClient {
         &self,
         title: &str,
         year: Option<u32>,
-    ) -> Result<Option<TmdbMovie>> {
+    ) -> Result<Option<crate::types::TmdbMatchResult>> {
         // Strategy 1: Try exact search with year
-        if let Some(movie) = self.find_best_match(title, year).await? {
-            return Ok(Some(movie));
+        if let Some(result) = self.find_best_match_with_score(title, year).await? {
+            return Ok(Some(result));
         }
 
         // Strategy 2: Try search without year (broader search)
-        if let Some(movie) = self.find_best_match(title, None).await? {
-            return Ok(Some(movie));
+        if let Some(result) = self.find_best_match_with_score(title, None).await? {
+            return Ok(Some(result));
         }
 
         // Strategy 3: Try with cleaned title (remove common suffixes/prefixes)
         let cleaned_title = self.clean_title_for_search(title);
         if cleaned_title != title
-            && let Some(movie) = self.find_best_match(&cleaned_title, year).await?
+            && let Some(result) = self
+                .find_best_match_with_score(&cleaned_title, year)
+                .await?
         {
-            return Ok(Some(movie));
+            return Ok(Some(result));
         }
 
         // Strategy 4: Try with alternative title variations
         for alt_title in self.generate_title_variations(title) {
-            if let Some(movie) = self.find_best_match(&alt_title, year).await? {
-                return Ok(Some(movie));
+            if let Some(result) = self.find_best_match_with_score(&alt_title, year).await? {
+                return Ok(Some(result));
             }
         }
 
@@ -343,6 +345,19 @@ impl TmdbClient {
         title: &str,
         year: Option<u32>,
     ) -> Result<Option<TmdbMovie>> {
+        if let Some(result) = self.find_best_match_with_score(title, year).await? {
+            Ok(Some(result.movie))
+        } else {
+            Ok(None)
+        }
+    }
+
+    /// Find the best matching movie from search results with enhanced fuzzy matching and return score
+    pub async fn find_best_match_with_score(
+        &self,
+        title: &str,
+        year: Option<u32>,
+    ) -> Result<Option<crate::types::TmdbMatchResult>> {
         let search_results = self.search_movie(title, year).await?;
 
         if search_results.is_empty() {
@@ -416,15 +431,52 @@ impl TmdbClient {
                 score += vote_average * 2.0; // Rating bonus
             }
 
+            // Penalize problematic content types
+            let title_lower = movie.title.to_lowercase();
+            let problematic_patterns = [
+                "production report",
+                "making of",
+                "behind the scenes",
+                "highlight film concert",
+                "documentary",
+                "special feature",
+                "bonus content",
+                "extras",
+                "commentary",
+                "interview",
+            ];
+
+            for pattern in &problematic_patterns {
+                if title_lower.contains(pattern) {
+                    score -= 1000.0; // Very heavy penalty for problematic content
+                    break;
+                }
+            }
+
             if score > best_score {
                 best_score = score;
                 best_match = Some(movie);
             }
         }
 
+        // Convert TMDB score to confidence score (0.0 to 1.0)
+        // TMDB scores can range from ~50 to ~400, so normalize to 0.0-1.0
+        let confidence_score = if best_score >= 50.0 {
+            // Normalize: 50 = 0.3, 400 = 1.0
+            let normalized = (best_score - 50.0) / 350.0; // 400 - 50 = 350
+            (0.3 + normalized * 0.7).min(1.0) // Scale to 0.3-1.0 range
+        } else {
+            0.0
+        };
+
         // Only return matches above a minimum threshold
         if best_score >= 50.0 {
-            Ok(best_match)
+            let movie = best_match.unwrap();
+
+            Ok(Some(crate::types::TmdbMatchResult {
+                movie: movie.clone(),
+                confidence_score,
+            }))
         } else {
             Ok(None)
         }
@@ -500,7 +552,7 @@ mod tests {
 
     #[test]
     fn test_fuzzy_matching_scoring() {
-        let client = TmdbClient::new("test_key".to_string());
+        let _client = TmdbClient::new("test_key".to_string());
         let fuzzy_matcher = SkimMatcherV2::default();
 
         // Test exact match

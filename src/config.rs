@@ -29,6 +29,8 @@ pub struct OrganizationConfig {
     pub quality: QualityConfig,
     /// CJK (Chinese/Japanese/Korean) title preferences
     pub original_titles: OriginalTitleConfig,
+    /// Confidence and matching preferences
+    pub matching: MatchingConfig,
 }
 
 /// Quality preferences
@@ -66,6 +68,30 @@ impl Default for OriginalTitleConfig {
             include_english_subtitle: true,      // Include English subtitle for clarity
             fallback_to_english_on_error: true,  // Safe fallback
             preserve_original_in_metadata: true, // Always preserve original
+        }
+    }
+}
+
+/// Confidence and matching preferences
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct MatchingConfig {
+    /// Minimum confidence score required to organize a movie (0.0-1.0)
+    pub min_confidence_threshold: f32, // Default: 0.5 (higher threshold to avoid wrong matches)
+    /// Skip movies with no TMDB match instead of using fallback data
+    pub skip_unmatched_movies: bool,
+    /// Show warnings for low confidence matches
+    pub warn_on_low_confidence: bool,
+    /// Allow organizing movies with "Unknown Year" when no year is found
+    pub allow_unknown_year: bool,
+}
+
+impl Default for MatchingConfig {
+    fn default() -> Self {
+        Self {
+            min_confidence_threshold: 0.7, // High threshold to avoid incorrect matches - requires strong evidence
+            skip_unmatched_movies: true,   // Default: skip files with no TMDB match
+            warn_on_low_confidence: true,  // Warn about low confidence matches
+            allow_unknown_year: true,      // Allow "Unknown Year" directories
         }
     }
 }

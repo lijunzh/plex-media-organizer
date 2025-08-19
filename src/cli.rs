@@ -9,6 +9,14 @@ use crate::movie_parser::MovieParser;
 use crate::scanner::Scanner;
 use crate::tmdb_client::TmdbClient;
 
+/// Confidence filtering settings
+#[derive(Debug, Clone)]
+struct ConfidenceSettings {
+    min_confidence: f32,
+    skip_unmatched: bool,
+    no_warnings: bool,
+}
+
 /// Plex Media Organizer - Intelligent media file organization
 #[derive(Parser)]
 #[command(name = "plex-media-organizer")]
@@ -43,6 +51,18 @@ enum Commands {
         /// Batch size for processing (smaller for network drives)
         #[arg(long, default_value = "100")]
         batch_size: usize,
+
+        /// Minimum confidence threshold (0.0-1.0) for organizing movies
+        #[arg(long, default_value = "0.7")]
+        min_confidence: f32,
+
+        /// Skip movies with no TMDB match instead of using fallback data
+        #[arg(long, default_value = "true")]
+        skip_unmatched: bool,
+
+        /// Skip warnings for low confidence matches
+        #[arg(long)]
+        no_warnings: bool,
     },
 
     /// Set up configuration interactively
@@ -107,6 +127,18 @@ enum Commands {
         /// Batch size for processing (smaller for network drives)
         #[arg(long, default_value = "100")]
         batch_size: usize,
+
+        /// Minimum confidence threshold (0.0-1.0) for organizing movies
+        #[arg(long, default_value = "0.7")]
+        min_confidence: f32,
+
+        /// Skip movies with no TMDB match instead of using fallback data
+        #[arg(long, default_value = "true")]
+        skip_unmatched: bool,
+
+        /// Skip warnings for low confidence matches
+        #[arg(long)]
+        no_warnings: bool,
     },
 
     /// Rollback a previous organization operation
@@ -156,8 +188,24 @@ impl Cli {
                 network_mode,
                 max_parallel,
                 batch_size,
+                min_confidence,
+                skip_unmatched,
+                no_warnings,
             } => {
-                Self::handle_scan(directory, verbose, network_mode, max_parallel, batch_size).await
+                let confidence_settings = ConfidenceSettings {
+                    min_confidence,
+                    skip_unmatched,
+                    no_warnings,
+                };
+                Self::handle_scan(
+                    directory,
+                    verbose,
+                    network_mode,
+                    max_parallel,
+                    batch_size,
+                    confidence_settings,
+                )
+                .await
             }
             Commands::Setup { force } => Self::handle_setup(force).await,
             Commands::Config { path } => Self::handle_config(path).await,
@@ -175,7 +223,15 @@ impl Cli {
                 network_mode,
                 max_parallel,
                 batch_size,
+                min_confidence,
+                skip_unmatched,
+                no_warnings,
             } => {
+                let confidence_settings = ConfidenceSettings {
+                    min_confidence,
+                    skip_unmatched,
+                    no_warnings,
+                };
                 Self::handle_organize(
                     directory,
                     preview,
@@ -184,6 +240,7 @@ impl Cli {
                     network_mode,
                     max_parallel,
                     batch_size,
+                    confidence_settings,
                 )
                 .await
             }
@@ -202,12 +259,14 @@ impl Cli {
     }
 
     /// Handle the scan command
+    #[allow(clippy::too_many_arguments)]
     async fn handle_scan(
         directory: PathBuf,
         verbose: bool,
         network_mode: bool,
         max_parallel: usize,
         batch_size: usize,
+        confidence_settings: ConfidenceSettings,
     ) -> Result<()> {
         println!("🎬 Plex Media Organizer - Scanning Directory");
         println!("Directory: {}", directory.display());
@@ -233,10 +292,7 @@ impl Cli {
         let tmdb_client = config.apis.tmdb_api_key.map(TmdbClient::new);
 
         // Create movie parser and scanner
-        let movie_parser = MovieParser::with_original_title_config(
-            tmdb_client,
-            config.organization.original_titles.clone(),
-        );
+        let movie_parser = MovieParser::new(tmdb_client);
 
         // Create scanner with network optimizations if requested
         let mut scanner = if network_mode {
@@ -247,6 +303,17 @@ impl Cli {
 
         // Apply custom settings
         scanner.set_batch_size(batch_size);
+
+        // Override confidence settings from CLI arguments
+        scanner
+            .config
+            .organization
+            .matching
+            .min_confidence_threshold = confidence_settings.min_confidence;
+        scanner.config.organization.matching.skip_unmatched_movies =
+            confidence_settings.skip_unmatched;
+        scanner.config.organization.matching.warn_on_low_confidence =
+            !confidence_settings.no_warnings;
 
         // Auto-detect network drives if not explicitly set
         if !network_mode && Scanner::detect_network_drive(&directory) {
@@ -360,10 +427,7 @@ impl Cli {
             let tmdb_client = config.apis.tmdb_api_key.map(TmdbClient::new);
 
             // Create movie parser and scanner
-            let movie_parser = MovieParser::with_original_title_config(
-                tmdb_client,
-                config.organization.original_titles.clone(),
-            );
+            let movie_parser = MovieParser::new(tmdb_client);
             let scanner = Scanner::new(movie_parser);
 
             // Scan directory
@@ -431,10 +495,7 @@ impl Cli {
             let tmdb_client = config.apis.tmdb_api_key.map(TmdbClient::new);
 
             // Create movie parser and test parsing
-            let movie_parser = MovieParser::with_original_title_config(
-                tmdb_client,
-                config.organization.original_titles.clone(),
-            );
+            let movie_parser = MovieParser::new(tmdb_client);
 
             match movie_parser.parse_movie(&path).await {
                 Ok(result) => {
@@ -529,6 +590,7 @@ impl Cli {
     }
 
     /// Handle the organize command
+    #[allow(clippy::too_many_arguments)]
     async fn handle_organize(
         directory: PathBuf,
         preview: bool,
@@ -537,6 +599,7 @@ impl Cli {
         network_mode: bool,
         max_parallel: usize,
         batch_size: usize,
+        confidence_settings: ConfidenceSettings,
     ) -> Result<()> {
         println!("🎬 Plex Media Organizer - File Organization");
         println!("Directory: {}", directory.display());
@@ -549,6 +612,50 @@ impl Cli {
             println!("Backup directory: {}", backup_dir.display());
         }
         println!();
+
+        // Safety check: require preview mode for lower confidence thresholds
+        if confidence_settings.min_confidence < 0.7 && !preview {
+            println!("❌ SAFETY CHECK FAILED");
+            println!(
+                "   • Lower confidence threshold ({:.1}) requires preview mode",
+                confidence_settings.min_confidence
+            );
+            println!("   • Use --preview to review results before applying changes");
+            println!("   • This prevents accidental incorrect organization");
+            println!();
+            anyhow::bail!("Lower confidence threshold requires --preview mode for safety");
+        }
+
+        // Display important warnings about the conservative approach
+        if confidence_settings.min_confidence >= 0.7 {
+            println!("⚠️  CONSERVATIVE MODE ENABLED");
+            println!(
+                "   • High confidence threshold ({:.1}) ensures accuracy over completeness",
+                confidence_settings.min_confidence
+            );
+            println!("   • Some movies may be skipped to avoid incorrect organization");
+            println!(
+                "   • Use --min-confidence 0.5 for more permissive matching (review carefully)"
+            );
+            println!();
+        } else if confidence_settings.min_confidence < 0.6 {
+            println!("⚠️  PERMISSIVE MODE ENABLED");
+            println!(
+                "   • Lower confidence threshold ({:.1}) may include incorrect matches",
+                confidence_settings.min_confidence
+            );
+            println!("   • Please review results carefully before applying changes");
+            println!("   • Preview mode is required for safety");
+            println!();
+        } else {
+            println!("⚠️  MODERATE MODE ENABLED");
+            println!(
+                "   • Moderate confidence threshold ({:.1}) - review results carefully",
+                confidence_settings.min_confidence
+            );
+            println!("   • Preview mode is required for safety");
+            println!();
+        }
 
         // Load configuration
         let config = match AppConfig::load() {
@@ -570,10 +677,7 @@ impl Cli {
         let tmdb_client = config.apis.tmdb_api_key.map(TmdbClient::new);
 
         // Create movie parser and scanner
-        let movie_parser = MovieParser::with_original_title_config(
-            tmdb_client,
-            config.organization.original_titles.clone(),
-        );
+        let movie_parser = MovieParser::new(tmdb_client);
 
         // Create scanner with network optimizations if requested
         let mut scanner = if network_mode {
@@ -584,6 +688,17 @@ impl Cli {
 
         // Apply custom settings
         scanner.set_batch_size(batch_size);
+
+        // Override confidence settings from CLI arguments
+        scanner
+            .config
+            .organization
+            .matching
+            .min_confidence_threshold = confidence_settings.min_confidence;
+        scanner.config.organization.matching.skip_unmatched_movies =
+            confidence_settings.skip_unmatched;
+        scanner.config.organization.matching.warn_on_low_confidence =
+            !confidence_settings.no_warnings;
 
         // Auto-detect network drives if not explicitly set
         if !network_mode && Scanner::detect_network_drive(&directory) {
@@ -1019,12 +1134,18 @@ mod tests {
                 network_mode,
                 max_parallel,
                 batch_size,
+                min_confidence,
+                skip_unmatched,
+                no_warnings,
             } => {
                 assert_eq!(directory, PathBuf::from("/test/dir"));
                 assert!(!verbose);
                 assert!(!network_mode);
                 assert_eq!(max_parallel, 16);
                 assert_eq!(batch_size, 100);
+                assert_eq!(min_confidence, 0.7);
+                assert!(skip_unmatched);
+                assert!(!no_warnings);
             }
             _ => panic!("Expected scan command"),
         }
@@ -1049,12 +1170,18 @@ mod tests {
                 network_mode,
                 max_parallel,
                 batch_size,
+                min_confidence,
+                skip_unmatched,
+                no_warnings,
             } => {
                 assert_eq!(directory, PathBuf::from("/test/dir"));
                 assert!(!verbose);
                 assert!(network_mode);
                 assert_eq!(max_parallel, 4);
                 assert_eq!(batch_size, 25);
+                assert_eq!(min_confidence, 0.7);
+                assert!(skip_unmatched);
+                assert!(!no_warnings);
             }
             _ => panic!("Expected scan command with network mode"),
         }

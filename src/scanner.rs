@@ -1,5 +1,6 @@
 //! Directory scanning and file discovery
 
+use crate::config::AppConfig;
 use crate::movie_parser::MovieParser;
 use crate::types::{FailedFile, MediaFile, MediaType, ScanResult, ScanStatistics};
 use anyhow::Result;
@@ -14,6 +15,8 @@ use walkdir::WalkDir;
 #[derive(Debug)]
 pub struct Scanner {
     movie_parser: MovieParser,
+    /// Application configuration
+    pub config: AppConfig,
     /// Maximum number of concurrent parsing operations
     concurrency_limit: usize,
     /// Whether to use network drive optimizations
@@ -25,8 +28,10 @@ pub struct Scanner {
 impl Scanner {
     /// Create a new scanner with default concurrency limit
     pub fn new(movie_parser: MovieParser) -> Self {
+        let config = AppConfig::load().unwrap_or_default();
         Self {
             movie_parser,
+            config,
             concurrency_limit: 16, // Default to 16 concurrent operations
             network_mode: false,
             batch_size: 100,
@@ -35,8 +40,10 @@ impl Scanner {
 
     /// Create a new scanner with custom concurrency limit
     pub fn with_concurrency(movie_parser: MovieParser, concurrency_limit: usize) -> Self {
+        let config = AppConfig::load().unwrap_or_default();
         Self {
             movie_parser,
+            config,
             concurrency_limit,
             network_mode: false,
             batch_size: 100,
@@ -45,8 +52,10 @@ impl Scanner {
 
     /// Create a scanner optimized for network drives
     pub fn for_network_drive(movie_parser: MovieParser) -> Self {
+        let config = AppConfig::load().unwrap_or_default();
         Self {
             movie_parser,
+            config,
             concurrency_limit: 4, // Reduced concurrency for network drives
             network_mode: true,
             batch_size: 50, // Smaller batches for network drives
@@ -168,7 +177,7 @@ impl Scanner {
             );
         }
 
-        let (parsed_files, failed_files) = if is_network {
+        let (parsed_files, parse_failed_files) = if is_network {
             self.parse_media_files_network_optimized(&media_files)
                 .await?
         } else {
@@ -176,19 +185,53 @@ impl Scanner {
         };
 
         println!("Successfully parsed {} files", parsed_files.len());
-        if !failed_files.is_empty() {
-            println!("Failed to parse {} files", failed_files.len());
+        if !parse_failed_files.is_empty() {
+            println!("Failed to parse {} files", parse_failed_files.len());
+            // Debug: Show first few parse failures
+            for (i, failed) in parse_failed_files.iter().take(3).enumerate() {
+                println!(
+                    "  Parse failed {}: {} - {}",
+                    i + 1,
+                    failed.media_file.file_name,
+                    failed.error
+                );
+            }
+        }
+
+        // Apply confidence filtering
+        let (filtered_files, confidence_failed_files) = self.filter_by_confidence(parsed_files);
+        let mut all_failed_files = parse_failed_files;
+        all_failed_files.extend(confidence_failed_files.clone());
+
+        println!(
+            "After confidence filtering: {} files ready for organization",
+            filtered_files.len()
+        );
+        if !confidence_failed_files.is_empty() {
+            println!(
+                "Skipped {} files due to low confidence or no TMDB match",
+                confidence_failed_files.len()
+            );
+            // Debug: Show first few failed files
+            for (i, failed) in confidence_failed_files.iter().take(3).enumerate() {
+                println!(
+                    "  Failed {}: {} - {}",
+                    i + 1,
+                    failed.media_file.file_name,
+                    failed.error
+                );
+            }
         }
 
         // Calculate statistics
         let statistics =
-            self.calculate_statistics(&media_files, &parsed_files, &failed_files, start_time);
+            self.calculate_statistics(&media_files, &filtered_files, &all_failed_files, start_time);
 
         let result = ScanResult {
             directory: directory.to_path_buf(),
             files: media_files,
-            parsed_files,
-            failed_files,
+            parsed_files: filtered_files,
+            failed_files: all_failed_files,
             statistics,
             scanned_at: Utc::now(),
         };
@@ -287,11 +330,19 @@ impl Scanner {
     fn filter_media_files(&self, files: &[PathBuf]) -> Result<Vec<MediaFile>> {
         let mut media_files = Vec::new();
         let mut processed = 0;
+        let mut skipped_extras = 0;
 
         for file_path in files {
             if let Some(extension) = file_path.extension()
                 && self.is_media_extension(extension)
             {
+                // Skip extras content (menus, interviews, trailers, etc.)
+                if self.is_extras_content(file_path) {
+                    skipped_extras += 1;
+                    processed += 1;
+                    continue;
+                }
+
                 // For network drives, minimize file system calls
                 let media_file = if self.network_mode {
                     self.create_media_file_network_optimized(file_path)?
@@ -306,14 +357,145 @@ impl Scanner {
             // Show progress for network drives
             if self.network_mode && processed % 100 == 0 {
                 println!(
-                    "   Filtered {} files, found {} media files...",
+                    "   Filtered {} files, found {} media files, skipped {} extras...",
                     processed,
-                    media_files.len()
+                    media_files.len(),
+                    skipped_extras
                 );
             }
         }
 
+        if skipped_extras > 0 {
+            println!(
+                "   Skipped {} extras files (menus, interviews, trailers, etc.)",
+                skipped_extras
+            );
+        }
+
         Ok(media_files)
+    }
+
+    /// Check if a file is extras content that should be skipped
+    fn is_extras_content(&self, file_path: &Path) -> bool {
+        let file_name = file_path
+            .file_name()
+            .and_then(|n| n.to_str())
+            .unwrap_or("")
+            .to_lowercase();
+
+        let path_str = file_path.to_string_lossy().to_lowercase();
+
+        // Check for extras directory patterns
+        let extras_dirs = [
+            "extras",
+            "bonus",
+            "special",
+            "behind",
+            "making",
+            "interviews",
+            "trailers",
+        ];
+        for dir in &extras_dirs {
+            if path_str.contains(dir) {
+                return true;
+            }
+        }
+
+        // Check for specific extras file patterns
+        let extras_patterns = [
+            // Blu-ray menus
+            "bdmenu",
+            "menu",
+            "bdmv",
+            // Interviews and behind-the-scenes
+            "interview",
+            "interviews",
+            "making",
+            "behind",
+            "featurette",
+            // Chinese/Japanese interview patterns
+            "访谈",
+            "采访",
+            "对谈",
+            "座谈",
+            "访问",
+            // Trailers and promotional content
+            "trailer",
+            "trailers",
+            "pv",
+            "promo",
+            "preview",
+            "teaser",
+            // Sample and short content
+            "sample",
+            "short",
+            "min",
+            "ver",
+            "version",
+            // Making-of and documentaries
+            "making.of",
+            "making-of",
+            "documentary",
+            "docu",
+            // Special features
+            "special",
+            "bonus",
+            "extra",
+            "extras",
+            // Audio commentaries
+            "commentary",
+            "commentaries",
+            // Deleted scenes
+            "deleted",
+            "scenes",
+            "outtakes",
+        ];
+
+        for pattern in &extras_patterns {
+            if file_name.contains(pattern) {
+                return true;
+            }
+        }
+
+        // Check for specific file extensions that are typically extras
+        let extras_extensions = ["ifo", "bup", "vob"]; // DVD/Blu-ray specific
+        if let Some(ext) = file_path.extension()
+            && let Some(ext_str) = ext.to_str()
+            && extras_extensions.contains(&ext_str.to_lowercase().as_str())
+        {
+            return true;
+        }
+
+        // Check for very short files (likely not full movies)
+        if let Ok(metadata) = std::fs::metadata(file_path) {
+            let size_mb = metadata.len() / (1024 * 1024);
+            if size_mb < 50 {
+                // Less than 50MB, likely not a full movie
+                // But only skip if it matches other extras patterns
+                if file_name.contains("sample")
+                    || file_name.contains("trailer")
+                    || file_name.contains("pv")
+                {
+                    return true;
+                }
+            }
+        }
+
+        // Check for specific patterns that indicate extras content
+        let specific_extras_patterns = [
+            "one.more.time",
+            "one.more.chance", // Music video patterns
+            "she.and.her.cat",
+            "5.min", // Short content patterns
+        ];
+
+        for pattern in &specific_extras_patterns {
+            if file_name.contains(pattern) {
+                return true;
+            }
+        }
+
+        false
     }
 
     /// Create media file with minimal file system calls (network optimized)
@@ -510,6 +692,75 @@ impl Scanner {
         Ok((parsed_files, failed_files))
     }
 
+    /// Filter parsing results based on confidence threshold
+    fn filter_by_confidence(
+        &self,
+        parsed_files: Vec<crate::types::ParsingResult>,
+    ) -> (Vec<crate::types::ParsingResult>, Vec<FailedFile>) {
+        let mut filtered_files = Vec::new();
+        let mut skipped_files = Vec::new();
+        let threshold = self.config.organization.matching.min_confidence_threshold;
+        let skip_unmatched = self.config.organization.matching.skip_unmatched_movies;
+        let warn_on_low_confidence = self.config.organization.matching.warn_on_low_confidence;
+
+        for parsing_result in parsed_files {
+            let confidence = parsing_result.confidence_score;
+            let has_tmdb_match = !parsing_result.external_sources.is_empty();
+
+            // Check if we should skip this file
+            let should_skip = if skip_unmatched && !has_tmdb_match {
+                // Skip unmatched movies if configured
+                true
+            } else if confidence < threshold {
+                // Skip low confidence matches
+                true
+            } else {
+                false
+            };
+
+            if should_skip {
+                let failed_file = FailedFile {
+                    media_file: parsing_result.media_file.clone(),
+                    error: if !has_tmdb_match {
+                        format!("No TMDB match found (confidence: {:.2})", confidence)
+                    } else {
+                        format!(
+                            "Low confidence match (confidence: {:.2} < {:.2})",
+                            confidence, threshold
+                        )
+                    },
+                    failed_at: Utc::now(),
+                };
+                skipped_files.push(failed_file);
+
+                // Show warning if configured
+                if warn_on_low_confidence {
+                    let filename = parsing_result.media_file.file_name.clone();
+                    if !has_tmdb_match {
+                        println!("⚠️  Skipped: {} - No TMDB match found", filename);
+                    } else {
+                        println!(
+                            "⚠️  Skipped: {} - Low confidence ({:.2} < {:.2})",
+                            filename, confidence, threshold
+                        );
+                    }
+                }
+            } else {
+                // Keep the file but show warning for low confidence
+                if warn_on_low_confidence && confidence < 0.7 {
+                    let filename = parsing_result.media_file.file_name.clone();
+                    println!(
+                        "⚠️  Low confidence: {} (confidence: {:.2})",
+                        filename, confidence
+                    );
+                }
+                filtered_files.push(parsing_result);
+            }
+        }
+
+        (filtered_files, skipped_files)
+    }
+
     /// Check if a file extension is a media file
     fn is_media_extension(&self, extension: &std::ffi::OsStr) -> bool {
         let ext_str = extension.to_string_lossy().to_lowercase();
@@ -654,5 +905,32 @@ mod tests {
         assert!(scanner.is_media_extension(std::ffi::OsStr::new("avi")));
         assert!(!scanner.is_media_extension(std::ffi::OsStr::new("txt")));
         assert!(!scanner.is_media_extension(std::ffi::OsStr::new("pdf")));
+    }
+
+    #[test]
+    fn test_extras_content_detection() {
+        let scanner = Scanner::new(MovieParser::new(None));
+
+        // Should be detected as extras
+        assert!(scanner.is_extras_content(Path::new("/path/to/Extras/BDMenu(JPGLBL).mkv")));
+        assert!(scanner.is_extras_content(Path::new("/path/to/BDMenu(JP).mkv")));
+        assert!(scanner.is_extras_content(Path::new("/path/to/Extras/DVDSP/樱花抄 动画分镜.mkv")));
+        assert!(scanner.is_extras_content(Path::new("/path/to/水桥研二访谈.mkv")));
+        assert!(scanner.is_extras_content(Path::new("/path/to/One.more.time,One.more.chance.mkv")));
+        assert!(scanner.is_extras_content(Path::new("/path/to/She.And.Her.Cat.5.min.ver.mkv")));
+        assert!(scanner.is_extras_content(Path::new("/path/to/PV.mkv")));
+        assert!(scanner.is_extras_content(Path::new("/path/to/Makoto.Shinkai.interview.mkv")));
+        assert!(scanner.is_extras_content(Path::new("/path/to/trailer.mkv")));
+        assert!(scanner.is_extras_content(Path::new("/path/to/sample.mkv")));
+        assert!(scanner.is_extras_content(Path::new("/path/to/making.of.mkv")));
+        assert!(scanner.is_extras_content(Path::new("/path/to/commentary.mkv")));
+
+        // Should NOT be detected as extras (actual movies)
+        assert!(!scanner.is_extras_content(Path::new(
+            "/path/to/5.Centimeters.Per.Second.2007.BluRay.1080p.x265.10bit.DDP.5.1-ted423@FRDS.mkv"
+        )));
+        assert!(!scanner.is_extras_content(Path::new("/path/to/Iron.Man.2008.BluRay.1080p.mkv")));
+        assert!(!scanner.is_extras_content(Path::new("/path/to/The.Matrix.1999.1080p.mkv")));
+        assert!(!scanner.is_extras_content(Path::new("/path/to/Avengers.Endgame.2019.4K.mkv")));
     }
 }

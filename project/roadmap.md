@@ -4,7 +4,7 @@
 
 This document outlines an iterative, incremental implementation plan for the Plex Media Organizer. Instead of a rigid waterfall approach, we'll start small with movies, test in small directories, and gradually expand to TV shows and music. This approach allows for faster feedback, learning, and course correction.
 
-**Important**: Before concluding any phase, refer to `docs/DEVELOPMENT_LESSONS.md` for the complete code review checklist and lessons learned.
+**Important**: Before concluding any phase, refer to `project/development/README.md` for the complete code review checklist and lessons learned.
 
 **Current Status**: Iteration 1 is focused on movie parsing and organization only. TV and music functionality will be added in future iterations.
 
@@ -434,7 +434,7 @@ Remember: **Perfect is the enemy of done**. Get something working, test it with 
 
 ### **Before Marking Any Phase Complete**
 
-**⚠️ CRITICAL**: Reference `docs/DEVELOPMENT_LESSONS.md` for the complete code review checklist.
+**⚠️ CRITICAL**: Reference `project/development/README.md` for the complete code review checklist.
 
 #### **Required Steps:**
 1. **Complete Code Review**: Review all source files against phase goals

@@ -73,7 +73,7 @@ Remember: **Perfect is the enemy of done**. Get something working, test it with 
 
 ### **Before Marking Any Phase Complete**
 
-**⚠️ CRITICAL**: Reference `docs/DEVELOPMENT_LESSONS.md` for the complete code review checklist.
+**⚠️ CRITICAL**: Reference `project/development/README.md` for the complete code review checklist.
 
 #### **Required Steps:**
 1. **Complete Code Review**: Review all source files against phase goals
