@@ -200,7 +200,7 @@ impl Organizer {
             metadata
                 .title
                 .as_ref()
-                .or_else(|| metadata.original_title.as_ref())
+                .or(metadata.original_title.as_ref())
                 .ok_or_else(|| anyhow::anyhow!("No title found in metadata"))?
                 .clone()
         };
@@ -329,7 +329,7 @@ impl Organizer {
             metadata
                 .title
                 .as_ref()
-                .or_else(|| metadata.original_title.as_ref())
+                .or(metadata.original_title.as_ref())
                 .ok_or_else(|| anyhow::anyhow!("No title found in metadata"))?
                 .clone()
         };
