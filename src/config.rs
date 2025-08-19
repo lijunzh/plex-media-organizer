@@ -88,7 +88,7 @@ pub struct MatchingConfig {
 impl Default for MatchingConfig {
     fn default() -> Self {
         Self {
-            min_confidence_threshold: 0.7, // Very high threshold to avoid wrong matches // Require at least filename parsing confidence
+            min_confidence_threshold: 0.7, // High threshold to avoid incorrect matches - requires strong evidence
             skip_unmatched_movies: true,   // Default: skip files with no TMDB match
             warn_on_low_confidence: true,  // Warn about low confidence matches
             allow_unknown_year: true,      // Allow "Unknown Year" directories

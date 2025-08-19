@@ -471,8 +471,10 @@ impl TmdbClient {
 
         // Only return matches above a minimum threshold
         if best_score >= 50.0 {
+            let movie = best_match.unwrap();
+
             Ok(Some(crate::types::TmdbMatchResult {
-                movie: best_match.unwrap(),
+                movie: movie.clone(),
                 confidence_score,
             }))
         } else {

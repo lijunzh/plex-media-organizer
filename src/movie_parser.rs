@@ -1,6 +1,5 @@
 //! Movie parsing and organization logic
 
-use crate::config::OriginalTitleConfig;
 use crate::filename_parser::FilenameParser;
 use crate::tmdb_client::TmdbClient;
 use crate::types::{
@@ -23,27 +22,12 @@ fn get_filename_parser() -> &'static FilenameParser {
 #[derive(Clone, Debug)]
 pub struct MovieParser {
     tmdb_client: Option<TmdbClient>,
-    original_title_config: OriginalTitleConfig,
 }
 
 impl MovieParser {
     /// Create a new movie parser
     pub fn new(tmdb_client: Option<TmdbClient>) -> Self {
-        Self {
-            tmdb_client,
-            original_title_config: OriginalTitleConfig::default(),
-        }
-    }
-
-    /// Create a new movie parser with original title configuration
-    pub fn with_original_title_config(
-        tmdb_client: Option<TmdbClient>,
-        original_title_config: OriginalTitleConfig,
-    ) -> Self {
-        Self {
-            tmdb_client,
-            original_title_config,
-        }
+        Self { tmdb_client }
     }
 
     /// Parse a movie filename and return MovieInfo
@@ -135,101 +119,12 @@ impl MovieParser {
 
     /// Merge movie info from different sources
     fn merge_movie_info(&self, base: MovieInfo, tmdb: MovieInfo) -> MovieInfo {
-        // Use TMDB's original language information to determine the true original title
-        let (final_title, final_original_title, final_original_language) =
-            if let Some(tmdb_original_language) = &tmdb.original_language {
-                // TMDB tells us the original language
-                match tmdb_original_language.as_str() {
-                    "ja" | "zh" | "ko" => {
-                        // For CJK languages, prefer the original title from TMDB
-                        if let Some(tmdb_original_title) = &tmdb.original_title {
-                            if self.original_title_config.prefer_original_titles {
-                                if self.original_title_config.include_english_subtitle {
-                                    // Original with English subtitle: 千と千尋の神隠し [Spirited Away]
-                                    let subtitle = format!(" [{}]", tmdb.title);
-                                    let combined_title = tmdb_original_title.clone() + &subtitle;
-                                    (
-                                        combined_title,
-                                        Some(tmdb.title.clone()),
-                                        tmdb.original_language.clone(),
-                                    )
-                                } else {
-                                    // Original title only: 千と千尋の神隠し
-                                    (
-                                        tmdb_original_title.clone(),
-                                        Some(tmdb.title.clone()),
-                                        tmdb.original_language.clone(),
-                                    )
-                                }
-                            } else {
-                                // English-first strategy
-                                (
-                                    tmdb.title.clone(),
-                                    Some(tmdb_original_title.clone()),
-                                    tmdb.original_language.clone(),
-                                )
-                            }
-                        } else {
-                            // No original title from TMDB, fall back to base
-                            (
-                                base.title.clone(),
-                                base.original_title.clone(),
-                                base.original_language.clone(),
-                            )
-                        }
-                    }
-                    _ => {
-                        // For non-CJK languages, use English title as primary
-                        (
-                            tmdb.title.clone(),
-                            tmdb.original_title.clone(),
-                            tmdb.original_language.clone(),
-                        )
-                    }
-                }
-            } else {
-                // No original language info from TMDB, fall back to filename-based logic
-                let has_cjk_in_base = base
-                    .original_title
-                    .as_ref()
-                    .map(|title| self.contains_cjk_characters(title))
-                    .unwrap_or(false);
-
-                let has_cjk_in_tmdb = tmdb
-                    .original_title
-                    .as_ref()
-                    .map(|title| self.contains_cjk_characters(title))
-                    .unwrap_or(false);
-
-                if (has_cjk_in_base || has_cjk_in_tmdb)
-                    && self.original_title_config.prefer_original_titles
-                {
-                    // We have CJK content and prefer original titles
-                    let cjk_title = if has_cjk_in_base {
-                        base.original_title.unwrap()
-                    } else {
-                        tmdb.original_title.unwrap()
-                    };
-
-                    let english_title = if has_cjk_in_base {
-                        base.title
-                    } else {
-                        tmdb.title
-                    };
-
-                    if self.original_title_config.include_english_subtitle {
-                        let subtitle = format!(" [{}]", english_title);
-                        let combined_title = cjk_title.clone() + &subtitle;
-                        (combined_title, Some(english_title), None)
-                    } else {
-                        (cjk_title, Some(english_title), None)
-                    }
-                } else {
-                    // Apply standard title strategy
-                    let (title, original_title) = self.apply_cjk_title_strategy(&base, &tmdb);
-                    (title, original_title, None)
-                }
-            };
+        // Simply use TMDB's data: English title for indexing, original title for display
+        let (final_title, final_original_title, final_original_language) = (
+            tmdb.title.clone(),             // English title for Plex indexing
+            tmdb.original_title.clone(), // Original title from TMDB (could be English or non-English)
+            tmdb.original_language.clone(), // Original language from TMDB
+        );
 
         MovieInfo {
             title: final_title,
@@ -243,71 +138,6 @@ impl MovieParser {
             source: base.source,   // Keep from filename
             language: tmdb.language.or(base.language),
         }
-    }
-
-    /// Apply CJK title strategy based on configuration
-    fn apply_cjk_title_strategy(
-        &self,
-        base: &MovieInfo,
-        tmdb: &MovieInfo,
-    ) -> (String, Option<String>) {
-        let english_title = tmdb.title.clone();
-        let original_cjk_title = base
-            .original_title
-            .clone()
-            .or_else(|| tmdb.original_title.clone());
-
-        // Detect if we have CJK content
-        let has_cjk_title = original_cjk_title
-            .as_ref()
-            .map(|title| self.contains_cjk_characters(title))
-            .unwrap_or(false);
-
-        if !has_cjk_title {
-            // No CJK content, use standard behavior
-            return (english_title, original_cjk_title);
-        }
-
-        // Apply original title strategy
-        match (
-            self.original_title_config.prefer_original_titles,
-            self.original_title_config.include_english_subtitle,
-        ) {
-            (true, true) => {
-                // Original with English subtitle: 英雄 [Hero]
-                let subtitle = format!(" [{}]", english_title);
-                let combined_title = original_cjk_title.clone().unwrap() + &subtitle;
-                (combined_title, Some(english_title))
-            }
-            (true, false) => {
-                // Original title only: 英雄
-                (original_cjk_title.unwrap(), Some(english_title))
-            }
-            (false, true) => {
-                // English with CJK subtitle: Hero [英雄]
-                let subtitle = format!(" [{}]", original_cjk_title.clone().unwrap());
-                let combined_title = english_title.clone() + &subtitle;
-                (combined_title, original_cjk_title)
-            }
-            (false, false) => {
-                // English title (default behavior)
-                (english_title, original_cjk_title)
-            }
-        }
-    }
-
-    /// Check if a string contains CJK characters
-    fn contains_cjk_characters(&self, text: &str) -> bool {
-        text.chars().any(|c| {
-            // Chinese characters (CJK Unified Ideographs)
-            ('\u{4e00}'..='\u{9fff}').contains(&c) ||
-            // Japanese Hiragana
-            ('\u{3040}'..='\u{309f}').contains(&c) ||
-            // Japanese Katakana
-            ('\u{30a0}'..='\u{30ff}').contains(&c) ||
-            // Korean Hangul
-            ('\u{ac00}'..='\u{d7af}').contains(&c)
-        })
     }
 
     /// Create MediaFile from MovieInfo
@@ -437,169 +267,6 @@ mod tests {
     }
 
     #[test]
-    fn test_original_title_strategy_default() {
-        use crate::config::OriginalTitleConfig;
-
-        let original_title_config = OriginalTitleConfig::default();
-        let parser = MovieParser::with_original_title_config(None, original_title_config);
-
-        // Create test data
-        let base = MovieInfo {
-            title: "Hero".to_string(),
-            original_title: Some("英雄".to_string()),
-            original_language: Some("zh".to_string()),
-            year: Some(2002),
-            part_number: None,
-            is_collection: false,
-            collection_name: None,
-
-            quality: Some("1080p".to_string()),
-            source: Some("BluRay".to_string()),
-            language: Some("zh".to_string()),
-        };
-
-        let tmdb = MovieInfo {
-            title: "Hero".to_string(),
-            original_title: Some("英雄".to_string()),
-            original_language: Some("zh".to_string()),
-            year: Some(2002),
-            part_number: None,
-            is_collection: false,
-            collection_name: None,
-
-            quality: None,
-            source: None,
-            language: Some("zh".to_string()),
-        };
-
-        let result = parser.merge_movie_info(base, tmdb);
-
-        // Default behavior: Original title with English subtitle
-        assert_eq!(result.title, "英雄 [Hero]");
-        assert_eq!(result.original_title, Some("Hero".to_string()));
-    }
-
-    #[test]
-    fn test_original_title_strategy_prefer_original() {
-        use crate::config::OriginalTitleConfig;
-
-        let original_title_config = OriginalTitleConfig {
-            prefer_original_titles: true,
-            include_english_subtitle: false,
-            fallback_to_english_on_error: true,
-            preserve_original_in_metadata: true,
-        };
-        let parser = MovieParser::with_original_title_config(None, original_title_config);
-
-        // Create test data
-        let base = MovieInfo {
-            title: "Hero".to_string(),
-            original_title: Some("英雄".to_string()),
-            original_language: Some("zh".to_string()),
-            year: Some(2002),
-            part_number: None,
-            is_collection: false,
-            collection_name: None,
-
-            quality: Some("1080p".to_string()),
-            source: Some("BluRay".to_string()),
-            language: Some("zh".to_string()),
-        };
-
-        let tmdb = MovieInfo {
-            title: "Hero".to_string(),
-            original_title: Some("英雄".to_string()),
-            original_language: Some("zh".to_string()),
-            year: Some(2002),
-            part_number: None,
-            is_collection: false,
-            collection_name: None,
-
-            quality: None,
-            source: None,
-            language: Some("zh".to_string()),
-        };
-
-        let result = parser.merge_movie_info(base, tmdb);
-
-        // Should prefer original CJK title
-        assert_eq!(result.title, "英雄");
-        assert_eq!(result.original_title, Some("Hero".to_string()));
-    }
-
-    #[test]
-    fn test_original_title_strategy_hybrid() {
-        use crate::config::OriginalTitleConfig;
-
-        let original_title_config = OriginalTitleConfig {
-            prefer_original_titles: true,
-            include_english_subtitle: true,
-            fallback_to_english_on_error: true,
-            preserve_original_in_metadata: true,
-        };
-        let parser = MovieParser::with_original_title_config(None, original_title_config);
-
-        // Create test data
-        let base = MovieInfo {
-            title: "Hero".to_string(),
-            original_title: Some("英雄".to_string()),
-            original_language: Some("zh".to_string()),
-            year: Some(2002),
-            part_number: None,
-            is_collection: false,
-            collection_name: None,
-
-            quality: Some("1080p".to_string()),
-            source: Some("BluRay".to_string()),
-            language: Some("zh".to_string()),
-        };
-
-        let tmdb = MovieInfo {
-            title: "Hero".to_string(),
-            original_title: Some("英雄".to_string()),
-            original_language: Some("zh".to_string()),
-            year: Some(2002),
-            part_number: None,
-            is_collection: false,
-            collection_name: None,
-
-            quality: None,
-            source: None,
-            language: Some("zh".to_string()),
-        };
-
-        let result = parser.merge_movie_info(base, tmdb);
-
-        // Should combine titles: 英雄 [Hero]
-        assert_eq!(result.title, "英雄 [Hero]");
-        assert_eq!(result.original_title, Some("Hero".to_string()));
-    }
-
-    #[test]
-    fn test_contains_cjk_characters() {
-        let parser = MovieParser::new(None);
-
-        // Test Chinese characters
-        assert!(parser.contains_cjk_characters("英雄"));
-        assert!(parser.contains_cjk_characters("白蛇2：青蛇劫起"));
-
-        // Test Japanese characters
-        assert!(parser.contains_cjk_characters("千と千尋の神隠し"));
-        assert!(parser.contains_cjk_characters("ドラゴンボール"));
-
-        // Test Korean characters
-        assert!(parser.contains_cjk_characters("기생충"));
-
-        // Test English only
-        assert!(!parser.contains_cjk_characters("Hero"));
-        assert!(!parser.contains_cjk_characters("The Matrix"));
-
-        // Test mixed
-        assert!(parser.contains_cjk_characters("Hero英雄"));
-        assert!(parser.contains_cjk_characters("The 英雄 Movie"));
-    }
-
-    #[test]
     fn test_parse_filename_edge_cases() {
         let parser = MovieParser::new(None);
 
@@ -672,13 +339,10 @@ mod tests {
     }
 
     #[test]
-    fn test_merge_movie_info_edge_cases() {
-        use crate::config::OriginalTitleConfig;
+    fn test_merge_movie_info_simple() {
+        let parser = MovieParser::new(None);
 
-        let original_title_config = OriginalTitleConfig::default();
-        let parser = MovieParser::with_original_title_config(None, original_title_config);
-
-        // Test with empty TMDB title - should use TMDB title (empty) but keep base year
+        // Test with simple TMDB data
         let base = MovieInfo {
             title: "Test Movie".to_string(),
             original_title: None,
@@ -693,10 +357,10 @@ mod tests {
         };
 
         let tmdb = MovieInfo {
-            title: "".to_string(),
-            original_title: None,
-            original_language: None,
-            year: None,
+            title: "The Test Movie".to_string(),
+            original_title: Some("Le Film de Test".to_string()),
+            original_language: Some("fr".to_string()),
+            year: Some(2023),
             part_number: None,
             is_collection: false,
             collection_name: None,
@@ -706,7 +370,9 @@ mod tests {
         };
 
         let result = parser.merge_movie_info(base, tmdb);
-        assert_eq!(result.title, ""); // TMDB title takes precedence
+        assert_eq!(result.title, "The Test Movie"); // TMDB title takes precedence
+        assert_eq!(result.original_title, Some("Le Film de Test".to_string())); // TMDB original title
+        assert_eq!(result.original_language, Some("fr".to_string())); // TMDB original language
         assert_eq!(result.year, Some(2023)); // Base year is kept
     }
 

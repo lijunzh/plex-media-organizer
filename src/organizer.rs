@@ -184,13 +184,29 @@ impl Organizer {
         media_file: &MediaFile,
         metadata: &crate::types::MediaMetadata,
     ) -> Result<PathBuf> {
-        let title = metadata
-            .title
-            .as_ref()
-            .ok_or_else(|| anyhow::anyhow!("No title found in metadata"))?;
+        // Create combined display title: Chinese Title [English Title]
+        let display_title = if let (Some(english_title), Some(original_title)) =
+            (&metadata.title, &metadata.original_title)
+        {
+            if english_title != original_title {
+                // Combine: Chinese Title [English Title]
+                format!("{} [{}]", original_title, english_title)
+            } else {
+                // Use English title when they're the same
+                english_title.clone()
+            }
+        } else {
+            // Fall back to available title
+            metadata
+                .title
+                .as_ref()
+                .or_else(|| metadata.original_title.as_ref())
+                .ok_or_else(|| anyhow::anyhow!("No title found in metadata"))?
+                .clone()
+        };
 
         // Clean title for directory name
-        let clean_title = self.clean_title_for_directory(title);
+        let clean_title = self.clean_title_for_directory(&display_title);
 
         // Create directory name with or without year
         let dir_name = if let Some(year) = metadata.year {
@@ -297,10 +313,26 @@ impl Organizer {
         media_file: &MediaFile,
         metadata: &crate::types::MediaMetadata,
     ) -> Result<String> {
-        let title = metadata
-            .title
-            .as_ref()
-            .ok_or_else(|| anyhow::anyhow!("No title found in metadata"))?;
+        // Create combined display title: Chinese Title [English Title]
+        let display_title = if let (Some(english_title), Some(original_title)) =
+            (&metadata.title, &metadata.original_title)
+        {
+            if english_title != original_title {
+                // Combine: Chinese Title [English Title]
+                format!("{} [{}]", original_title, english_title)
+            } else {
+                // Use English title when they're the same
+                english_title.clone()
+            }
+        } else {
+            // Fall back to available title
+            metadata
+                .title
+                .as_ref()
+                .or_else(|| metadata.original_title.as_ref())
+                .ok_or_else(|| anyhow::anyhow!("No title found in metadata"))?
+                .clone()
+        };
 
         // Get file extension
         let extension = media_file
@@ -310,7 +342,7 @@ impl Organizer {
             .unwrap_or("mkv");
 
         // Build filename with or without year
-        let mut filename_parts = vec![title.to_string()];
+        let mut filename_parts = vec![display_title.to_string()];
 
         if let Some(year) = metadata.year {
             filename_parts.push(format!("({})", year));
@@ -437,6 +469,35 @@ impl Organizer {
             println!("\n🔍 DRY-RUN COMPLETE: No actual changes were made");
         } else {
             println!("\n✅ Organization complete!");
+        }
+
+        // Display trade-off summary
+        if result.statistics.failed_files > 0 {
+            println!("\n📋 TRADE-OFF SUMMARY:");
+            println!(
+                "   • {} files organized successfully",
+                result.statistics.organized_files
+            );
+            println!(
+                "   • {} files skipped/failed to ensure accuracy",
+                result.statistics.failed_files
+            );
+            println!(
+                "   • Success rate: {:.1}%",
+                result.statistics.success_rate * 100.0
+            );
+            println!();
+            println!("💡 TIP: Skipped files are often due to:");
+            println!("   • Technical terms in filenames (e.g., 'DualAudio', 'iNT', 'TLF')");
+            println!("   • Movies not found in TMDB database");
+            println!("   • Year/title mismatches between filename and TMDB data");
+            println!();
+            println!("🔧 To improve coverage:");
+            println!("   • Use --min-confidence 0.5 for more permissive matching");
+            println!("   • Manually clean filenames before organizing");
+            println!("   • Check TMDB for correct movie titles and years");
+            println!();
+            println!("📖 For more details, see: project/CURRENT_LIMITATIONS.md");
         }
     }
 }
