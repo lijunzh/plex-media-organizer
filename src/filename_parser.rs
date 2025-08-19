@@ -189,7 +189,7 @@ impl FilenameParser {
             if self
                 .quality_patterns
                 .iter()
-                .any(|p| token.to_lowercase().contains(&p.to_lowercase()))
+                .any(|p| token.to_lowercase() == p.to_lowercase())
             {
                 return Some(token.clone());
             }
@@ -234,7 +234,7 @@ impl FilenameParser {
             if self
                 .audio_patterns
                 .iter()
-                .any(|p| token.to_lowercase().contains(&p.to_lowercase()))
+                .any(|p| token.to_lowercase() == p.to_lowercase())
             {
                 return Some(token.clone());
             }
@@ -665,6 +665,7 @@ impl FilenameParser {
             "NowOur",
             "QHstudIo",
             "tdw9430",
+            "EtHD",
         ];
 
         if technical_terms

@@ -619,14 +619,14 @@ mod tests {
         let result = parser.parse_filename("The Matrix.mkv");
         assert!(result.is_ok());
         let parsed = result.unwrap();
-        assert_eq!(parsed.title, "The");
+        assert_eq!(parsed.title, "The Matrix");
         assert_eq!(parsed.year, None);
 
         // Test filename with invalid year
         let result = parser.parse_filename("The Matrix 9999.mkv");
         assert!(result.is_ok());
         let parsed = result.unwrap();
-        assert_eq!(parsed.title, "The");
+        assert_eq!(parsed.title, "The Matrix");
         assert_eq!(parsed.year, None); // Invalid year should not be parsed
     }
 
