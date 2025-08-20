@@ -1,5 +1,6 @@
 //! Movie parsing and organization logic
 
+use crate::config::AppConfig;
 use crate::filename_parser::FilenameParser;
 use crate::tmdb_client::TmdbClient;
 use crate::types::{
@@ -9,25 +10,34 @@ use anyhow::{Context, Result};
 use chrono::Utc;
 use std::path::Path;
 
-use std::sync::OnceLock;
-
-// Token-based filename parser instance
-static FILENAME_PARSER: OnceLock<FilenameParser> = OnceLock::new();
-
-fn get_filename_parser() -> &'static FilenameParser {
-    FILENAME_PARSER.get_or_init(FilenameParser::new)
+fn get_filename_parser_with_config(config: &AppConfig) -> FilenameParser {
+    let technical_terms = config.get_all_technical_terms();
+    FilenameParser::with_technical_terms(technical_terms)
 }
 
 /// Movie parser that handles various filename patterns
 #[derive(Clone, Debug)]
 pub struct MovieParser {
     tmdb_client: Option<TmdbClient>,
+    config: AppConfig,
 }
 
 impl MovieParser {
     /// Create a new movie parser
     pub fn new(tmdb_client: Option<TmdbClient>) -> Self {
-        Self { tmdb_client }
+        let config = AppConfig::load().unwrap_or_default();
+        Self {
+            tmdb_client,
+            config,
+        }
+    }
+
+    /// Create a new movie parser with custom configuration
+    pub fn with_config(tmdb_client: Option<TmdbClient>, config: AppConfig) -> Self {
+        Self {
+            tmdb_client,
+            config,
+        }
     }
 
     /// Parse a movie filename and return MovieInfo
@@ -96,8 +106,8 @@ impl MovieParser {
 
     /// Parse filename using token-based approach
     pub fn parse_filename(&self, filename: &str) -> Result<MovieInfo> {
-        // Use the new token-based parser
-        let parser = get_filename_parser();
+        // Use the new token-based parser with config
+        let parser = get_filename_parser_with_config(&self.config);
         let components = parser.parse(filename)?;
 
         // Convert to MovieInfo

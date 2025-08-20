@@ -31,6 +31,8 @@ pub struct OrganizationConfig {
     pub original_titles: OriginalTitleConfig,
     /// Confidence and matching preferences
     pub matching: MatchingConfig,
+    /// Technical terms filtering configuration
+    pub technical_terms: TechnicalTermsConfig,
 }
 
 /// Quality preferences
@@ -96,6 +98,261 @@ impl Default for MatchingConfig {
     }
 }
 
+/// Technical terms filtering configuration
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct TechnicalTermsConfig {
+    /// Release group names to filter out from movie titles
+    pub release_groups: Vec<String>,
+    /// Video/audio codec and quality terms to filter out
+    pub video_audio_terms: Vec<String>,
+    /// Source/platform names to filter out
+    pub source_platform_terms: Vec<String>,
+    /// File format and container terms to filter out
+    pub file_format_terms: Vec<String>,
+    /// Special edition and version terms to filter out
+    pub special_edition_terms: Vec<String>,
+    /// Additional custom terms to filter out
+    pub custom_terms: Vec<String>,
+}
+
+impl Default for TechnicalTermsConfig {
+    fn default() -> Self {
+        Self {
+            release_groups: vec![
+                // Common release groups
+                "CMCT".to_string(),
+                "WiKi".to_string(),
+                "FRDS".to_string(),
+                "HDS".to_string(),
+                "ADWeb".to_string(),
+                "TLF".to_string(),
+                "CHDWEB".to_string(),
+                "PTerWEB".to_string(),
+                "GREENOTEA".to_string(),
+                "ZmWeb".to_string(),
+                "HDVWEB".to_string(),
+                "NukeHD".to_string(),
+                "TJUPT".to_string(),
+                "CMCTV".to_string(),
+                "NTG".to_string(),
+                "HDWTV".to_string(),
+                "NowOur".to_string(),
+                "PandaQT".to_string(),
+                "HANDJOB".to_string(),
+                "npuer".to_string(),
+                "BYRHD".to_string(),
+                "c0kE".to_string(),
+                "TBMovies".to_string(),
+                "MNHD".to_string(),
+                "YTS".to_string(),
+                "MX".to_string(),
+                "HDWinG".to_string(),
+                "NYPAD".to_string(),
+                "ZigZag".to_string(),
+                "NTb".to_string(),
+                "REMUX".to_string(),
+                "iT".to_string(),
+                "mUHD".to_string(),
+                "IAMABLE".to_string(),
+                "KRaLiMaRKo".to_string(),
+                "HDChina".to_string(),
+                "CtrlHD".to_string(),
+                "SWTYBLZ".to_string(),
+                "ADE".to_string(),
+                "PHOBOS".to_string(),
+                "PTHOME".to_string(),
+                "SyncUP".to_string(),
+                "YIFY".to_string(),
+                "SPARKS".to_string(),
+                "HiDt".to_string(),
+                "Geek".to_string(),
+                "TayTO".to_string(),
+                "nikt0".to_string(),
+                "beAst".to_string(),
+                "FoRM".to_string(),
+                "CRiME".to_string(),
+                "HVAC".to_string(),
+                "MaoZhan".to_string(),
+                "VietHD".to_string(),
+                "JYK".to_string(),
+                "PiRaTeS".to_string(),
+                "GalaxyRG265".to_string(),
+                "PaODEQUEiJO".to_string(),
+                "Silence".to_string(),
+                "LoRD".to_string(),
+                "SA89".to_string(),
+                "FANDANGO".to_string(),
+                "DON".to_string(),
+                "D-Z0N3".to_string(),
+                "PTer".to_string(),
+                "ABM".to_string(),
+                "MZABI".to_string(),
+                "BYRPAD".to_string(),
+                "NCmt".to_string(),
+                "MTeam".to_string(),
+                "playWEB".to_string(),
+                "FLUX".to_string(),
+                "CMRG".to_string(),
+                "MZABARBiE".to_string(),
+                "SMURF".to_string(),
+                "AREY".to_string(),
+                "RABiDS".to_string(),
+                "ETHEL".to_string(),
+                "RightSiZE".to_string(),
+                "CiNEPHiLES".to_string(),
+                "Kitsune".to_string(),
+                "CHD".to_string(),
+                "LolHD".to_string(),
+                "DDP5".to_string(),
+                "WiKi".to_string(),
+                "SyncUP".to_string(),
+                "HDChina".to_string(),
+                "FRDS".to_string(),
+                "BYRHD".to_string(),
+                "playWEB".to_string(),
+                "IAMABLE".to_string(),
+                "EtHD".to_string(),
+                "FANDANGO".to_string(),
+                "LoRD".to_string(),
+                "MNHD".to_string(),
+                "PTer".to_string(),
+                "DON".to_string(),
+                "D-Z0N3".to_string(),
+                "BYRPAD".to_string(),
+                "iPad".to_string(),
+            ],
+            video_audio_terms: vec![
+                // Video/audio codecs and quality
+                "10bit".to_string(),
+                "10bits".to_string(),
+                "bit".to_string(),
+                "bits".to_string(),
+                "DDP".to_string(),
+                "DTS".to_string(),
+                "AC3".to_string(),
+                "AAC".to_string(),
+                "FLAC".to_string(),
+                "THD".to_string(),
+                "MA".to_string(),
+                "HD".to_string(),
+                "x264".to_string(),
+                "x265".to_string(),
+                "H264".to_string(),
+                "H265".to_string(),
+                "AVC".to_string(),
+                "HEVC".to_string(),
+                "Atmos".to_string(),
+                "TrueHD".to_string(),
+                "DualAudio".to_string(),
+                "2Audio".to_string(),
+                "2Audios".to_string(),
+                "4Audios".to_string(),
+                "60fps".to_string(),
+                "HQ".to_string(),
+                "AAC(5".to_string(),
+                "1)".to_string(),
+                "Hi10P".to_string(),
+                "DD5".to_string(),
+                "TrueHD7".to_string(),
+                "H".to_string(),
+                "264".to_string(),
+                "265".to_string(),
+                "4Audio".to_string(),
+                "3Audio".to_string(),
+                "5Audio".to_string(),
+                "REPACK".to_string(),
+                "Remux".to_string(),
+                "VC-1".to_string(),
+                "DoVi".to_string(),
+                "HDR10".to_string(),
+                "EDR".to_string(),
+                "MULTi".to_string(),
+                "HDTS".to_string(),
+                "IMAX".to_string(),
+                "DSNP".to_string(),
+                "DTS-HD".to_string(),
+                "HDR".to_string(),
+                "120FPS".to_string(),
+                "4K".to_string(),
+                "WEB".to_string(),
+                "WEBRip".to_string(),
+                "UHD".to_string(),
+                "Blu-ray".to_string(),
+                "Bluray".to_string(),
+                "BluRay".to_string(),
+                "DD5".to_string(),
+                "DD+".to_string(),
+                "AC3".to_string(),
+                "AAC5".to_string(),
+                "AAC1".to_string(),
+                "10bit".to_string(),
+                "DV".to_string(),
+                "MP4".to_string(),
+                "MKV".to_string(),
+            ],
+            source_platform_terms: vec![
+                // Source/platform names
+                "NF".to_string(),
+                "AMZN".to_string(),
+                "HKG".to_string(),
+                "ESP".to_string(),
+                "GBR".to_string(),
+                "INT".to_string(),
+                "JPN".to_string(),
+                "CHN".to_string(),
+                "CCTV6HD".to_string(),
+                "CHC".to_string(),
+                "Star".to_string(),
+                "Movie-HD".to_string(),
+                "AKA".to_string(),
+                "Chinese".to_string(),
+                "iTunes".to_string(),
+                "AMZN".to_string(),
+                "NF".to_string(),
+                "Netflix".to_string(),
+                "HMAX".to_string(),
+                "NOW".to_string(),
+                "ATVP".to_string(),
+                "HULU".to_string(),
+                "DSNP".to_string(),
+            ],
+            file_format_terms: vec![
+                // File formats and containers
+                "HDTVRip".to_string(),
+                "DVDRip".to_string(),
+                "BDRip".to_string(),
+                "HDRip".to_string(),
+                "WEBRip".to_string(),
+                "HDTV".to_string(),
+                "MP3".to_string(),
+            ],
+            special_edition_terms: vec![
+                // Special editions and versions
+                "EXTENDED".to_string(),
+                "修复加长版".to_string(),
+                "导演剪辑版".to_string(),
+                "Extended".to_string(),
+                "RERIP".to_string(),
+                "Hybrid".to_string(),
+                "ES".to_string(),
+            ],
+            custom_terms: vec![
+                // Additional custom terms
+                "Blu".to_string(),
+                "ray".to_string(),
+                "VC".to_string(),
+                "YTS".to_string(),
+                "MX".to_string(),
+                "AM".to_string(),
+                "iNT".to_string(),
+                "HHWEB".to_string(),
+                "HDxT".to_string(),
+                "BYNDR".to_string(),
+            ],
+        }
+    }
+}
+
 impl AppConfig {
     /// Load configuration from file and environment variables
     pub fn load() -> Result<Self> {
@@ -104,15 +361,17 @@ impl AppConfig {
 
         let mut config_builder = config::ConfigBuilder::<config::builder::DefaultState>::default();
 
-        // Set default configuration
-        config_builder = config_builder.set_default("apis.tmdb_api_key", "")?;
+        // Load default configuration first
+        let default_config = include_str!("../config/default.toml");
+        config_builder =
+            config_builder.add_source(File::from_str(default_config, config::FileFormat::Toml));
 
-        // Load configuration file if it exists
+        // Load user configuration file if it exists (overrides defaults)
         if config_file.exists() {
             config_builder = config_builder.add_source(File::from(config_file.as_path()));
         }
 
-        // Load environment variables
+        // Load environment variables (highest priority)
         config_builder =
             config_builder.add_source(Environment::with_prefix("PLEX_MEDIA_ORGANIZER"));
 
@@ -163,6 +422,30 @@ impl AppConfig {
         };
 
         Ok(config_dir)
+    }
+
+    /// Get all technical terms as a single list for filtering
+    pub fn get_all_technical_terms(&self) -> Vec<String> {
+        let mut all_terms = Vec::new();
+
+        all_terms.extend(self.organization.technical_terms.release_groups.clone());
+        all_terms.extend(self.organization.technical_terms.video_audio_terms.clone());
+        all_terms.extend(
+            self.organization
+                .technical_terms
+                .source_platform_terms
+                .clone(),
+        );
+        all_terms.extend(self.organization.technical_terms.file_format_terms.clone());
+        all_terms.extend(
+            self.organization
+                .technical_terms
+                .special_edition_terms
+                .clone(),
+        );
+        all_terms.extend(self.organization.technical_terms.custom_terms.clone());
+
+        all_terms
     }
 
     /// Check if required API keys are configured

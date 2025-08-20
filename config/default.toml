@@ -1,0 +1,90 @@
+# Default configuration for Plex Media Organizer
+# This file contains comprehensive technical terms for filtering movie filenames
+
+[apis]
+# TMDB API key - get one for free at https://www.themoviedb.org/settings/api
+tmdb_api_key = ""
+
+[organization]
+# Quality preferences
+[organization.quality]
+preferred_quality = "1080p"
+
+# CJK (Chinese/Japanese/Korean) title preferences
+[organization.original_titles]
+prefer_original_titles = true
+include_english_subtitle = true
+fallback_to_english_on_error = true
+preserve_original_in_metadata = true
+
+# Confidence and matching preferences
+[organization.matching]
+min_confidence_threshold = 0.7
+skip_unmatched_movies = true
+warn_on_low_confidence = true
+allow_unknown_year = true
+
+# Technical terms filtering configuration
+[organization.technical_terms]
+# Release group names to filter out from movie titles
+release_groups = [
+    # Common release groups
+    "CMCT", "WiKi", "FRDS", "HDS", "ADWeb", "TLF", "CHDWEB", "PTerWEB", "PTer", "GREENOTEA",
+    "ZmWeb", "HDVWEB", "NukeHD", "TJUPT", "CMCTV", "NTG", "HDWTV", "NowOur", "PandaQT", "HANDJOB",
+    "npuer", "BYRHD", "c0kE", "TBMovies", "MNHD", "YTS", "MX", "HDWinG", "NYPAD", "ZigZag", "NTb",
+    "REMUX", "iT", "mUHD", "IAMABLE", "KRaLiMaRKo", "HDChina", "CtrlHD", "SWTYBLZ", "ADE", "PHOBOS",
+    "PTHOME", "SyncUP", "YIFY", "SPARKS", "HiDt", "Geek", "TayTO", "nikt0", "beAst", "FoRM",
+    "CRiME", "HVAC", "MaoZhan", "VietHD", "JYK", "PiRaTeS", "GalaxyRG265", "PaODEQUEiJO", "Silence",
+    "LoRD", "SA89", "FANDANGO", "DON", "D-Z0N3", "ABM", "MZABI", "BYRPAD", "NCmt", "MTeam",
+    "playWEB", "FLUX", "CMRG", "MZABARBiE", "SMURF", "AREY", "RABiDS", "ETHEL", "RightSiZE",
+    "CiNEPHiLES", "Kitsune", "HHWEB", "HDxT", "BYNDR", "iNT",
+]
+
+# Video/audio codec and quality terms to filter out
+video_audio_terms = [
+    # Video/audio codecs and quality
+    "10bit", "10bits", "bit", "bits", "DDP", "DTS", "AC3", "AAC", "FLAC", "THD", "MA", "HD",
+    "x264", "x265", "H264", "H265", "AVC", "HEVC", "Atmos", "TrueHD", "DualAudio", "2Audio",
+    "2Audios", "4Audios", "60fps", "HQ", "AAC(5", "1)", "Hi10P", "DD5", "TrueHD7", "H", "264", "265",
+    "4Audio", "3Audio", "5Audio", "REPACK", "Remux", "VC-1", "DoVi", "HDR10", "EDR", "MULTi",
+    "HDTS", "IMAX", "DSNP", "DTS-HD", "HDR", "120FPS", "4K", "WEB", "WEBRip", "UHD", "Blu-ray",
+    "Bluray", "BluRay", "DD5", "DD+", "AC3", "AAC5", "AAC1", "10bit", "DV", "MP4", "MKV",
+    "DDP5", "DDP7", "TrueHD(Atmos)", "DTS-ES", "Hi10P", "AAC1.0", "DD5.1", "DDP5.1", "DDP7.1",
+    "TrueHD7.1", "DTS-HD.MA", "DTS-HD.MA.5.1", "DTS-HD.MA.7.1", "Atmos", "TrueHD.7.1", "TrueHD.5.1",
+    "DDP.5.1", "DDP.7.1", "DD+.5.1", "DD+.7.1", "AAC5.1", "AAC7.1", "FLACx2", "FLACx3", "2xDDP",
+    "xDDP", "DD5.1", "DDP5", "2160p", "1080p", "720p", "480p", "360p", "240p", "144p",
+]
+
+# Source/platform names to filter out
+source_platform_terms = [
+    # Source/platform names
+    "NF", "AMZN", "HKG", "ESP", "GBR", "INT", "JPN", "CHN", "CCTV6HD", "CHC", "Star", "Movie-HD",
+    "AKA", "Chinese", "iTunes", "Netflix", "HMAX", "NOW", "ATVP", "HULU", "DSNP", "MA", "WEB-DL",
+    "WEB", "DL", "WEBRip", "HDTVRip", "DVDRip", "BDRip", "HDRip", "HDTV", "BluRay", "Blu-ray",
+    "UHD", "4K", "2160p", "1080p", "720p", "480p", "360p", "240p", "144p",
+]
+
+# File format and container terms to filter out
+file_format_terms = [
+    # File formats and containers
+    "HDTVRip", "DVDRip", "BDRip", "HDRip", "WEBRip", "HDTV", "MP3",
+]
+
+# Special edition and version terms to filter out
+special_edition_terms = [
+    # Special editions and versions
+    "EXTENDED", "修复加长版", "导演剪辑版", "Extended", "RERIP", "Hybrid", "ES",
+]
+
+# Additional custom terms to filter out
+custom_terms = [
+    # Additional terms
+    "Blu", "ray", "VC", "AM", "YTS", "MX", "AM", "SP01", "SP02", "SP13", "SP14", "SP15", "SP16",
+    "TV-CM", "TV-CM #01", "TV-CM #02", "TV-CM #03", "TV-CM #04", "TV Series EP1080", "BDRIP",
+    "BDrip", "Main10P", "Logo", "Tokuten", "Haibara", "Ai", "Monogatari", "Kurogane", "Mystery",
+    "Train", "JPN+ENG", "FLACx2", "FLACx3", "DTS-HDMA", "PTHweb", "ted423@FRDS", "2xDDP", "xDDP",
+    "HDH", "DL", "iPad", "DD5.1", "DDP5", "OurTV", "GPTHD", "QHstudIo", "tdw9430", "EtHD",
+    
+    # Chinese technical terms (language/audio descriptions)
+    "国日双语", "双语", "国日", "日英", "英日", "中日", "日中",
+]
