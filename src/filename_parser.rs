@@ -570,6 +570,37 @@ impl FilenameParser {
         if known_titles.iter().any(|title| token.contains(title)) {
             return false;
         }
+
+        // FIRST: Check if this is a common word that should be preserved
+        // This check must come BEFORE technical terms to prevent over-filtering
+        let common_words = crate::config::AppConfig::load()
+            .map(|config| config.get_common_words())
+            .unwrap_or_else(|_| {
+                vec![
+                    "Matrix".to_string(),
+                    "The".to_string(),
+                    "Movie".to_string(),
+                    "Part".to_string(),
+                    "Name".to_string(),
+                    "Title".to_string(),
+                    "1".to_string(),
+                    "2".to_string(),
+                    "3".to_string(),
+                    "4".to_string(),
+                    "5".to_string(),
+                    "6".to_string(),
+                    "7".to_string(),
+                    "8".to_string(),
+                    "9".to_string(),
+                    "10".to_string(),
+                ]
+            });
+        if common_words
+            .iter()
+            .any(|word| token.to_lowercase() == word.to_lowercase())
+        {
+            return false; // Keep this word
+        }
         // Check if it's a year
         if let Some(y) = year
             && token.parse::<u32>().ok() == Some(*y)
@@ -898,26 +929,6 @@ impl FilenameParser {
             return true;
         }
 
-        // Don't filter out common English words that might be mistaken for technical terms
-        let common_words = crate::config::AppConfig::load()
-            .map(|config| config.get_common_words())
-            .unwrap_or_else(|_| {
-                vec![
-                    "Matrix".to_string(),
-                    "The".to_string(),
-                    "Movie".to_string(),
-                    "Part".to_string(),
-                    "Name".to_string(),
-                    "Title".to_string(),
-                ]
-            });
-        if common_words
-            .iter()
-            .any(|word| token.to_lowercase() == word.to_lowercase())
-        {
-            return false;
-        }
-
         false
     }
 
@@ -1024,7 +1035,7 @@ mod tests {
         assert!(
             result
                 .title
-                .contains("Detective Conan Movie The Time Bomb Skyscraper")
+                .contains("Detective Conan Movie 1 The Time Bomb Skyscraper")
         );
         assert_eq!(result.year, Some(1997));
         assert_eq!(result.quality, Some("720p".to_string()));
