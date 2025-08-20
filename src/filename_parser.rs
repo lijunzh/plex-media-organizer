@@ -399,6 +399,9 @@ impl FilenameParser {
         let title = title_tokens.join(" ");
         let title = self.clean_title(&title);
 
+        // Post-process: remove multi-token technical terms that might have been missed
+        let title = self.remove_multi_token_technical_terms(&title);
+
         // Format title with brackets around English title if we have both Chinese and English
         let title = if !chinese_tokens.is_empty() && !english_tokens.is_empty() {
             let chinese_title = chinese_tokens.join(" ");
@@ -881,6 +884,18 @@ impl FilenameParser {
                 "LolHD",
                 "DDP5",
                 "iPad",
+                // Additional terms found in debug output
+                "7.1",
+                "7 1",
+                "5.1",
+                "5 1",
+                "DD+5.1",
+                "DD+5 1",
+                "terminal",
+                "D-Z0N3",
+                "Silence",
+                "KBTV",
+                "EbP",
             ];
 
             // Convert &[&str] to &[String] for comparison
@@ -948,6 +963,104 @@ impl FilenameParser {
         cleaned = cleaned.replace('.', " ");
 
         // Clean up multiple spaces again
+        while cleaned.contains("  ") {
+            cleaned = cleaned.replace("  ", " ");
+        }
+
+        cleaned.trim().to_string()
+    }
+
+    /// Remove multi-token technical terms from title
+    fn remove_multi_token_technical_terms(&self, title: &str) -> String {
+        let mut cleaned = title.to_string();
+
+        // Get technical terms from configuration
+        let technical_terms = if let Some(ref terms) = self.technical_terms {
+            terms.as_slice()
+        } else {
+            // Fallback to comprehensive default terms if no config is provided
+            static DEFAULT_TERMS: std::sync::OnceLock<Vec<String>> = std::sync::OnceLock::new();
+            DEFAULT_TERMS
+                .get_or_init(|| {
+                    vec![
+                        // Multi-token patterns that should be removed
+                        "7 1".to_string(),
+                        "5 1".to_string(),
+                        "DD+5 1".to_string(),
+                        "DD+5.1".to_string(),
+                        "7.1".to_string(),
+                        "5.1".to_string(),
+                        // Single tokens that might have been missed
+                        "CHD".to_string(),
+                        "terminal".to_string(),
+                        "LolHD".to_string(),
+                        "D-Z0N3".to_string(),
+                        "Silence".to_string(),
+                        "KBTV".to_string(),
+                        "EbP".to_string(),
+                    ]
+                })
+                .as_slice()
+        };
+
+        // Remove each technical term with word boundary matching
+        for term in technical_terms {
+            let term_lower = term.to_lowercase();
+
+            // Handle multi-word patterns (like "7 1")
+            if term.contains(' ') {
+                // For multi-word patterns, check if the pattern exists in the title
+                let title_lower = cleaned.to_lowercase();
+                if title_lower.contains(&term_lower) {
+                    // Replace the pattern with empty string
+                    let mut result = String::new();
+                    let mut i = 0;
+                    let words: Vec<&str> = cleaned.split_whitespace().collect();
+
+                    while i < words.len() {
+                        // Check if we have enough words left to match the pattern
+                        let term_words: Vec<&str> = term.split_whitespace().collect();
+                        if i + term_words.len() <= words.len() {
+                            // Check if the next few words match the pattern
+                            let mut matches = true;
+                            for j in 0..term_words.len() {
+                                if words[i + j].to_lowercase() != term_words[j].to_lowercase() {
+                                    matches = false;
+                                    break;
+                                }
+                            }
+                            if matches {
+                                // Skip these words
+                                i += term_words.len();
+                                continue;
+                            }
+                        }
+                        // Add this word
+                        if !result.is_empty() {
+                            result.push(' ');
+                        }
+                        result.push_str(words[i]);
+                        i += 1;
+                    }
+                    cleaned = result;
+                }
+            } else {
+                // For single-word patterns, check each word individually
+                let words: Vec<&str> = cleaned.split_whitespace().collect();
+                let mut new_words = Vec::new();
+
+                for word in words {
+                    let word_lower = word.to_lowercase();
+                    if word_lower != term_lower {
+                        new_words.push(word);
+                    }
+                }
+
+                cleaned = new_words.join(" ");
+            }
+        }
+
+        // Clean up extra spaces
         while cleaned.contains("  ") {
             cleaned = cleaned.replace("  ", " ");
         }

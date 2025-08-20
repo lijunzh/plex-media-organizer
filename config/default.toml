@@ -38,6 +38,9 @@ release_groups = [
     "LoRD", "SA89", "FANDANGO", "DON", "D-Z0N3", "ABM", "MZABI", "BYRPAD", "NCmt", "MTeam",
     "playWEB", "FLUX", "CMRG", "MZABARBiE", "SMURF", "AREY", "RABiDS", "ETHEL", "RightSiZE",
     "CiNEPHiLES", "Kitsune", "HHWEB", "HDxT", "BYNDR", "iNT",
+    
+    # Additional release groups found in debug output
+    "CHD", "terminal", "LolHD", "D-Z0N3", "YTS", "MX", "Silence", "KBTV", "EbP", "D-Z0N3",
 ]
 
 # Video/audio codec and quality terms to filter out
@@ -53,6 +56,12 @@ video_audio_terms = [
     "TrueHD7.1", "DTS-HD.MA", "DTS-HD.MA.5.1", "DTS-HD.MA.7.1", "Atmos", "TrueHD.7.1", "TrueHD.5.1",
     "DDP.5.1", "DDP.7.1", "DD+.5.1", "DD+.7.1", "AAC5.1", "AAC7.1", "FLACx2", "FLACx3", "2xDDP",
     "xDDP", "DD5.1", "DDP5", "2160p", "1080p", "720p", "480p", "360p", "240p", "144p",
+    
+    # Additional audio format terms found in debug output
+    "7.1", "7 1", "5.1", "5 1", "DD+5.1", "DD+5 1",
+    
+    # Additional video quality terms found in debug output
+    "4K_HDR", "(1080p", "1080p)",
 ]
 
 # Source/platform names to filter out
