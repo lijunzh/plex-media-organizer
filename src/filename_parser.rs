@@ -283,7 +283,21 @@ impl FilenameParser {
 
     /// Extract language information and detect trilingual patterns
     fn extract_language(&self, tokens: &[String]) -> Option<String> {
-        let language_patterns = ["JPN", "ENG", "CHI", "KOR", "JAP", "EN", "CN"];
+        // Get language codes from configuration
+        let language_patterns = crate::config::AppConfig::load()
+            .map(|config| config.get_language_codes())
+            .unwrap_or_else(|_| {
+                vec![
+                    "JPN".to_string(),
+                    "ENG".to_string(),
+                    "CHI".to_string(),
+                    "KOR".to_string(),
+                    "JAP".to_string(),
+                    "EN".to_string(),
+                    "CN".to_string(),
+                ]
+            });
+
         for token in tokens {
             if language_patterns.iter().any(|p| token.to_uppercase() == *p) {
                 return Some(token.clone());
@@ -437,7 +451,19 @@ impl FilenameParser {
         }
 
         // Must not be purely technical terms
-        let technical_japanese = ["国日双语", "双语", "国日", "日英", "英日", "中日", "日中"];
+        let technical_japanese = crate::config::AppConfig::load()
+            .map(|config| config.get_technical_japanese_terms())
+            .unwrap_or_else(|_| {
+                vec![
+                    "国日双语".to_string(),
+                    "双语".to_string(),
+                    "国日".to_string(),
+                    "日英".to_string(),
+                    "英日".to_string(),
+                    "中日".to_string(),
+                    "日中".to_string(),
+                ]
+            });
         if technical_japanese.iter().any(|term| token.contains(term)) {
             return false;
         }
@@ -480,7 +506,16 @@ impl FilenameParser {
         }
 
         // Special case: preserve known movie titles that might be filtered out
-        let known_titles = ["灌篮高手", "灌篮", "Slam", "Dunk"];
+        let known_titles = crate::config::AppConfig::load()
+            .map(|config| config.get_known_titles())
+            .unwrap_or_else(|_| {
+                vec![
+                    "灌篮高手".to_string(),
+                    "灌篮".to_string(),
+                    "Slam".to_string(),
+                    "Dunk".to_string(),
+                ]
+            });
         if known_titles.iter().any(|title| token.contains(title)) {
             return true;
         }
@@ -585,7 +620,19 @@ impl FilenameParser {
         }
 
         // Check for language codes
-        let language_codes = ["JPN", "ENG", "CHI", "KOR", "JAP", "EN", "CN"];
+        let language_codes = crate::config::AppConfig::load()
+            .map(|config| config.get_language_codes())
+            .unwrap_or_else(|_| {
+                vec![
+                    "JPN".to_string(),
+                    "ENG".to_string(),
+                    "CHI".to_string(),
+                    "KOR".to_string(),
+                    "JAP".to_string(),
+                    "EN".to_string(),
+                    "CN".to_string(),
+                ]
+            });
         if language_codes
             .iter()
             .any(|code| token.to_uppercase() == *code)
@@ -852,7 +899,18 @@ impl FilenameParser {
         }
 
         // Don't filter out common English words that might be mistaken for technical terms
-        let common_words = ["Matrix", "The", "Movie", "Part", "Name", "Title"];
+        let common_words = crate::config::AppConfig::load()
+            .map(|config| config.get_common_words())
+            .unwrap_or_else(|_| {
+                vec![
+                    "Matrix".to_string(),
+                    "The".to_string(),
+                    "Movie".to_string(),
+                    "Part".to_string(),
+                    "Name".to_string(),
+                    "Title".to_string(),
+                ]
+            });
         if common_words
             .iter()
             .any(|word| token.to_lowercase() == word.to_lowercase())

@@ -88,3 +88,51 @@ custom_terms = [
     # Chinese technical terms (language/audio descriptions)
     "国日双语", "双语", "国日", "日英", "英日", "中日", "日中",
 ]
+
+# Content filtering configuration
+[organization.content_filtering]
+# Patterns that indicate problematic content (extras, documentaries, etc.)
+# These are used to penalize TMDB matches that are likely extras or non-movie content
+problematic_patterns = [
+    # Most reliable patterns that clearly indicate non-movie content
+    "production report", "making of", "behind the scenes", "documentary", 
+    "special feature", "bonus content", "extras", "commentary", "interview",
+    "photo gallery", "gallery", "trailer", "teaser", "preview", "sneak peek", 
+    "deleted scene", "alternate ending", "bloopers", "outtakes", "featurette", 
+    "promo", "promotional", "music video", "soundtrack", "score", "ost",
+]
+
+# Language codes for detection in filenames
+language_codes = [
+    "JPN", "ENG", "CHI", "KOR", "JAP", "EN", "CN",
+]
+
+# Japanese technical terms to filter out
+technical_japanese_terms = [
+    "国日双语", "双语", "国日", "日英", "英日", "中日", "日中",
+]
+
+# Known movie titles to preserve from filtering
+known_titles = [
+    "灌篮高手", "灌篮", "Slam", "Dunk",
+]
+
+# Common English words to preserve from filtering
+common_words = [
+    "Matrix", "The", "Movie", "Part", "Name", "Title",
+]
+
+# File extensions that indicate extras content
+extras_extensions = [
+    "ifo", "bup", "vob",
+]
+
+# Specific patterns that indicate extras content
+# Note: Most extras detection is now done via directory names (extras/, bonus/, etc.)
+# These patterns are only used as a fallback for files not in extras directories
+extras_patterns = [
+    # Only keep the most reliable patterns that clearly indicate non-movie content
+    "sample", "trailer", "pv", "menu", "bdmv",
+    "interview", "commentary", "featurette",
+    "deleted.scene", "bloopers", "outtakes",
+]

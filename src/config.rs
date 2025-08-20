@@ -33,6 +33,8 @@ pub struct OrganizationConfig {
     pub matching: MatchingConfig,
     /// Technical terms filtering configuration
     pub technical_terms: TechnicalTermsConfig,
+    /// Content filtering configuration for problematic patterns
+    pub content_filtering: ContentFilteringConfig,
 }
 
 /// Quality preferences
@@ -353,6 +355,101 @@ impl Default for TechnicalTermsConfig {
     }
 }
 
+/// Content filtering configuration for problematic patterns
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ContentFilteringConfig {
+    /// Patterns that indicate problematic content (extras, documentaries, etc.)
+    pub problematic_patterns: Vec<String>,
+    /// Language codes for detection in filenames
+    pub language_codes: Vec<String>,
+    /// Japanese technical terms to filter out
+    pub technical_japanese_terms: Vec<String>,
+    /// Known movie titles to preserve from filtering
+    pub known_titles: Vec<String>,
+    /// Common English words to preserve from filtering
+    pub common_words: Vec<String>,
+    /// File extensions that indicate extras content
+    pub extras_extensions: Vec<String>,
+    /// Specific patterns that indicate extras content
+    pub extras_patterns: Vec<String>,
+}
+
+impl Default for ContentFilteringConfig {
+    fn default() -> Self {
+        Self {
+            problematic_patterns: vec![
+                // Extras and bonus content
+                "production report".to_string(),
+                "making of".to_string(),
+                "behind the scenes".to_string(),
+                "highlight film concert".to_string(),
+                "documentary".to_string(),
+                "special feature".to_string(),
+                "bonus content".to_string(),
+                "extras".to_string(),
+                "commentary".to_string(),
+                "interview".to_string(),
+                "photo gallery".to_string(),
+                "gallery".to_string(),
+                "trailer".to_string(),
+                "teaser".to_string(),
+                "preview".to_string(),
+                "sneak peek".to_string(),
+                "deleted scene".to_string(),
+                "alternate ending".to_string(),
+                "bloopers".to_string(),
+                "outtakes".to_string(),
+                "featurette".to_string(),
+                "promo".to_string(),
+                "promotional".to_string(),
+                "music video".to_string(),
+                "soundtrack".to_string(),
+                "score".to_string(),
+                "ost".to_string(),
+            ],
+            language_codes: vec![
+                "JPN".to_string(),
+                "ENG".to_string(),
+                "CHI".to_string(),
+                "KOR".to_string(),
+                "JAP".to_string(),
+                "EN".to_string(),
+                "CN".to_string(),
+            ],
+            technical_japanese_terms: vec![
+                "国日双语".to_string(),
+                "双语".to_string(),
+                "国日".to_string(),
+                "日英".to_string(),
+                "英日".to_string(),
+                "中日".to_string(),
+                "日中".to_string(),
+            ],
+            known_titles: vec![
+                "灌篮高手".to_string(),
+                "灌篮".to_string(),
+                "Slam".to_string(),
+                "Dunk".to_string(),
+            ],
+            common_words: vec![
+                "Matrix".to_string(),
+                "The".to_string(),
+                "Movie".to_string(),
+                "Part".to_string(),
+                "Name".to_string(),
+                "Title".to_string(),
+            ],
+            extras_extensions: vec!["ifo".to_string(), "bup".to_string(), "vob".to_string()],
+            extras_patterns: vec![
+                "one.more.time".to_string(),
+                "one.more.chance".to_string(),
+                "she.and.her.cat".to_string(),
+                "5.min".to_string(),
+            ],
+        }
+    }
+}
+
 impl AppConfig {
     /// Load configuration from file and environment variables
     pub fn load() -> Result<Self> {
@@ -446,6 +543,52 @@ impl AppConfig {
         all_terms.extend(self.organization.technical_terms.custom_terms.clone());
 
         all_terms
+    }
+
+    /// Get all content filtering patterns as a single list
+    pub fn get_all_content_filtering_patterns(&self) -> Vec<String> {
+        let mut all_patterns = Vec::new();
+
+        all_patterns.extend(
+            self.organization
+                .content_filtering
+                .problematic_patterns
+                .clone(),
+        );
+        all_patterns.extend(self.organization.content_filtering.extras_patterns.clone());
+
+        all_patterns
+    }
+
+    /// Get all language codes for detection
+    pub fn get_language_codes(&self) -> Vec<String> {
+        self.organization.content_filtering.language_codes.clone()
+    }
+
+    /// Get Japanese technical terms to filter out
+    pub fn get_technical_japanese_terms(&self) -> Vec<String> {
+        self.organization
+            .content_filtering
+            .technical_japanese_terms
+            .clone()
+    }
+
+    /// Get known movie titles to preserve
+    pub fn get_known_titles(&self) -> Vec<String> {
+        self.organization.content_filtering.known_titles.clone()
+    }
+
+    /// Get common English words to preserve
+    pub fn get_common_words(&self) -> Vec<String> {
+        self.organization.content_filtering.common_words.clone()
+    }
+
+    /// Get extras file extensions
+    pub fn get_extras_extensions(&self) -> Vec<String> {
+        self.organization
+            .content_filtering
+            .extras_extensions
+            .clone()
     }
 
     /// Check if required API keys are configured

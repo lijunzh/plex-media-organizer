@@ -378,6 +378,22 @@ impl TmdbClient {
             // Exact match (highest priority)
             if title_lower == movie_title_lower {
                 score += 200.0;
+            } else if title_lower.len() <= 10 {
+                // For short titles (like "Apples"), be very strict about matching
+                // Only accept very close matches to avoid false positives
+                let fuzzy_matcher = SkimMatcherV2::default();
+                if let Some(fuzzy_score) =
+                    fuzzy_matcher.fuzzy_match(&movie_title_lower, &title_lower)
+                {
+                    // For short titles, require very high fuzzy scores
+                    if fuzzy_score >= 80 {
+                        let normalized_fuzzy_score = (fuzzy_score as f32) * 1.0;
+                        score += normalized_fuzzy_score;
+                    }
+                }
+
+                // For short titles, don't give partial match bonuses
+                // This prevents "Apples" from matching "Crab Apples"
             } else {
                 // Fuzzy matching for similar titles
                 let fuzzy_matcher = SkimMatcherV2::default();
@@ -389,11 +405,12 @@ impl TmdbClient {
                     score += normalized_fuzzy_score;
                 }
 
-                // Partial match bonus
-                if movie_title_lower.contains(&title_lower)
-                    || title_lower.contains(&movie_title_lower)
+                // Partial match bonus (only for longer titles to avoid false positives)
+                if title_lower.len() > 10
+                    && (movie_title_lower.contains(&title_lower)
+                        || title_lower.contains(&movie_title_lower))
                 {
-                    score += 30.0;
+                    score += 10.0; // Reduced from 30.0
                 }
 
                 // Check original title if available
@@ -433,18 +450,38 @@ impl TmdbClient {
 
             // Penalize problematic content types
             let title_lower = movie.title.to_lowercase();
-            let problematic_patterns = [
-                "production report",
-                "making of",
-                "behind the scenes",
-                "highlight film concert",
-                "documentary",
-                "special feature",
-                "bonus content",
-                "extras",
-                "commentary",
-                "interview",
-            ];
+
+            // Get problematic patterns from configuration
+            let problematic_patterns = crate::config::AppConfig::load()
+                .map(|config| config.get_all_content_filtering_patterns())
+                .unwrap_or_else(|_| {
+                    vec![
+                        "production report".to_string(),
+                        "making of".to_string(),
+                        "behind the scenes".to_string(),
+                        "documentary".to_string(),
+                        "extras".to_string(),
+                        "commentary".to_string(),
+                        "interview".to_string(),
+                        "photo gallery".to_string(),
+                        "gallery".to_string(),
+                        "trailer".to_string(),
+                        "teaser".to_string(),
+                        "preview".to_string(),
+                        "sneak peek".to_string(),
+                        "deleted scene".to_string(),
+                        "alternate ending".to_string(),
+                        "bloopers".to_string(),
+                        "outtakes".to_string(),
+                        "featurette".to_string(),
+                        "promo".to_string(),
+                        "promotional".to_string(),
+                        "music video".to_string(),
+                        "soundtrack".to_string(),
+                        "score".to_string(),
+                        "ost".to_string(),
+                    ]
+                });
 
             for pattern in &problematic_patterns {
                 if title_lower.contains(pattern) {

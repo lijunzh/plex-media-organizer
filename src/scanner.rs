@@ -377,15 +377,10 @@ impl Scanner {
 
     /// Check if a file is extras content that should be skipped
     fn is_extras_content(&self, file_path: &Path) -> bool {
-        let file_name = file_path
-            .file_name()
-            .and_then(|n| n.to_str())
-            .unwrap_or("")
-            .to_lowercase();
-
         let path_str = file_path.to_string_lossy().to_lowercase();
 
-        // Check for extras directory patterns
+        // Primary check: Skip everything in extras/bonus directories
+        // This is the most reliable method as it follows standard conventions
         let extras_dirs = [
             "extras",
             "bonus",
@@ -394,104 +389,94 @@ impl Scanner {
             "making",
             "interviews",
             "trailers",
+            "commentaries",
+            "deleted.scenes",
+            "outtakes",
+            "featurettes",
+            "promos",
+            "samples",
         ];
+
         for dir in &extras_dirs {
-            if path_str.contains(dir) {
+            if path_str.contains(&format!("/{}/", dir))
+                || path_str.contains(&format!("\\{}\\", dir))
+            {
                 return true;
             }
         }
 
-        // Check for specific extras file patterns
-        let extras_patterns = [
-            // Blu-ray menus
+        // Secondary check: Skip specific file extensions that are typically extras
+        let extras_extensions = crate::config::AppConfig::load()
+            .map(|config| config.get_extras_extensions())
+            .unwrap_or_else(|_| vec!["ifo".to_string(), "bup".to_string(), "vob".to_string()]);
+        if let Some(ext) = file_path.extension()
+            && let Some(ext_str) = ext.to_str()
+            && extras_extensions.contains(&ext_str.to_lowercase())
+        {
+            return true;
+        }
+
+        // Secondary check: Skip files with obvious extras patterns in filename
+        let file_name = file_path
+            .file_name()
+            .and_then(|n| n.to_str())
+            .unwrap_or("")
+            .to_lowercase();
+
+        // Check for obvious extras patterns in filename
+        let obvious_extras_patterns = [
             "bdmenu",
             "menu",
             "bdmv",
-            // Interviews and behind-the-scenes
+            "sample",
+            "trailer",
+            "pv",
             "interview",
-            "interviews",
-            "making",
-            "behind",
+            "commentary",
             "featurette",
+            "deleted.scene",
+            "bloopers",
+            "outtakes",
+            "making.of",
+            "behind.scenes",
+            "promo",
+            "teaser",
+            "preview",
             // Chinese/Japanese interview patterns
             "访谈",
             "采访",
             "对谈",
             "座谈",
             "访问",
-            // Trailers and promotional content
-            "trailer",
-            "trailers",
-            "pv",
-            "promo",
-            "preview",
-            "teaser",
-            // Sample and short content
-            "sample",
-            "short",
-            "min",
-            "ver",
-            "version",
-            // Making-of and documentaries
-            "making.of",
-            "making-of",
-            "documentary",
-            "docu",
-            // Special features
-            "special",
-            "bonus",
-            "extra",
-            "extras",
-            // Audio commentaries
-            "commentary",
-            "commentaries",
-            // Deleted scenes
-            "deleted",
-            "scenes",
-            "outtakes",
         ];
 
-        for pattern in &extras_patterns {
+        for pattern in &obvious_extras_patterns {
             if file_name.contains(pattern) {
                 return true;
             }
         }
 
-        // Check for specific file extensions that are typically extras
-        let extras_extensions = ["ifo", "bup", "vob"]; // DVD/Blu-ray specific
-        if let Some(ext) = file_path.extension()
-            && let Some(ext_str) = ext.to_str()
-            && extras_extensions.contains(&ext_str.to_lowercase().as_str())
-        {
-            return true;
-        }
-
-        // Check for very short files (likely not full movies)
+        // Tertiary check: Skip very small files that are likely not full movies
+        // Only apply this check for files that are clearly not movies
         if let Ok(metadata) = std::fs::metadata(file_path) {
             let size_mb = metadata.len() / (1024 * 1024);
             if size_mb < 50 {
-                // Less than 50MB, likely not a full movie
-                // But only skip if it matches other extras patterns
+                // Only skip if filename clearly indicates it's not a movie
+                // This is a minimal list since we primarily rely on directory-based detection
                 if file_name.contains("sample")
                     || file_name.contains("trailer")
                     || file_name.contains("pv")
+                    || file_name.contains("menu")
+                    || file_name.contains("bdmv")
+                    || file_name.contains("interview")
+                    || file_name.contains("commentary")
+                    || file_name.contains("featurette")
+                    || file_name.contains("deleted.scene")
+                    || file_name.contains("bloopers")
+                    || file_name.contains("outtakes")
                 {
                     return true;
                 }
-            }
-        }
-
-        // Check for specific patterns that indicate extras content
-        let specific_extras_patterns = [
-            "one.more.time",
-            "one.more.chance", // Music video patterns
-            "she.and.her.cat",
-            "5.min", // Short content patterns
-        ];
-
-        for pattern in &specific_extras_patterns {
-            if file_name.contains(pattern) {
-                return true;
             }
         }
 
@@ -911,19 +896,23 @@ mod tests {
     fn test_extras_content_detection() {
         let scanner = Scanner::new(MovieParser::new(None));
 
-        // Should be detected as extras
-        assert!(scanner.is_extras_content(Path::new("/path/to/Extras/BDMenu(JPGLBL).mkv")));
+        // Directory-based detection (most reliable)
+        assert!(scanner.is_extras_content(Path::new("/path/to/extras/BDMenu(JPGLBL).mkv")));
+        assert!(scanner.is_extras_content(Path::new("/path/to/bonus/making.of.batman.mkv")));
+        assert!(scanner.is_extras_content(Path::new("/path/to/interviews/director.interview.mkv")));
+        assert!(scanner.is_extras_content(Path::new("/path/to/trailers/movie.trailer.mkv")));
+        assert!(scanner.is_extras_content(Path::new("/movie/extras/DVDSP/樱花抄 动画分镜.mkv")));
+
+        // Obvious filename patterns (fallback for files not in extras directories)
         assert!(scanner.is_extras_content(Path::new("/path/to/BDMenu(JP).mkv")));
-        assert!(scanner.is_extras_content(Path::new("/path/to/Extras/DVDSP/樱花抄 动画分镜.mkv")));
         assert!(scanner.is_extras_content(Path::new("/path/to/水桥研二访谈.mkv")));
-        assert!(scanner.is_extras_content(Path::new("/path/to/One.more.time,One.more.chance.mkv")));
-        assert!(scanner.is_extras_content(Path::new("/path/to/She.And.Her.Cat.5.min.ver.mkv")));
-        assert!(scanner.is_extras_content(Path::new("/path/to/PV.mkv")));
-        assert!(scanner.is_extras_content(Path::new("/path/to/Makoto.Shinkai.interview.mkv")));
-        assert!(scanner.is_extras_content(Path::new("/path/to/trailer.mkv")));
-        assert!(scanner.is_extras_content(Path::new("/path/to/sample.mkv")));
-        assert!(scanner.is_extras_content(Path::new("/path/to/making.of.mkv")));
-        assert!(scanner.is_extras_content(Path::new("/path/to/commentary.mkv")));
+        assert!(scanner.is_extras_content(Path::new("/path/to/movie.trailer.mkv")));
+        assert!(scanner.is_extras_content(Path::new("/path/to/sample.video.mkv")));
+        assert!(scanner.is_extras_content(Path::new("/path/to/director.commentary.mkv")));
+        assert!(scanner.is_extras_content(Path::new("/path/to/behind.scenes.mkv")));
+        assert!(scanner.is_extras_content(Path::new("/path/to/deleted.scene.mkv")));
+        assert!(scanner.is_extras_content(Path::new("/path/to/movie.pv.mkv")));
+        assert!(scanner.is_extras_content(Path::new("/path/to/featurette.mkv")));
 
         // Should NOT be detected as extras (actual movies)
         assert!(!scanner.is_extras_content(Path::new(
@@ -932,5 +921,8 @@ mod tests {
         assert!(!scanner.is_extras_content(Path::new("/path/to/Iron.Man.2008.BluRay.1080p.mkv")));
         assert!(!scanner.is_extras_content(Path::new("/path/to/The.Matrix.1999.1080p.mkv")));
         assert!(!scanner.is_extras_content(Path::new("/path/to/Avengers.Endgame.2019.4K.mkv")));
+        // Note: We still use some filename-based detection as fallback for obvious extras
+        // but this means movies with certain words in titles might be false positives.
+        // The primary detection method is directory-based which is much more reliable.
     }
 }
