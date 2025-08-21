@@ -245,6 +245,11 @@ impl TmdbClient {
         title: &str,
         year: Option<u32>,
     ) -> Result<Option<crate::types::TmdbMatchResult>> {
+        // Validate input - reject empty or whitespace-only titles
+        if title.trim().is_empty() {
+            return Ok(None);
+        }
+
         // Strategy 1: Try exact search with year
         if let Some(result) = self.find_best_match_with_score(title, year).await? {
             return Ok(Some(result));

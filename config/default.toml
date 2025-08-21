@@ -34,7 +34,7 @@ release_groups = [
     "npuer", "BYRHD", "c0kE", "TBMovies", "MNHD", "YTS", "MX", "HDWinG", "NYPAD", "ZigZag", "NTb",
     "REMUX", "iT", "mUHD", "IAMABLE", "KRaLiMaRKo", "HDChina", "CtrlHD", "SWTYBLZ", "ADE", "PHOBOS",
     "PTHOME", "SyncUP", "YIFY", "SPARKS", "HiDt", "Geek", "TayTO", "nikt0", "beAst", "FoRM",
-    "CRiME", "HVAC", "MaoZhan", "VietHD", "JYK", "PiRaTeS", "GalaxyRG265", "PaODEQUEiJO", "Silence",
+    "CRiME", "HVAC", "MaoZhan", "VietHD", "JYK", "GalaxyRG265", "PaODEQUEiJO", "Silence",
     "LoRD", "SA89", "FANDANGO", "DON", "D-Z0N3", "ABM", "MZABI", "BYRPAD", "NCmt", "MTeam",
     "playWEB", "FLUX", "CMRG", "MZABARBiE", "SMURF", "AREY", "RABiDS", "ETHEL", "RightSiZE",
     "CiNEPHiLES", "Kitsune", "HHWEB", "HDxT", "BYNDR", "iNT",
@@ -133,7 +133,7 @@ common_words = [
     "The", "A", "An", "And", "Of", "In", "On", "At", "To", "For", "With", "From", "By", "As", "Is", "Are", "Was", "Were", "Be", "Been", "Being",
     
     # Common movie title words (from the problematic cases)
-    "Matrix", "Movie", "Part", "Name", "Title", "Lord", "King", "Queen", "Prince", "Princess", "Knight", "Dark", "Light", "New", "Old", "Big", "Small", "Good", "Bad", "Last", "First", "Second", "Third", "Fourth", "Fifth",
+    "Matrix", "Movie", "Part", "Name", "Title", "Lord", "King", "Queen", "Prince", "Princess", "Knight", "Dark", "Light", "New", "Old", "Big", "Small", "Good", "Bad", "Last", "First", "Second", "Third", "Fourth", "Fifth", "Beasts", "Man", "Earth", "Harbor", "Pearl", "Murder", "Orient", "Express", "Poirot", "Misérables", "Pirates", "Caribbean",
     
     # Numbers (common in movie titles)
     "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10",
