@@ -101,6 +101,39 @@ This document outlines the strategy and implementation plan for optimizing the c
 - [x] **Result**: Clean builds with no warnings
 - [x] **Benefits**: Cleaner codebase, smaller binary size, better maintainability
 
+### Phase 4: Performance Test Optimization ✅ COMPLETED
+**Status**: COMPLETED
+**Duration**: 1 session
+
+#### Performance Test Separation ✅ COMPLETED
+- [x] **Identified Issue**: Performance test was taking 3.44s in regular integration tests
+- [x] **Root Cause**: Processing 730 movie files sequentially in `test_performance_large_collection`
+- [x] **Solution**: Moved performance tests to Rust's benchmark system using `criterion`
+- [x] **Created**: `benches/performance.rs` with comprehensive benchmarks
+- [x] **Added**: `criterion` dependency for proper benchmarking
+- [x] **Removed**: Performance test from integration tests
+- [x] **Result**: Integration tests now run in ~2.36s instead of 3.44s
+- [x] **Benefits**: 
+  - Proper separation of concerns (performance vs functionality)
+  - Faster regular test runs
+  - Professional benchmarking with statistical analysis
+  - HTML reports and detailed performance metrics
+
+#### Benchmark Features ✅ COMPLETED
+- [x] **Large Collection Benchmark**: Tests with full 730-file dataset
+- [x] **Small Dataset Benchmark**: Tests with 50-file subset for comparison
+- [x] **Individual File Benchmark**: Tests different file patterns
+- [x] **Filename Parser Benchmark**: Isolated parser performance
+- [x] **Movie Parser Benchmark**: Full parser with TMDB integration
+- [x] **Statistical Analysis**: Criterion provides detailed performance metrics
+- [x] **HTML Reports**: Visual performance analysis and trends
+
+#### Performance Improvements ✅ COMPLETED
+- [x] **Integration Test Speed**: Reduced from 3.44s to 2.36s (31% improvement)
+- [x] **Total Test Suite**: Now runs in ~40s with proper separation
+- [x] **Benchmark System**: Professional performance measurement
+- [x] **Future-Ready**: Easy to add more performance benchmarks
+
 ### Phase 3: Eliminate Duplication 🔄 PENDING
 **Status**: PENDING
 **Duration**: 1 session

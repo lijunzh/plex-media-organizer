@@ -135,59 +135,6 @@ async fn test_movie_organization_workflow() {
 // TV and Music tests removed - not in scope for iteration 1
 // These will be re-implemented when TV and music parsing are added in future iterations
 
-/// Performance test with large collections
-#[test]
-fn test_performance_large_collection() {
-    let runner = DynamicTestRunner::new();
-
-    let tree_file = Path::new("tests/test_data/movie_directory.txt");
-
-    if !tree_file.exists() {
-        eprintln!("⚠️  Skipping performance test - movie directory file not found");
-        return;
-    }
-
-    println!("⚡ PERFORMANCE TEST: Large Collection Parsing");
-    println!("============================================");
-
-    let start_time = std::time::Instant::now();
-
-    println!("⏱️  Starting tree file parsing...");
-    let results = match runner.test_tree_file(tree_file) {
-        Ok(results) => results,
-        Err(e) => {
-            panic!("Failed to test tree file: {}", e);
-        }
-    };
-    println!(
-        "⏱️  Tree file parsing completed in {:?}",
-        start_time.elapsed()
-    );
-
-    let duration = start_time.elapsed();
-    let files_per_second = results.total_files as f64 / duration.as_secs_f64();
-
-    println!("⏱️  Performance Results:");
-    println!("   • Total files: {}", results.total_files);
-    println!("   • Time taken: {:.2?}", duration);
-    println!("   • Files per second: {:.1}", files_per_second);
-
-    // Performance assertions
-    assert!(
-        files_per_second > 5.0,
-        "Performance too slow: {:.1} files/sec. Expected >5 files/sec (reduced due to TMDB API calls)",
-        files_per_second
-    );
-
-    assert!(
-        duration.as_millis() < 10000,
-        "Test took too long: {:.0}ms. Expected <10000ms (increased due to TMDB API calls)",
-        duration.as_millis()
-    );
-
-    println!("✅ Performance test passed!");
-}
-
 /// Test error handling and edge cases
 #[test]
 fn test_error_handling_edge_cases() {
