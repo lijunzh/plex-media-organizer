@@ -152,12 +152,17 @@ fn test_performance_large_collection() {
 
     let start_time = std::time::Instant::now();
 
+    println!("⏱️  Starting tree file parsing...");
     let results = match runner.test_tree_file(tree_file) {
         Ok(results) => results,
         Err(e) => {
             panic!("Failed to test tree file: {}", e);
         }
     };
+    println!(
+        "⏱️  Tree file parsing completed in {:?}",
+        start_time.elapsed()
+    );
 
     let duration = start_time.elapsed();
     let files_per_second = results.total_files as f64 / duration.as_secs_f64();

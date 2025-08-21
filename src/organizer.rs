@@ -647,8 +647,8 @@ mod tests {
         assert_eq!(filename, "Iron Man (2008) 1080p BluRay.mkv");
     }
 
-    #[tokio::test]
-    async fn test_organizer_creation() {
+    #[test]
+    fn test_organizer_creation() {
         let organizer = Organizer::new(true, None);
         assert!(organizer.dry_run);
         assert!(organizer.backup_dir.is_none());

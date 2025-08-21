@@ -239,7 +239,58 @@ impl TmdbClient {
         Ok(movie)
     }
 
-    /// Enhanced movie search with multiple fallback strategies
+    /// Enhanced search with multiple fallback strategies and config parameters
+    pub async fn enhanced_search_with_config(
+        &self,
+        title: &str,
+        year: Option<u32>,
+        problematic_patterns: &[String],
+    ) -> Result<Option<crate::types::TmdbMatchResult>> {
+        // Validate input - reject empty or whitespace-only titles
+        if title.trim().is_empty() {
+            return Ok(None);
+        }
+
+        // Strategy 1: Try exact search with year
+        if let Some(result) = self
+            .find_best_match_with_score_and_config(title, year, problematic_patterns)
+            .await?
+        {
+            return Ok(Some(result));
+        }
+
+        // Strategy 2: Try search without year (broader search)
+        if let Some(result) = self
+            .find_best_match_with_score_and_config(title, None, problematic_patterns)
+            .await?
+        {
+            return Ok(Some(result));
+        }
+
+        // Strategy 3: Try with cleaned title (remove common suffixes/prefixes)
+        let cleaned_title = self.clean_title_for_search(title);
+        if cleaned_title != title
+            && let Some(result) = self
+                .find_best_match_with_score_and_config(&cleaned_title, year, problematic_patterns)
+                .await?
+        {
+            return Ok(Some(result));
+        }
+
+        // Strategy 4: Try with alternative title variations
+        for alt_title in self.generate_title_variations(title) {
+            if let Some(result) = self
+                .find_best_match_with_score_and_config(&alt_title, year, problematic_patterns)
+                .await?
+            {
+                return Ok(Some(result));
+            }
+        }
+
+        Ok(None)
+    }
+
+    /// Enhanced search with multiple fallback strategies (legacy method - loads config internally)
     pub async fn enhanced_search(
         &self,
         title: &str,
@@ -357,43 +408,47 @@ impl TmdbClient {
         }
     }
 
-    /// Find the best matching movie from search results with enhanced fuzzy matching and return score
-    pub async fn find_best_match_with_score(
+    /// Find the best matching movie with scoring and config parameters
+    pub async fn find_best_match_with_score_and_config(
         &self,
         title: &str,
         year: Option<u32>,
+        problematic_patterns: &[String],
     ) -> Result<Option<crate::types::TmdbMatchResult>> {
-        let search_results = self.search_movie(title, year).await?;
+        let movies = self.search_movie(title, year).await?;
 
-        if search_results.is_empty() {
+        if movies.is_empty() {
             return Ok(None);
         }
 
-        // Enhanced scoring with fuzzy matching
-        let mut best_match = None;
         let mut best_score = 0.0;
+        let mut best_match: Option<TmdbMovie> = None;
+        let title_lower = title.to_lowercase();
 
-        for movie in search_results {
+        for movie in movies {
             let mut score = 0.0;
-
-            // Enhanced title similarity with fuzzy matching
-            let title_lower = title.to_lowercase();
             let movie_title_lower = movie.title.to_lowercase();
 
-            // Exact match (highest priority)
-            if title_lower == movie_title_lower {
-                score += 200.0;
-            } else if title_lower.len() <= 10 {
-                // For short titles (like "Apples"), be very strict about matching
-                // Only accept very close matches to avoid false positives
-                let fuzzy_matcher = SkimMatcherV2::default();
-                if let Some(fuzzy_score) =
-                    fuzzy_matcher.fuzzy_match(&movie_title_lower, &title_lower)
-                {
-                    // For short titles, require very high fuzzy scores
-                    if fuzzy_score >= 80 {
-                        let normalized_fuzzy_score = (fuzzy_score as f32) * 1.0;
-                        score += normalized_fuzzy_score;
+            // Exact title match (highest priority)
+            if movie_title_lower == title_lower {
+                score += 1000.0;
+            } else if movie_title_lower.len() > 10 && title_lower.len() > 10 {
+                // For longer titles, check if they're very similar
+                let title_words: Vec<&str> = title_lower.split_whitespace().collect();
+                let movie_words: Vec<&str> = movie_title_lower.split_whitespace().collect();
+
+                if title_words.len() >= 3 && movie_words.len() >= 3 {
+                    let common_words = title_words
+                        .iter()
+                        .filter(|word| movie_words.contains(word))
+                        .count();
+                    let similarity =
+                        common_words as f32 / title_words.len().max(movie_words.len()) as f32;
+
+                    if similarity >= 0.8 {
+                        score += 800.0; // Very high score for high similarity
+                    } else if similarity >= 0.6 {
+                        score += 400.0; // High score for good similarity
                     }
                 }
 
@@ -453,42 +508,10 @@ impl TmdbClient {
                 score += vote_average * 2.0; // Rating bonus
             }
 
-            // Penalize problematic content types
+            // Penalize problematic content types using passed config
             let title_lower = movie.title.to_lowercase();
 
-            // Get problematic patterns from configuration
-            let problematic_patterns = crate::config::AppConfig::load()
-                .map(|config| config.get_all_content_filtering_patterns())
-                .unwrap_or_else(|_| {
-                    vec![
-                        "production report".to_string(),
-                        "making of".to_string(),
-                        "behind the scenes".to_string(),
-                        "documentary".to_string(),
-                        "extras".to_string(),
-                        "commentary".to_string(),
-                        "interview".to_string(),
-                        "photo gallery".to_string(),
-                        "gallery".to_string(),
-                        "trailer".to_string(),
-                        "teaser".to_string(),
-                        "preview".to_string(),
-                        "sneak peek".to_string(),
-                        "deleted scene".to_string(),
-                        "alternate ending".to_string(),
-                        "bloopers".to_string(),
-                        "outtakes".to_string(),
-                        "featurette".to_string(),
-                        "promo".to_string(),
-                        "promotional".to_string(),
-                        "music video".to_string(),
-                        "soundtrack".to_string(),
-                        "score".to_string(),
-                        "ost".to_string(),
-                    ]
-                });
-
-            for pattern in &problematic_patterns {
+            for pattern in problematic_patterns {
                 if title_lower.contains(pattern) {
                     score -= 1000.0; // Very heavy penalty for problematic content
                     break;
@@ -506,7 +529,7 @@ impl TmdbClient {
         let confidence_score = if best_score >= 50.0 {
             // Normalize: 50 = 0.3, 400 = 1.0
             let normalized = (best_score - 50.0) / 350.0; // 400 - 50 = 350
-            (0.3 + normalized * 0.7).min(1.0) // Scale to 0.3-1.0 range
+            (0.3 + normalized * 0.7).min(1.0_f32) // Scale to 0.3-1.0 range
         } else {
             0.0
         };
@@ -522,6 +545,48 @@ impl TmdbClient {
         } else {
             Ok(None)
         }
+    }
+
+    /// Find the best matching movie with scoring (legacy method - loads config internally)
+    pub async fn find_best_match_with_score(
+        &self,
+        title: &str,
+        year: Option<u32>,
+    ) -> Result<Option<crate::types::TmdbMatchResult>> {
+        // Get problematic patterns from configuration
+        let problematic_patterns = crate::config::AppConfig::load()
+            .map(|config| config.get_all_content_filtering_patterns())
+            .unwrap_or_else(|_| {
+                vec![
+                    "production report".to_string(),
+                    "making of".to_string(),
+                    "behind the scenes".to_string(),
+                    "documentary".to_string(),
+                    "extras".to_string(),
+                    "commentary".to_string(),
+                    "interview".to_string(),
+                    "photo gallery".to_string(),
+                    "gallery".to_string(),
+                    "trailer".to_string(),
+                    "teaser".to_string(),
+                    "preview".to_string(),
+                    "sneak peek".to_string(),
+                    "deleted scene".to_string(),
+                    "alternate ending".to_string(),
+                    "bloopers".to_string(),
+                    "outtakes".to_string(),
+                    "featurette".to_string(),
+                    "promo".to_string(),
+                    "promotional".to_string(),
+                    "music video".to_string(),
+                    "soundtrack".to_string(),
+                    "score".to_string(),
+                    "ost".to_string(),
+                ]
+            });
+
+        self.find_best_match_with_score_and_config(title, year, &problematic_patterns)
+            .await
     }
 
     /// Convert TMDB movie to our MovieInfo format

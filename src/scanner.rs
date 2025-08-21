@@ -62,6 +62,32 @@ impl Scanner {
         }
     }
 
+    /// Create a new scanner with custom concurrency limit and config (single load)
+    pub fn with_concurrency_and_config(
+        movie_parser: MovieParser,
+        concurrency_limit: usize,
+        config: &AppConfig,
+    ) -> Self {
+        Self {
+            movie_parser,
+            config: config.clone(),
+            concurrency_limit,
+            network_mode: false,
+            batch_size: 100,
+        }
+    }
+
+    /// Create a scanner optimized for network drives with config (single load)
+    pub fn for_network_drive_with_config(movie_parser: MovieParser, config: &AppConfig) -> Self {
+        Self {
+            movie_parser,
+            config: config.clone(),
+            concurrency_limit: 4, // Reduced concurrency for network drives
+            network_mode: true,
+            batch_size: 50, // Smaller batches for network drives
+        }
+    }
+
     /// Set the concurrency limit for parallel processing
     pub fn set_concurrency_limit(&mut self, limit: usize) {
         self.concurrency_limit = limit;

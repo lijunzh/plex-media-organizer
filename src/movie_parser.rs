@@ -10,32 +10,62 @@ use anyhow::{Context, Result};
 use chrono::Utc;
 use std::path::Path;
 
-fn get_filename_parser_with_config(config: &AppConfig) -> FilenameParser {
-    let technical_terms = config.get_all_technical_terms();
-    FilenameParser::with_technical_terms(technical_terms)
-}
-
 /// Movie parser that handles various filename patterns
 #[derive(Clone, Debug)]
 pub struct MovieParser {
     tmdb_client: Option<TmdbClient>,
-    config: AppConfig,
+    filename_parser: FilenameParser, // Cache the filename parser
+    config: AppConfig,               // Store the full config for passing to filename parser
 }
 
 impl MovieParser {
-    /// Create a new movie parser
+    /// Create a new movie parser with default configuration
     pub fn new(tmdb_client: Option<TmdbClient>) -> Self {
+        // Load config once and extract parameters
         let config = AppConfig::load().unwrap_or_default();
+        let technical_terms = config.get_all_technical_terms();
+
+        let filename_parser = FilenameParser::with_technical_terms(technical_terms);
         Self {
             tmdb_client,
+            filename_parser,
             config,
         }
     }
 
-    /// Create a new movie parser with custom configuration
-    pub fn with_config(tmdb_client: Option<TmdbClient>, config: AppConfig) -> Self {
+    /// Create a movie parser with specific parameters (no config loading)
+    pub fn with_parameters(
+        tmdb_client: Option<TmdbClient>,
+        technical_terms: Vec<String>,
+        language_codes: Vec<String>,
+        common_words: Vec<String>,
+        technical_japanese_terms: Vec<String>,
+    ) -> Self {
+        let filename_parser = FilenameParser::with_technical_terms(technical_terms);
+        // Create a minimal config with the provided parameters
+        let mut config = AppConfig::default();
+        config.organization.content_filtering.language_codes = language_codes;
+        config.organization.content_filtering.common_words = common_words;
+        config
+            .organization
+            .content_filtering
+            .technical_japanese_terms = technical_japanese_terms;
+
         Self {
             tmdb_client,
+            filename_parser,
+            config,
+        }
+    }
+
+    /// Create a movie parser with full configuration
+    pub fn with_config(tmdb_client: Option<TmdbClient>, config: AppConfig) -> Self {
+        let technical_terms = config.get_all_technical_terms();
+        let filename_parser = FilenameParser::with_technical_terms(technical_terms);
+
+        Self {
+            tmdb_client,
+            filename_parser,
             config,
         }
     }
@@ -58,9 +88,16 @@ impl MovieParser {
 
         // If we have a TMDB client, try to get additional data
         if let Some(ref tmdb_client) = self.tmdb_client {
-            // Use enhanced search with multiple fallback strategies
+            // Get problematic patterns from config (single load)
+            let problematic_patterns = self.config.get_all_content_filtering_patterns();
+
+            // Use enhanced search with config parameters (no repeated loading)
             let tmdb_result = tmdb_client
-                .enhanced_search(&movie_info.title, movie_info.year)
+                .enhanced_search_with_config(
+                    &movie_info.title,
+                    movie_info.year,
+                    &problematic_patterns,
+                )
                 .await?;
 
             if let Some(tmdb_result) = tmdb_result {
@@ -106,9 +143,10 @@ impl MovieParser {
 
     /// Parse filename using token-based approach
     pub fn parse_filename(&self, filename: &str) -> Result<MovieInfo> {
-        // Use the new token-based parser with config
-        let parser = get_filename_parser_with_config(&self.config);
-        let components = parser.parse(filename)?;
+        // Use the cached filename parser with config
+        let components = self
+            .filename_parser
+            .parse_with_config(filename, Some(&self.config))?;
 
         // Convert to MovieInfo
         let movie_info = MovieInfo {

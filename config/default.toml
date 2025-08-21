@@ -35,7 +35,7 @@ release_groups = [
     "REMUX", "iT", "mUHD", "IAMABLE", "KRaLiMaRKo", "HDChina", "CtrlHD", "SWTYBLZ", "ADE", "PHOBOS",
     "PTHOME", "SyncUP", "YIFY", "SPARKS", "HiDt", "Geek", "TayTO", "nikt0", "beAst", "FoRM",
     "CRiME", "HVAC", "MaoZhan", "VietHD", "JYK", "GalaxyRG265", "PaODEQUEiJO", "Silence",
-    "LoRD", "SA89", "FANDANGO", "DON", "D-Z0N3", "ABM", "MZABI", "BYRPAD", "NCmt", "MTeam",
+    "SA89", "FANDANGO", "DON", "D-Z0N3", "ABM", "MZABI", "BYRPAD", "NCmt", "MTeam",
     "playWEB", "FLUX", "CMRG", "MZABARBiE", "SMURF", "AREY", "RABiDS", "ETHEL", "RightSiZE",
     "CiNEPHiLES", "Kitsune", "HHWEB", "HDxT", "BYNDR", "iNT",
     
@@ -67,7 +67,7 @@ video_audio_terms = [
 # Source/platform names to filter out
 source_platform_terms = [
     # Source/platform names
-    "NF", "AMZN", "HKG", "ESP", "GBR", "INT", "JPN", "CHN", "CCTV6HD", "CHC", "Star", "Movie-HD",
+    "NF", "AMZN", "HKG", "ESP", "GBR", "INT", "JPN", "CHN", "CCTV6HD", "CHC", "Movie-HD",
     "AKA", "Chinese", "iTunes", "Netflix", "HMAX", "NOW", "ATVP", "HULU", "DSNP", "MA", "WEB-DL",
     "WEB", "DL", "WEBRip", "HDTVRip", "DVDRip", "BDRip", "HDRip", "HDTV", "BluRay", "Blu-ray",
     "UHD", "4K", "2160p", "1080p", "720p", "480p", "360p", "240p", "144p",
@@ -129,17 +129,36 @@ known_titles = [
 # Common English words to preserve from filtering
 # This is a focused list of essential words that are part of legitimate movie titles
 common_words = [
-    # Basic articles and prepositions (essential for movie titles)
-    "The", "A", "An", "And", "Of", "In", "On", "At", "To", "For", "With", "From", "By", "As", "Is", "Are", "Was", "Were", "Be", "Been", "Being",
+    # Essential articles and prepositions for movie titles
+    "The", "A", "An", "Of", "In", "On", "At", "To", "For", "With", "From", "By",
     
-    # Common movie title words (from the problematic cases)
-    "Matrix", "Movie", "Part", "Name", "Title", "Lord", "King", "Queen", "Prince", "Princess", "Knight", "Dark", "Light", "New", "Old", "Big", "Small", "Good", "Bad", "Last", "First", "Second", "Third", "Fourth", "Fifth", "Beasts", "Man", "Earth", "Harbor", "Pearl", "Murder", "Orient", "Express", "Poirot", "Misérables", "Pirates", "Caribbean",
+    # Common movie title words (from actual problematic cases)
+    "Matrix", "Movie", "Part", "Lord", "King", "Queen", "Prince", "Princess", "Knight", 
+    "Dark", "Light", "New", "Old", "Last", "First", "Second", "Third", "Fourth", "Fifth",
+    "Beasts", "Man", "Earth", "Harbor", "Pearl", "Murder", "Orient", "Express", 
+    "Poirot", "Misérables", "Pirates", "Caribbean", "Star", "Wars", "Episode",
     
     # Numbers (common in movie titles)
-    "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10",
+    "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten",
+    "1", "2", "3", "4", "5", "6", "7", "8", "9", "10",
     
-    # Common movie title words (from the problematic cases)
-    "Man", "Woman", "Boy", "Girl", "Child", "Children", "Family", "Home", "House", "City", "Town", "Country", "World", "Earth", "Sky", "Sea", "Ocean", "River", "Mountain", "Forest", "Road", "Street", "Way", "Time", "Day", "Night", "Morning", "Evening", "Year", "Years", "Life", "Death", "Love", "Hate", "War", "Peace", "Justice", "Crime", "Law", "Order", "Freedom", "Power", "Money", "Gold", "Silver", "Diamond", "Stone", "Rock", "Fire", "Water", "Air", "Wind", "Sun", "Moon", "Star", "Stars", "Planet", "Space", "Ship", "Car", "Train", "Plane", "Boat", "Dog", "Cat", "Bird", "Fish", "Dragon", "Monster", "Ghost", "Spirit", "Angel", "Devil", "God", "Goddess", "Hero", "Heroine", "Villain", "Friend", "Enemy", "Brother", "Sister", "Father", "Mother", "Son", "Daughter", "Uncle", "Aunt", "Grandfather", "Grandmother", "King", "Queen", "Prince", "Princess", "Knight", "Soldier", "Captain", "General", "President", "Doctor", "Teacher", "Student", "Police", "Detective", "Lawyer", "Judge", "Priest", "Wizard", "Witch", "Magician", "Artist", "Writer", "Singer", "Dancer", "Actor", "Actress", "Director", "Producer", "Manager", "Boss", "Worker", "Farmer", "Hunter", "Fisherman", "Sailor", "Pilot", "Driver", "Rider", "Runner", "Swimmer", "Fighter", "Warrior", "Guard", "Protector", "Savior", "Messiah", "Prophet", "Sage", "Wise", "Smart", "Clever", "Brave", "Strong", "Weak", "Fast", "Slow", "Young", "Old", "New", "Ancient", "Modern", "Future", "Past", "Present", "Real", "Fake", "True", "False", "Right", "Wrong", "Good", "Bad", "Beautiful", "Ugly", "Happy", "Sad", "Angry", "Calm", "Wild", "Quiet", "Loud", "Big", "Small", "Large", "Tiny", "Huge", "Giant", "Little", "Great", "Grand", "Magnificent", "Wonderful", "Amazing", "Incredible", "Fantastic", "Terrible", "Horrible", "Awful", "Perfect", "Complete", "Full", "Empty", "Open", "Closed", "Free", "Bound", "Lost", "Found", "Hidden", "Visible", "Clear", "Cloudy", "Bright", "Dark", "Light", "Heavy", "Light", "Soft", "Hard", "Smooth", "Rough", "Clean", "Dirty", "Fresh", "Stale", "Hot", "Cold", "Warm", "Cool", "Wet", "Dry", "Wet", "Dry", "High", "Low", "Deep", "Shallow", "Long", "Short", "Wide", "Narrow", "Thick", "Thin", "Round", "Square", "Straight", "Curved", "Sharp", "Blunt", "Sweet", "Sour", "Bitter", "Salty", "Spicy", "Mild", "Strong", "Weak", "Rich", "Poor", "Expensive", "Cheap", "Valuable", "Worthless", "Important", "Unimportant", "Necessary", "Unnecessary", "Possible", "Impossible", "Easy", "Difficult", "Simple", "Complex", "Clear", "Confusing", "Obvious", "Hidden", "Secret", "Public", "Private", "Personal", "General", "Specific", "Special", "Ordinary", "Normal", "Strange", "Familiar", "Unknown", "Famous", "Infamous", "Popular", "Unpopular", "Loved", "Hated", "Respected", "Disrespected", "Trusted", "Distrusted", "Loyal", "Disloyal", "Honest", "Dishonest", "Kind", "Cruel", "Gentle", "Rough", "Polite", "Rude", "Friendly", "Unfriendly", "Helpful", "Harmful", "Useful", "Useless", "Active", "Passive", "Alive", "Dead", "Living", "Dying", "Born", "Killed", "Saved", "Destroyed", "Created", "Built", "Made", "Broken", "Fixed", "Started", "Stopped", "Began", "Ended", "Opened", "Closed", "Entered", "Left", "Arrived", "Departed", "Came", "Went", "Walked", "Ran", "Jumped", "Fell", "Rose", "Sank", "Flew", "Landed", "Swam", "Dived", "Climbed", "Descended", "Reached", "Missed", "Hit", "Struck", "Punched", "Kicked", "Fought", "Defended", "Attacked", "Protected", "Threatened", "Warned", "Told", "Said", "Spoke", "Talked", "Listened", "Heard", "Saw", "Looked", "Watched", "Observed", "Noticed", "Found", "Lost", "Searched", "Found", "Discovered", "Explored", "Traveled", "Journeyed", "Adventured", "Explored", "Investigated", "Examined", "Studied", "Learned", "Taught", "Trained", "Practiced", "Played", "Worked", "Rested", "Slept", "Woke", "Dreamed", "Thought", "Believed", "Knew", "Understood", "Remembered", "Forgot", "Forgave", "Forgot", "Loved", "Hated", "Liked", "Disliked", "Wanted", "Needed", "Had", "Gave", "Took", "Brought", "Carried", "Held", "Dropped", "Picked", "Placed", "Put", "Set", "Moved", "Stayed", "Remained", "Changed", "Became", "Grew", "Shrank", "Increased", "Decreased", "Improved", "Worsened", "Better", "Worse", "Best", "Worst", "More", "Less", "Most", "Least", "Many", "Few", "Some", "None", "All", "Each", "Every", "Any", "No", "Yes", "Maybe", "Perhaps", "Probably", "Certainly", "Definitely", "Absolutely", "Completely", "Totally", "Entirely", "Partly", "Mostly", "Mainly", "Primarily", "Especially", "Particularly", "Specifically", "Generally", "Usually", "Often", "Sometimes", "Rarely", "Never", "Always", "Forever", "Ever", "Never", "Once", "Twice", "Again", "Back", "Forward", "Ahead", "Behind", "Above", "Below", "Over", "Under", "Inside", "Outside", "Within", "Without", "Between", "Among", "Around", "About", "Against", "Toward", "Towards", "Through", "Across", "Along", "Beside", "Besides", "Beyond", "Near", "Far", "Close", "Distant", "Remote", "Local", "Global", "International", "National", "Regional", "Local", "Personal", "Individual", "Collective", "Group", "Team", "Family", "Community", "Society", "World", "Universe", "Galaxy", "Planet", "Earth", "Moon", "Sun", "Star", "Stars", "Sky", "Heaven", "Hell", "Paradise", "Eden", "Garden", "Forest", "Jungle", "Desert", "Mountain", "Valley", "River", "Lake", "Ocean", "Sea", "Island", "Beach", "Coast", "Shore", "Land", "Ground", "Soil", "Rock", "Stone", "Crystal", "Diamond", "Gold", "Silver", "Iron", "Steel", "Wood", "Paper", "Glass", "Plastic", "Metal", "Fabric", "Cloth", "Silk", "Cotton", "Wool", "Leather", "Skin", "Flesh", "Blood", "Bone", "Heart", "Mind", "Soul", "Spirit", "Ghost", "Angel", "Devil", "God", "Goddess", "Deity", "Divine", "Holy", "Sacred", "Profane", "Evil", "Good", "Pure", "Corrupt", "Innocent", "Guilty", "Righteous", "Wicked", "Virtuous", "Sinful", "Blessed", "Cursed", "Lucky", "Unlucky", "Fortunate", "Unfortunate", "Happy", "Sad", "Joyful", "Sorrowful", "Cheerful", "Gloomy", "Bright", "Dark", "Light", "Shadow", "Shade", "Color", "Red", "Blue", "Green", "Yellow", "Orange", "Purple", "Pink", "Brown", "Black", "White", "Gray", "Grey", "Silver", "Gold", "Bronze", "Copper", "Brass", "Steel", "Iron", "Aluminum", "Platinum", "Titanium", "Zinc", "Lead", "Mercury", "Uranium", "Plutonium", "Radium", "Carbon", "Oxygen", "Hydrogen", "Nitrogen", "Helium", "Neon", "Argon", "Krypton", "Xenon", "Radon", "Fluorine", "Chlorine", "Bromine", "Iodine", "Sulfur", "Phosphorus", "Silicon", "Boron", "Lithium", "Sodium", "Potassium", "Calcium", "Magnesium", "Barium", "Strontium", "Rubidium", "Cesium", "Francium", "Beryllium", "Scandium", "Titanium", "Vanadium", "Chromium", "Manganese", "Cobalt", "Nickel", "Copper", "Zinc", "Gallium", "Germanium", "Arsenic", "Selenium", "Bromine", "Krypton", "Rubidium", "Strontium", "Yttrium", "Zirconium", "Niobium", "Molybdenum", "Technetium", "Ruthenium", "Rhodium", "Palladium", "Silver", "Cadmium", "Indium", "Tin", "Antimony", "Tellurium", "Iodine", "Xenon", "Cesium", "Barium", "Lanthanum", "Cerium", "Praseodymium", "Neodymium", "Promethium", "Samarium", "Europium", "Gadolinium", "Terbium", "Dysprosium", "Holmium", "Erbium", "Thulium", "Ytterbium", "Lutetium", "Hafnium", "Tantalum", "Tungsten", "Rhenium", "Osmium", "Iridium", "Platinum", "Gold", "Mercury", "Thallium", "Lead", "Bismuth", "Polonium", "Astatine", "Radon", "Francium", "Radium", "Actinium", "Thorium", "Protactinium", "Uranium", "Neptunium", "Plutonium", "Americium", "Curium", "Berkelium", "Californium", "Einsteinium", "Fermium", "Mendelevium", "Nobelium", "Lawrencium", "Rutherfordium", "Dubnium", "Seaborgium", "Bohrium", "Hassium", "Meitnerium", "Darmstadtium", "Roentgenium", "Copernicium", "Nihonium", "Flerovium", "Moscovium", "Livermorium", "Tennessine", "Oganesson",
+    # Essential movie title words (reduced list)
+    "Woman", "Boy", "Girl", "Family", "Home", "House", "City", "Town", "Country", 
+    "World", "Sky", "Sea", "Ocean", "River", "Mountain", "Forest", "Road", "Street", 
+    "Way", "Time", "Day", "Night", "Life", "Death", "Love", "War", "Peace", 
+    "Justice", "Crime", "Law", "Order", "Freedom", "Power", "Money", "Gold", 
+    "Silver", "Diamond", "Stone", "Rock", "Fire", "Water", "Air", "Wind", 
+    "Sun", "Moon", "Star", "Stars", "Planet", "Space", "Ship", "Car", "Train", 
+    "Plane", "Boat", "Dog", "Cat", "Bird", "Fish", "Dragon", "Monster", "Ghost", 
+    "Spirit", "Angel", "Devil", "God", "Goddess", "Hero", "Heroine", "Villain", 
+    "Friend", "Enemy", "Brother", "Sister", "Father", "Mother", "Son", "Daughter", 
+    "Uncle", "Aunt", "King", "Queen", "Prince", "Princess", "Knight", "Soldier", 
+    "Captain", "General", "President", "Doctor", "Teacher", "Student", "Police", 
+    "Detective", "Lawyer", "Judge", "Priest", "Wizard", "Witch", "Magician", 
+    "Artist", "Writer", "Singer", "Dancer", "Actor", "Actress", "Director", 
+    "Producer", "Manager", "Boss", "Worker", "Farmer", "Hunter", "Fisherman", 
+    "Sailor", "Pilot", "Driver", "Rider", "Runner", "Swimmer", "Fighter", 
+    "Warrior", "Guard", "Protector", "Savior", "Messiah", "Prophet", "Sage",
 ]
 
 # File extensions that indicate extras content

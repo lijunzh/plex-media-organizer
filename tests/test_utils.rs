@@ -131,11 +131,20 @@ impl DynamicTestRunner {
         tree_file_path: &Path,
     ) -> Result<DynamicTestResults, Box<dyn std::error::Error>> {
         let content = fs::read_to_string(tree_file_path)?;
+        println!("⏱️  File read completed");
+
+        let extract_start = std::time::Instant::now();
         let filenames = self.extract_filenames_from_tree(&content);
+        println!(
+            "⏱️  Filename extraction completed in {:?}",
+            extract_start.elapsed()
+        );
 
         println!("📁 Found {} movie files in tree output", filenames.len());
 
+        let parse_start = std::time::Instant::now();
         let results = self.run_dynamic_tests(&filenames);
+        println!("⏱️  Dynamic tests completed in {:?}", parse_start.elapsed());
         Ok(results)
     }
 
