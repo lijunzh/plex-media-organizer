@@ -15,6 +15,16 @@ pub struct FilenameComponents {
     pub confidence: f32,
 }
 
+/// Anime movie information extracted from filename
+#[derive(Debug, Clone)]
+pub struct AnimeInfo {
+    pub is_anime: bool,
+    pub movie_number: Option<u32>,
+    pub has_japanese_title: bool,
+    pub has_chinese_title: bool,
+    pub is_movie_series: bool,
+}
+
 /// Token-based filename parser
 #[derive(Clone, Debug)]
 pub struct FilenameParser {
@@ -1269,6 +1279,100 @@ impl FilenameParser {
         }
         None
     }
+
+    /// Detect anime movie patterns and extract enhanced metadata
+    pub fn detect_anime_pattern(&self, title: &str, filename: &str) -> Option<AnimeInfo> {
+        // Check for Japanese characters in both title and filename
+        let has_japanese = title.chars().any(|c| {
+            // Hiragana, Katakana, Kanji ranges
+            ('\u{3040}'..='\u{309F}').contains(&c) || // Hiragana
+            ('\u{30A0}'..='\u{30FF}').contains(&c) || // Katakana
+            ('\u{4E00}'..='\u{9FAF}').contains(&c) // Kanji
+        }) || filename.chars().any(|c| {
+            // Hiragana, Katakana, Kanji ranges
+            ('\u{3040}'..='\u{309F}').contains(&c) || // Hiragana
+            ('\u{30A0}'..='\u{30FF}').contains(&c) || // Katakana
+            ('\u{4E00}'..='\u{9FAF}').contains(&c) // Kanji
+        });
+
+        // Check for Chinese characters in both title and filename
+        let has_chinese = title.chars().any(|c| {
+            ('\u{4E00}'..='\u{9FAF}').contains(&c) // CJK Unified Ideographs (includes Chinese)
+        }) || filename.chars().any(|c| {
+            ('\u{4E00}'..='\u{9FAF}').contains(&c) // CJK Unified Ideographs (includes Chinese)
+        });
+
+        // Look for anime movie series patterns
+        let anime_movie_patterns = [
+            // Detective Conan Movie patterns
+            (r"Detective\.Conan\.Movie\.(\d+)", 1),
+            (r"名探偵コナン.*?劇場版.*?(\d+)", 1),
+            (r"名侦探柯南.*?(\d+)", 1),
+            // Studio Ghibli patterns
+            (r"Ghibli", 0),
+            // Common anime movie indicators
+            (r"劇場版", 0), // "Theatrical version" in Japanese
+            (r"映画", 0),   // "Movie" in Japanese
+            (r"电影", 0),   // "Movie" in Chinese
+        ];
+
+        // Check for anime indicators
+        let mut is_anime = has_japanese || has_chinese;
+        let mut movie_number = None;
+
+        // Check anime movie patterns
+        for (pattern, capture_group) in anime_movie_patterns.iter() {
+            if let Some(captures) = regex::Regex::new(pattern)
+                .ok()
+                .and_then(|re| re.captures(filename))
+            {
+                is_anime = true;
+                if *capture_group > 0
+                    && let Some(num_str) = captures.get(*capture_group)
+                    && let Ok(num) = num_str.as_str().parse::<u32>()
+                {
+                    movie_number = Some(num);
+                }
+            }
+        }
+
+        // Check for common anime keywords
+        let anime_keywords = [
+            "anime",
+            "アニメ",
+            "动画",
+            "動畫",
+            "Studio",
+            "スタジオ",
+            "OVA",
+            "ONA",
+            "OAD",
+            "劇場版",
+            "映画",
+            "电影",
+            "名探偵",
+            "名侦探",
+        ];
+
+        for keyword in anime_keywords.iter() {
+            if filename.contains(keyword) || title.contains(keyword) {
+                is_anime = true;
+                break;
+            }
+        }
+
+        if is_anime {
+            Some(AnimeInfo {
+                is_anime: true,
+                movie_number,
+                has_japanese_title: has_japanese,
+                has_chinese_title: has_chinese,
+                is_movie_series: movie_number.is_some(),
+            })
+        } else {
+            None
+        }
+    }
 }
 
 #[cfg(test)]
@@ -1634,5 +1738,61 @@ mod tests {
                 input
             );
         }
+    }
+
+    #[test]
+    fn test_anime_detection() {
+        let parser = FilenameParser::new();
+
+        // Test Detective Conan Movie patterns
+        let anime_info = parser.detect_anime_pattern(
+            "Detective Conan The Scarlet Bullet",
+            "[BD-1080P] [名探偵コナン 緋色の弾丸] Detective Conan The Scarlet Bullet (2021) [BDRip][HEVC-10bit][1080p][CHS&CHT&ENG].mkv"
+        );
+        assert!(anime_info.is_some());
+        let info = anime_info.unwrap();
+        assert!(info.is_anime);
+        assert!(info.has_japanese_title); // Should detect Japanese characters in filename
+
+        // Test Detective Conan Movie series pattern
+        let anime_info = parser.detect_anime_pattern(
+            "Detective Conan Movie 1 The Time Bomb Skyscraper",
+            "Detective.Conan.Movie.1.The.Time.Bomb.Skyscraper.1997.720p.BluRay.x264-WiKi.mkv",
+        );
+        assert!(anime_info.is_some());
+        let info = anime_info.unwrap();
+        assert!(info.is_anime);
+        assert_eq!(info.movie_number, Some(1));
+        assert!(info.is_movie_series);
+
+        // Test Chinese anime pattern
+        let anime_info = parser.detect_anime_pattern(
+            "名侦探柯南：百万美元的五棱星",
+            "[名侦探柯南：百万美元的五棱星].Detective.Conan.The.Million-dollar.Pentagram.2024.JPN.BluRay.1080p.x265.10bit.DD5.1-CMCT.mkv"
+        );
+        assert!(anime_info.is_some());
+        let info = anime_info.unwrap();
+        assert!(info.is_anime);
+        assert!(info.has_chinese_title);
+
+        // Test Studio Ghibli pattern
+        let anime_info = parser.detect_anime_pattern(
+            "Spirited Away",
+            "Spirited.Away.2001.Studio.Ghibli.BluRay.1080p.mkv",
+        );
+        assert!(anime_info.is_some());
+        let info = anime_info.unwrap();
+        assert!(info.is_anime);
+
+        // Test non-anime pattern
+        let anime_info =
+            parser.detect_anime_pattern("The Matrix", "The.Matrix.1999.1080p.BluRay.x264.mkv");
+        assert!(anime_info.is_none());
+
+        // Test Japanese keywords
+        let anime_info = parser.detect_anime_pattern("映画 Test Movie", "映画.Test.Movie.2023.mkv");
+        assert!(anime_info.is_some());
+        let info = anime_info.unwrap();
+        assert!(info.is_anime);
     }
 }

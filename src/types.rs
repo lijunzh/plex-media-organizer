@@ -181,6 +181,14 @@ pub struct MovieInfo {
     pub series_name: Option<String>,
     /// Series number/sequence if applicable
     pub series_number: Option<u32>,
+    /// Whether this is an anime movie
+    pub is_anime: bool,
+    /// Anime movie number if applicable (e.g., Detective Conan Movie 26)
+    pub anime_movie_number: Option<u32>,
+    /// Whether the title contains Japanese characters
+    pub has_japanese_title: bool,
+    /// Whether the title contains Chinese characters
+    pub has_chinese_title: bool,
     /// Video quality
     pub quality: Option<String>,
     /// Source

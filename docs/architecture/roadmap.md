@@ -81,9 +81,9 @@ This document outlines an iterative, incremental implementation plan for the Ple
 - [x] Handle Chinese-English bilingual titles
 - [x] Support bracketed Chinese titles
 - [x] Multi-part movie detection (CD1, CD2, Part 1, Part 2)
-- [ ] Japanese anime movie patterns
+- [x] Japanese anime movie patterns
 - [x] Enhanced collection detection (TMDB collection API integration)
-- [ ] Series movie detection (Iron Man 1, 2, 3 patterns)
+- [x] Series movie detection (Iron Man 1, 2, 3 patterns)
 
 #### **2.2 Simple SQLite Storage** ✅ **PHASE 1 COMPLETED**
 - [x] Basic database schema for movies
