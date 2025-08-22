@@ -328,3 +328,44 @@ fn test_quality_and_source_detection() {
         );
     }
 }
+
+#[test]
+fn test_complex_modern_patterns() {
+    let filename_parser = FilenameParser::new();
+    let movie_parser = MovieParser::new(None);
+
+    // Test cases from debug_parsing.rs - testing that both parsers can handle complex patterns
+    let complex_test_cases = vec![
+        "Ghost.in.the.Shell.2.Innocence.2004.2160p.HDR.UHD.BluRay.DTS-HD.MA.7.1.x265-10bit-HDS.mkv",
+        "Ghost.in.the.Shell.1995.1080p.BluRay.x264-WiKi.mkv",
+        "Kokuhaku.2010.1080p.BluRay.DD5.1.x264-NTb.mkv",
+        "Lupin.III.The.Castle.of.Cagliostro.1979.BluRay.720p.x264.AC3-HDWinG.mkv",
+        "Overlord.The.Scared.Kingdom.2024.1080p.ATVP.WEB-DL.JPN.DD5.1.H.264.mkv",
+        "Parasyte.Part.1.2014.BluRay.iPad.720p.x264.AAC-NYPAD.mp4",
+        "Suzume.2022.1080p.iT.WEB-DL.DD5.1.H.264-ZigZag.mkv",
+        "[名侦探柯南：百万美元的五棱星].Detective.Conan.The.Million-dollar.Pentagram.2024.JPN.BluRay.1080p.x265.10bit.DD5.1-CMCT.mkv",
+    ];
+
+    for filename in complex_test_cases {
+        // Test filename parser - just check that we get a valid result
+        let result = filename_parser.parse(filename).unwrap();
+        assert!(
+            !result.title.is_empty(),
+            "Filename parser failed: {}",
+            filename
+        );
+        assert!(
+            result.year.is_some(),
+            "Filename parser failed to extract year: {}",
+            filename
+        );
+
+        // Test movie parser - just check that we get a valid result
+        let movie_result = movie_parser.parse_filename(filename).unwrap();
+        assert!(
+            !movie_result.title.is_empty(),
+            "Movie parser failed: {}",
+            filename
+        );
+    }
+}
