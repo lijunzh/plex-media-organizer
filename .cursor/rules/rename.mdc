@@ -1,0 +1,6 @@
+---
+description: documentation
+globs:
+alwaysApply: false
+---
+Always document change in docs/ before git commit.
