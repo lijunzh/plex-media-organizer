@@ -1,44 +1,54 @@
 # Tests Directory
 
-This directory contains the comprehensive test suite for the Plex Media Organizer.
+This directory contains the comprehensive test suite for the Plex Media Organizer, following Rust best practices.
 
 ## 📁 **Test Structure**
 
-### **Unit Tests**
-- **`real_world_patterns_test.rs`** - Static unit tests with hardcoded test cases
-  - Tests specific filename patterns with predefined assertions
-  - Focuses on individual pattern validation
-  - Uses hardcoded examples from real-world data
-  - Fast execution, specific validation
+### **Unit Tests** (Co-located with source code)
+- **`src/filename_parser.rs`** - Unit tests for `FilenameParser` (using `#[cfg(test)]` module)
+- **`src/movie_parser.rs`** - Unit tests for `MovieParser` (to be added)
+- **`src/scanner.rs`** - Unit tests for `Scanner` (to be added)
+- **`src/organizer.rs`** - Unit tests for `Organizer` (to be added)
+- **`src/tmdb_client.rs`** - Unit tests for `TmdbClient` (to be added)
 
-### **Integration Tests**
-- **`dynamic_real_world_test.rs`** - Dynamic integration tests using actual tree files
-  - Tests against real directory tree outputs from `tests/test_data/`
-  - Validates performance and success rates
-  - Uses actual media server directory structures
-  - Comprehensive real-world validation
+### **Integration Tests** (`tests/` directory)
+- **`tests/filename_parsing_integration.rs`** - Comprehensive filename parsing tests
+- **`tests/real_world_patterns.rs`** - Real-world pattern validation
+- **`tests/parsing_regression.rs`** - Previously failing cases to prevent regressions
+- **`tests/edge_case_scanner.rs`** - Comprehensive edge case detection
+- **`tests/plex_organization.rs`** - Plex directory structure validation
+- **`tests/rollback_integration.rs`** - Rollback functionality testing
+- **`tests/dynamic_real_world.rs`** - Dynamic tests using actual tree files
 
 ### **Test Utilities**
-- **`test_utils.rs`** - Shared test utilities and helpers
-  - `DynamicTestRunner` for processing tree files
-  - Pattern analysis and reporting
-  - Performance measurement utilities
-  - Common test assertions
+- **`tests/test_utils.rs`** - Shared test utilities and helpers
+- **`tests/test_data/`** - Test data files
 
-## 🎯 **Test Data**
+## 🎯 **Test Philosophy**
 
-Test data is stored in `tests/test_data/` directory:
+### **Unit Tests (Co-located)**
+- **Fast execution** for development feedback
+- **Specific validation** of individual components
+- **Edge case coverage** for robustness
+- **Regression prevention** for changes
+- **Follow Rust conventions** with `#[cfg(test)]` modules
 
-- **`movie_directory.txt`** - Real movie directory tree output (✅ actively used)
-- **`tv_directory.txt`** - Real TV show directory tree output (⏸️ for future iterations)
-- **`music_directory.txt`** - Real music directory tree output (⏸️ for future iterations)
+### **Integration Tests**
+- Test component interactions
+- Use realistic test data
+- Include performance measurements
+- Test end-to-end workflows
 
-### **Why Test Data is at Root Level:**
-- **Standard practice** for large data files (1.7MB+)
-- **Easy to reference** from both unit and integration tests
-- **Separate from test code** for better organization
-- **Can be gitignored** if needed for privacy
-- **Better performance** - large files don't impact git operations
+### **Regression Tests**
+- **Previously failing cases** to prevent regressions
+- **Specific bug fixes** validation
+- **Edge case preservation** for known issues
+
+### **Specialized Tests**
+- ✅ Edge case scanning (real directory analysis)
+- ✅ Plex organization structure validation
+- ✅ Rollback functionality testing
+- ✅ Dynamic real-world data testing
 
 ## 🚀 **Running Tests**
 
@@ -50,12 +60,26 @@ cargo test
 ### **Unit Tests Only**
 ```bash
 cargo test --lib
-cargo test --test real_world_patterns_test
 ```
 
 ### **Integration Tests Only**
 ```bash
-cargo test --test dynamic_real_world_test
+cargo test --test
+```
+
+### **Specific Test Categories**
+```bash
+# Integration tests
+cargo test --test filename_parsing_integration
+cargo test --test real_world_patterns
+cargo test --test parsing_regression
+cargo test --test edge_case_scanner
+cargo test --test plex_organization
+cargo test --test rollback_integration
+cargo test --test dynamic_real_world
+
+# Edge case scanning (requires actual media directory)
+cargo test --test edge_case_scanner -- --nocapture
 ```
 
 ### **With Output**
@@ -65,57 +89,50 @@ cargo test -- --nocapture
 
 ## 📊 **Test Coverage**
 
-### **Static Tests (`real_world_patterns_test.rs`)**
-- ✅ Chinese-English bilingual patterns
-- ✅ Bracketed Chinese title patterns
-- ✅ Multi-part movie patterns
-- ✅ Quality and source detection
-- ✅ Complex modern patterns
-- ✅ Edge cases and error handling
+### **Unit Tests**
+- ✅ `FilenameParser` - Basic parsing, edge cases, Unicode handling
+- ✅ `FilenameParser` - Chinese-English bilingual patterns
+- ✅ `FilenameParser` - Technical terms filtering
+- ⏸️ `MovieParser` - TMDB integration (to be added)
+- ⏸️ `Scanner` - Directory scanning (to be added)
+- ⏸️ `Organizer` - File organization (to be added)
 
-### **Dynamic Tests (`dynamic_real_world_test.rs`)**
-- ✅ Real-world movie directory validation
-- ⏸️ Real-world TV directory validation (not in scope for iteration 1)
-- ⏸️ Real-world music directory validation (not in scope for iteration 1)
-- ✅ Performance benchmarking
-- ✅ Success rate validation
-- ✅ Pattern distribution analysis
+### **Integration Tests**
+- ✅ Comprehensive filename parsing patterns
+- ✅ Real-world English movie patterns
+- ✅ Real-world Chinese bilingual patterns
+- ✅ Complex series patterns (Lord of the Rings, Star Wars, etc.)
+- ✅ Quality and source detection
+- ✅ Pattern statistics and analysis
+
+### **Regression Tests**
+- ✅ Unicode handling (Les Misérables)
+- ✅ Long title series (Pirates of the Caribbean)
+- ✅ Extended editions (Lord of the Rings)
+- ✅ Chinese bilingual patterns
+- ✅ Technical terms filtering
+- ✅ Parenthesized content extraction
+- ✅ Empty title prevention
+- ✅ Dots in titles (A.I., I, Robot)
+
+### **Specialized Tests**
+- ✅ Edge case scanning (real directory analysis)
+- ✅ Plex organization structure validation
+- ✅ Rollback functionality testing
+- ✅ Dynamic real-world data testing
 
 ## 🔧 **Test Utilities**
 
-### **DynamicTestRunner**
-- Processes tree output files
-- Analyzes parsing success rates
-- Generates performance reports
-- Identifies pattern distributions
+### **Shared Test Functions**
+- Pattern validation helpers
+- Performance measurement utilities
+- Common test assertions
+- Test data generation
 
-### **Pattern Analysis**
-- Chinese-English bilingual detection
-- Bracketed pattern detection
-- Quality pattern identification
-- Source format detection
-
-## 📈 **Performance Benchmarks**
-
-The dynamic tests validate:
-- **Success Rate**: >95% on real-world data
-- **Performance**: 445+ files/second parsing speed
-- **Memory Usage**: Efficient parsing without bloat
-- **Scalability**: Handles large directories (5,774+ files)
-
-## 🎯 **Test Philosophy**
-
-### **Static Tests**
-- **Fast execution** for development feedback
-- **Specific validation** of parsing logic
-- **Edge case coverage** for robustness
-- **Regression prevention** for changes
-
-### **Dynamic Tests**
-- **Real-world validation** against actual data
-- **Performance measurement** with realistic workloads
-- **Pattern discovery** from actual usage
-- **Production readiness** verification
+### **Test Data**
+- **`tests/test_data/movie_directory.txt`** - Real movie directory tree output
+- **`tests/test_data/tv_directory.txt`** - Real TV show directory tree output
+- **`tests/test_data/music_directory.txt`** - Real music directory tree output
 
 ## 🔄 **Maintenance**
 
@@ -124,12 +141,60 @@ The dynamic tests validate:
 - Performance requirements change
 - Real-world data structure evolves
 - Bug fixes require new test cases
+- New components are added
+
+### **Adding New Unit Tests**
+1. Add `#[cfg(test)]` module to the source file
+2. Write focused tests for the specific component
+3. Include edge cases and error conditions
+4. Ensure fast execution (<1 second per test)
+
+### **Adding New Integration Tests**
+1. Create test in appropriate `tests/` subdirectory
+2. Use `#[tokio::test]` for async tests
+3. Include comprehensive real-world patterns
+4. Add performance assertions where appropriate
 
 ### **Test Data Updates**
 - Update `tests/test_data/` files when directory structures change
 - Regenerate tree outputs after significant reorganization
 - Validate test data reflects current naming conventions
 
+## 🎯 **Best Practices**
+
+### **Unit Tests**
+- Keep tests close to the code they test
+- Use descriptive test names
+- Test both success and failure cases
+- Keep tests fast and focused
+
+### **Integration Tests**
+- Test component interactions
+- Use realistic test data
+- Include performance measurements
+- Test end-to-end workflows
+
+### **Regression Tests**
+- Document why each test exists
+- Include comments about the original bug
+- Ensure tests are specific and reliable
+- Don't remove tests without careful consideration
+
+### **Specialized Tests**
+- **Edge Case Scanner**: Use for real-world validation
+- **Plex Organization**: Test directory structure compliance
+- **Rollback Integration**: Ensure safety mechanisms work
+- **Dynamic Real World**: Use actual data for comprehensive testing
+
+## 🧹 **Cleanup Summary**
+
+The test directory has been cleaned up by:
+- ✅ **Removed all debug files** (`debug_*.rs`)
+- ✅ **Organized tests by purpose** (integration, regression, performance)
+- ✅ **Renamed files for clarity** (e.g., `edge_case_detector.rs` → `edge_case_scanner.rs`)
+- ✅ **Maintained comprehensive coverage** while improving organization
+- ✅ **Preserved valuable test cases** from debug files in proper test categories
+
 ---
 
-**Note**: The separation between static and dynamic tests, along with the test data organization, provides comprehensive validation while maintaining good performance and organization.
+**Note**: This refactored structure follows Rust conventions with unit tests co-located with source code and integration tests in the `tests/` directory. This provides better organization, faster feedback during development, and clearer separation of concerns.

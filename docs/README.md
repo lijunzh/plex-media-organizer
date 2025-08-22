@@ -1,153 +1,105 @@
-# 📚 Plex Media Organizer Documentation
+# Plex Media Organizer Documentation
 
-Complete documentation for users, power users, and developers.
+Welcome to the comprehensive documentation for the Plex Media Organizer project. This directory contains all documentation organized into logical sections for easy navigation.
 
-## 🚀 Quick Navigation
+## 📁 Directory Structure
 
-### **New Users - Get Started Fast**
-- **[🚀 Quick Start Guide](quick-start.md)** - 5-minute setup and first use
-- **[📦 Installation](installation.md)** - All installation methods and platforms
-- **[💡 First Movie Organization](examples/basic/first-movie-organization.md)** - Step-by-step first project
+### 🚀 User Guides (`user-guides/`)
+**For end users and basic usage**
 
-### **All Users - Complete Guides**
-- **[📖 User Guide](user-guide.md)** - Comprehensive usage tutorial and workflows
-- **[⚙️ Configuration](configuration.md)** - Complete configuration reference
-- **[🔧 Troubleshooting](troubleshooting.md)** - Common issues and solutions
+- **[Installation Guide](user-guides/installation.md)** - How to install and set up the application
+- **[Quick Start Guide](user-guides/quick-start.md)** - Get up and running quickly
+- **[User Guide](user-guides/user-guide.md)** - Comprehensive user manual
+- **[Configuration Guide](user-guides/configuration.md)** - How to configure the application
+- **[Troubleshooting Guide](user-guides/troubleshooting.md)** - Common issues and solutions
 
-### **Examples and Use Cases**
-- **[💡 Examples Overview](examples/)** - Real-world usage examples
-- **[🎬 Basic Examples](examples/basic/)** - Simple, common use cases
-- **[⚡ Advanced Examples](examples/advanced/)** - Complex scenarios and workflows
-- **[🔌 Integrations](examples/integrations/)** - Media server setup (Plex, Jellyfin)
+### 🏗️ Architecture (`architecture/`)
+**System design and technical architecture**
 
-### **Developers and Contributors**
-- **[🏗️ Development Guide](development/)** - Code architecture and contribution guide
-- **[📋 API Reference](development/api-reference.md)** - Library API documentation
+- **[System Architecture](architecture/architecture.md)** - Overall system design and components
+- **[Roadmap](architecture/roadmap.md)** - Development roadmap and future plans
+- **[Security](architecture/security.md)** - Security considerations and best practices
+- **[Architecture Decisions](architecture/decisions/)** - Design decision records (ADRs)
 
-### **Project Information**
-- **[📊 Project Status](../project/status.md)** - Current development progress
-- **[🏛️ Architecture](../project/architecture.md)** - System design and decisions
-- **[🗺️ Roadmap](../project/roadmap.md)** - Development timeline and planning
+### 🔧 Development (`development/`)
+**For developers and contributors**
 
-## 🎯 Documentation by User Type
+- **[Development Guide](development/README.md)** - Development setup and guidelines
+- **[Planning](development/planning/)** - Development planning documents
+- **[Retrospectives](development/retrospectives/)** - Project retrospectives and lessons learned
+- **[Config Optimization Plan](development/config_optimization_plan.md)** - Configuration system optimization
+- **[Config Design Assessment](development/config_design_assessment.md)** - Assessment of config system strengths/weaknesses
+- **[Iteration 2 Plan](development/ITERATION_2_PLAN.md)** - Plan for the second development iteration
+- **[Network Optimization](development/network-optimization.md)** - Network performance optimization
 
-### **Light Users** - "I want to get started ASAP"
-1. **[Quick Start](quick-start.md)** - 5-minute setup
-2. **[First Organization](examples/basic/first-movie-organization.md)** - Your first success
-3. **[Plex Setup](examples/integrations/plex-server-setup.md)** - Complete Plex integration
+### 📊 Analysis (`analysis/`)
+**Technical analysis and research**
 
-### **Power Users** - "I want to understand all capabilities"
-1. **[User Guide](user-guide.md)** - Complete feature overview
-2. **[Configuration](configuration.md)** - All settings and options
-3. **[Advanced Examples](examples/advanced/)** - Complex workflows
-4. **[Troubleshooting](troubleshooting.md)** - Fix any issues
+- **[Current Status](analysis/status.md)** - Current project status and metrics
+- **[Current Limitations](analysis/CURRENT_LIMITATIONS.md)** - Known limitations and constraints
+- **[Current Issues Analysis](analysis/CURRENT_ISSUES_ANALYSIS.md)** - Analysis of current issues
+- **[Edge Cases Analysis](analysis/edge_cases_analysis.md)** - Analysis of edge cases and special scenarios
+- **[TMDB Matching Challenges](analysis/tmdb_matching_challenges.md)** - Challenges with TMDB API matching
 
-### **Developers** - "I want to understand the code and contribute"
-1. **[Development Guide](development/)** - Code architecture overview
-2. **[API Reference](development/api-reference.md)** - Library documentation
-3. **[Architecture](../project/architecture.md)** - System design philosophy
-4. **[Contributing](../CONTRIBUTING.md)** - How to contribute
+### 📚 Examples (`examples/`)
+**Usage examples and tutorials**
 
-## 📊 Quick Reference
+- **[Examples Overview](examples/README.md)** - Overview of available examples
+- **[Basic Examples](examples/basic/)** - Basic usage examples
+- **[Advanced Examples](examples/advanced/)** - Advanced usage scenarios
+- **[Integration Examples](examples/integrations/)** - Integration with other systems
 
-### **Essential Commands**
-```bash
-# Test setup
-plex-media-organizer test "Movie.Name.2023.1080p.mkv"
+## 🎯 Quick Navigation
 
-# Scan directory
-plex-media-organizer scan /path/to/movies
+### For New Users
+1. Start with **[Installation Guide](user-guides/installation.md)**
+2. Follow the **[Quick Start Guide](user-guides/quick-start.md)**
+3. Read the **[User Guide](user-guides/user-guide.md)** for comprehensive usage
 
-# Organize with preview
-plex-media-organizer organize /movies --dry-run
+### For Developers
+1. Review **[System Architecture](architecture/architecture.md)**
+2. Read **[Development Guide](development/README.md)**
+3. Check **[Current Status](analysis/status.md)** for project state
+4. Review **[Config Design Assessment](development/config_design_assessment.md)**
 
-# Full organization with backup
-plex-media-organizer organize /movies --backup
+### For Contributors
+1. Read **[Development Guidelines](development/planning/development-guidelines.md)**
+2. Review **[Testing Strategy](development/planning/testing-strategy.md)**
+3. Check **[Architecture Decisions](architecture/decisions/)** for design context
+4. Read **[Retrospectives](development/retrospectives/)** for lessons learned
 
-# Rollback previous operation
-plex-media-organizer rollback operation_result_123.json
+## 📈 Project Status
 
-# Clean up old organization files
-plex-media-organizer cleanup --preview
-```
+- **Current Phase**: Configuration optimization completed
+- **Performance**: 60x improvement achieved (35s → 560ms)
+- **Test Coverage**: 100% maintained
+- **Documentation**: Comprehensive coverage across all areas
 
-### **Common Issues**
-| Issue | Solution |
-|-------|----------|
-| API key error | Set `TMDB_API_KEY=your_key` |
-| No files found | Check extensions: mkv, mp4, avi |
-| Low success rate | Enable debug: `--log-level debug` |
-| Permission error | Fix permissions: `chmod 755` |
+## 🔄 Recent Updates
 
-### **Best Practices**
-- ✅ Always use `--dry-run` first
-- ✅ Create backups with `--backup`
-- ✅ Start with small test directories
-- ✅ Check [troubleshooting](troubleshooting.md) for issues
+- **Config Optimization**: Completed 5-phase optimization plan
+- **Documentation Consolidation**: Merged `docs/` and `project/` directories
+- **Performance**: Achieved 60x performance improvement
+- **Architecture**: Prepared for database-driven learning system
 
-## 🔄 Documentation Structure
+## 🤝 Contributing
 
-```
-docs/
-├── README.md              # This navigation guide
-├── quick-start.md         # 5-minute setup guide
-├── installation.md        # Installation methods
-├── user-guide.md          # Complete user manual
-├── configuration.md       # Configuration reference
-├── troubleshooting.md     # Issue solutions
-├── examples/              # Real-world examples
-│   ├── basic/            # Simple use cases
-│   ├── advanced/         # Complex workflows
-│   └── integrations/     # Media server setup
-└── development/          # Developer documentation
-    ├── code-architecture.md
-    ├── api-reference.md
-    └── adding-features.md
-```
+When contributing to documentation:
 
-## 🎯 Success Metrics
+1. Follow the established directory structure
+2. Use clear, descriptive file names
+3. Include comprehensive examples where appropriate
+4. Update this README when adding new sections
+5. Maintain consistent formatting and style
 
-After reading the appropriate documentation, you should be able to:
+## 📝 Documentation Standards
 
-### **After Quick Start**
-- ✅ Install and configure the tool
-- ✅ Parse your first movie file successfully
-- ✅ Understand the basic workflow
-
-### **After User Guide**
-- ✅ Organize complete movie collections
-- ✅ Handle different file types and naming patterns
-- ✅ Configure advanced settings for your needs
-
-### **After Examples**
-- ✅ Set up integration with Plex or Jellyfin
-- ✅ Handle complex multi-language collections
-- ✅ Automate your media organization workflow
-
-### **After Development Guide**
-- ✅ Understand the codebase architecture
-- ✅ Know where to make specific types of changes
-- ✅ Contribute features or fixes confidently
-
-## 🆘 Need Help?
-
-1. **Check this documentation** - Most questions are answered here
-2. **Search issues** - [GitHub Issues](https://github.com/lijunzh/plex-media-organizer/issues)
-3. **Ask questions** - [GitHub Discussions](https://github.com/lijunzh/plex-media-organizer/discussions)
-4. **Report bugs** - [New Issue](https://github.com/lijunzh/plex-media-organizer/issues/new)
-
-## 📈 Documentation Quality
-
-This documentation is designed to be:
-- **User-focused**: Organized by what you want to achieve
-- **Example-driven**: Real commands and expected outputs
-- **Comprehensive**: Covers basic to advanced usage
-- **Maintainable**: Updated with each release
+- **Markdown Format**: All documentation uses Markdown
+- **Clear Headers**: Use descriptive headers and subheaders
+- **Code Examples**: Include practical code examples
+- **Cross-References**: Link between related documents
+- **Regular Updates**: Keep documentation current with code changes
 
 ---
 
-**🎯 Goal**: Get you from zero to successfully organizing your media collection with confidence!
-
-**⏱️ Time Investment**: 5 minutes to hours, depending on your needs and collection size.
-
-**💡 Pro Tip**: Start with [Quick Start](quick-start.md) even if you're an experienced user - it establishes good practices for more complex scenarios.
+*Last updated: After config optimization completion and documentation consolidation*

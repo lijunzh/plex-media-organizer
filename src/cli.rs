@@ -199,11 +199,11 @@ impl Cli {
                 };
                 Self::handle_scan(
                     directory,
-                    verbose,
                     network_mode,
                     max_parallel,
                     batch_size,
                     confidence_settings,
+                    verbose,
                 )
                 .await
             }
@@ -259,20 +259,19 @@ impl Cli {
     }
 
     /// Handle the scan command
-    #[allow(clippy::too_many_arguments)]
     async fn handle_scan(
         directory: PathBuf,
-        verbose: bool,
         network_mode: bool,
         max_parallel: usize,
         batch_size: usize,
         confidence_settings: ConfidenceSettings,
+        verbose: bool,
     ) -> Result<()> {
         println!("🎬 Plex Media Organizer - Scanning Directory");
         println!("Directory: {}", directory.display());
         println!();
 
-        // Load configuration
+        // Load configuration ONCE at the entry point
         let config = match AppConfig::load() {
             Ok(config) => config,
             Err(_) => {
@@ -289,16 +288,16 @@ impl Cli {
         }
 
         // Create TMDB client
-        let tmdb_client = config.apis.tmdb_api_key.map(TmdbClient::new);
+        let tmdb_client = config.apis.tmdb_api_key.clone().map(TmdbClient::new);
 
-        // Create movie parser and scanner
-        let movie_parser = MovieParser::new(tmdb_client);
+        // Create movie parser with the loaded config (single load)
+        let movie_parser = MovieParser::with_config(tmdb_client, config.clone());
 
         // Create scanner with network optimizations if requested
         let mut scanner = if network_mode {
-            Scanner::for_network_drive(movie_parser)
+            Scanner::for_network_drive_with_config(movie_parser, &config)
         } else {
-            Scanner::with_concurrency(movie_parser, max_parallel)
+            Scanner::with_concurrency_and_config(movie_parser, max_parallel, &config)
         };
 
         // Apply custom settings

@@ -86,8 +86,8 @@ jobs:
           echo "⏰ Started at: $(date)"
           
           # Run integration tests
-          cargo test --test real_world_patterns_test --verbose -- --nocapture
-          cargo test --test dynamic_real_world_test --verbose -- --nocapture
+          cargo test --test real_world_patterns --verbose -- --nocapture
+          cargo test --test dynamic_real_world --verbose -- --nocapture
           
           echo "✅ Integration tests completed successfully!"
           echo "⏰ Finished at: $(date)"
@@ -206,10 +206,10 @@ jobs:
           TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
         run: |
           # Run performance benchmarks
-          cargo test --test dynamic_real_world_test test_performance_large_collection -- --nocapture
+          cargo test --test dynamic_real_world test_performance_large_collection -- --nocapture
           
           # Run all dynamic tests to measure performance
-          time cargo test --test dynamic_real_world_test -- --nocapture
+          time cargo test --test dynamic_real_world -- --nocapture
       
       - name: Performance Report
         run: |
