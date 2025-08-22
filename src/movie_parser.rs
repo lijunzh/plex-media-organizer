@@ -1,8 +1,8 @@
 //! Movie parsing and organization logic
 
 use crate::config::AppConfig;
+use crate::external::TmdbClient;
 use crate::filename_parser::FilenameParser;
-use crate::tmdb_client::TmdbClient;
 use crate::types::{
     ExternalSource, MediaFile, MediaMetadata, MediaType, MovieInfo, ParsingResult, ParsingStrategy,
 };

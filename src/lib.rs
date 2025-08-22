@@ -207,6 +207,7 @@
 pub mod cli;
 pub mod config;
 pub mod database;
+pub mod external;
 pub mod filename_parser;
 pub mod metadata_extractor;
 pub mod movie_parser;
@@ -219,11 +220,11 @@ pub mod types;
 pub use cli::*;
 pub use config::*;
 pub use database::*;
+pub use external::*;
 pub use metadata_extractor::*;
 pub use organizer::*;
 pub use parsers::*;
 pub use scanner::*;
-pub use tmdb_client::*;
 pub use types::*;
 
 /// Main result type for the library
