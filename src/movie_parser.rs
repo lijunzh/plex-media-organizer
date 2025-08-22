@@ -44,12 +44,9 @@ impl MovieParser {
         let filename_parser = FilenameParser::with_technical_terms(technical_terms);
         // Create a minimal config with the provided parameters
         let mut config = AppConfig::default();
-        config.organization.content_filtering.language_codes = language_codes;
-        config.organization.content_filtering.common_words = common_words;
-        config
-            .organization
-            .content_filtering
-            .technical_japanese_terms = technical_japanese_terms;
+        config.organization.language.language_codes = language_codes;
+        config.organization.title_preservation.common_words = common_words;
+        config.organization.language.technical_japanese_terms = technical_japanese_terms;
 
         Self {
             tmdb_client,

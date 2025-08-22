@@ -31,6 +31,10 @@ pub struct OrganizationConfig {
     pub original_titles: OriginalTitleConfig,
     /// Confidence and matching preferences
     pub matching: MatchingConfig,
+    /// Title preservation configuration
+    pub title_preservation: TitlePreservationConfig,
+    /// Language detection and processing configuration
+    pub language: LanguageConfig,
     /// Technical terms filtering configuration
     pub technical_terms: TechnicalTermsConfig,
     /// Content filtering configuration for problematic patterns
@@ -96,6 +100,76 @@ impl Default for MatchingConfig {
             skip_unmatched_movies: true,   // Default: skip files with no TMDB match
             warn_on_low_confidence: true,  // Warn about low confidence matches
             allow_unknown_year: true,      // Allow "Unknown Year" directories
+        }
+    }
+}
+
+/// Title preservation configuration
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct TitlePreservationConfig {
+    /// Known movie titles to preserve from filtering
+    pub known_titles: Vec<String>,
+    /// Common English words to preserve from filtering
+    pub common_words: Vec<String>,
+}
+
+impl Default for TitlePreservationConfig {
+    fn default() -> Self {
+        Self {
+            known_titles: vec![
+                "灌篮高手".to_string(),
+                "灌篮".to_string(),
+                "Slam".to_string(),
+                "Dunk".to_string(),
+            ],
+            common_words: vec![
+                "The".to_string(),
+                "A".to_string(),
+                "An".to_string(),
+                "Of".to_string(),
+                "In".to_string(),
+                "On".to_string(),
+                "At".to_string(),
+                "To".to_string(),
+                "For".to_string(),
+                "With".to_string(),
+                "From".to_string(),
+                "By".to_string(),
+            ],
+        }
+    }
+}
+
+/// Language detection and processing configuration
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct LanguageConfig {
+    /// Language codes for detection in filenames
+    pub language_codes: Vec<String>,
+    /// Japanese technical terms to filter out (language/audio descriptions)
+    pub technical_japanese_terms: Vec<String>,
+}
+
+impl Default for LanguageConfig {
+    fn default() -> Self {
+        Self {
+            language_codes: vec![
+                "JPN".to_string(),
+                "ENG".to_string(),
+                "CHI".to_string(),
+                "KOR".to_string(),
+                "JAP".to_string(),
+                "EN".to_string(),
+                "CN".to_string(),
+            ],
+            technical_japanese_terms: vec![
+                "国日双语".to_string(),
+                "双语".to_string(),
+                "国日".to_string(),
+                "日英".to_string(),
+                "英日".to_string(),
+                "中日".to_string(),
+                "日中".to_string(),
+            ],
         }
     }
 }
@@ -360,14 +434,6 @@ impl Default for TechnicalTermsConfig {
 pub struct ContentFilteringConfig {
     /// Patterns that indicate problematic content (extras, documentaries, etc.)
     pub problematic_patterns: Vec<String>,
-    /// Language codes for detection in filenames
-    pub language_codes: Vec<String>,
-    /// Japanese technical terms to filter out
-    pub technical_japanese_terms: Vec<String>,
-    /// Known movie titles to preserve from filtering
-    pub known_titles: Vec<String>,
-    /// Common English words to preserve from filtering
-    pub common_words: Vec<String>,
     /// File extensions that indicate extras content
     pub extras_extensions: Vec<String>,
     /// Specific patterns that indicate extras content
@@ -406,38 +472,6 @@ impl Default for ContentFilteringConfig {
                 "soundtrack".to_string(),
                 "score".to_string(),
                 "ost".to_string(),
-            ],
-            language_codes: vec![
-                "JPN".to_string(),
-                "ENG".to_string(),
-                "CHI".to_string(),
-                "KOR".to_string(),
-                "JAP".to_string(),
-                "EN".to_string(),
-                "CN".to_string(),
-            ],
-            technical_japanese_terms: vec![
-                "国日双语".to_string(),
-                "双语".to_string(),
-                "国日".to_string(),
-                "日英".to_string(),
-                "英日".to_string(),
-                "中日".to_string(),
-                "日中".to_string(),
-            ],
-            known_titles: vec![
-                "灌篮高手".to_string(),
-                "灌篮".to_string(),
-                "Slam".to_string(),
-                "Dunk".to_string(),
-            ],
-            common_words: vec![
-                "Matrix".to_string(),
-                "The".to_string(),
-                "Movie".to_string(),
-                "Part".to_string(),
-                "Name".to_string(),
-                "Title".to_string(),
             ],
             extras_extensions: vec!["ifo".to_string(), "bup".to_string(), "vob".to_string()],
             extras_patterns: vec![
@@ -562,7 +596,7 @@ impl AppConfig {
 
     /// Get all language codes for detection
     pub fn get_language_codes(&self) -> Vec<String> {
-        self.organization.content_filtering.language_codes.clone()
+        self.organization.language.language_codes.clone()
     }
 
     /// Get release groups for filtering
@@ -572,20 +606,17 @@ impl AppConfig {
 
     /// Get Japanese technical terms to filter out
     pub fn get_technical_japanese_terms(&self) -> Vec<String> {
-        self.organization
-            .content_filtering
-            .technical_japanese_terms
-            .clone()
+        self.organization.language.technical_japanese_terms.clone()
     }
 
     /// Get known movie titles to preserve
     pub fn get_known_titles(&self) -> Vec<String> {
-        self.organization.content_filtering.known_titles.clone()
+        self.organization.title_preservation.known_titles.clone()
     }
 
     /// Get common English words to preserve
     pub fn get_common_words(&self) -> Vec<String> {
-        self.organization.content_filtering.common_words.clone()
+        self.organization.title_preservation.common_words.clone()
     }
 
     /// Get extras file extensions

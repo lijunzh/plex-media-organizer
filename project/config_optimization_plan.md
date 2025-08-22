@@ -159,15 +159,37 @@ This document outlines the strategy and implementation plan for optimizing the c
 - [x] **No Breaking Changes**: All existing functionality preserved
 - [x] **Test Coverage**: 100% test coverage maintained (56 unit tests + integration tests)
 
-### Phase 4: Basic Reorganization 🔄 PENDING
-**Status**: PENDING
+### Phase 4: Basic Reorganization ✅ COMPLETED
+**Status**: COMPLETED
 **Duration**: 1 session
 
-#### Problem 4: Poor Organization
-- [ ] Logically reorganize config sections
-- [ ] Create new `[organization.title_preservation]` section
-- [ ] Separate concerns: distinguish between filtering and preservation logic
-- [ ] Improve readability through better organization and documentation
+#### Problem 4: Poor Organization ✅ COMPLETED
+- [x] **Created New Sections**: Added `[organization.title_preservation]` and `[organization.language]` sections
+- [x] **Separated Concerns**: Moved preservation logic from filtering logic
+- [x] **Consolidated Language Terms**: Grouped all language-related terms in one section
+- [x] **Improved Documentation**: Added clear comments explaining each section's purpose
+- [x] **Removed Duplications**: Eliminated duplicate terms between sections
+- [x] **Updated Rust Code**: Modified config structs and methods to match new organization
+- [x] **Maintained Compatibility**: All existing functionality preserved
+
+#### Reorganization Details ✅ COMPLETED
+- [x] **Title Preservation Section**: 
+  - `known_titles` - Terms to preserve in movie titles
+  - `common_words` - Essential English words for titles
+- [x] **Language Section**:
+  - `language_codes` - Language detection codes
+  - `technical_japanese_terms` - Japanese technical terms to filter
+- [x] **Technical Terms Section**: Focused purely on filtering terms
+- [x] **Content Filtering Section**: Focused on extras and problematic content
+- [x] **Removed Duplications**: Eliminated "国日双语" appearing in multiple sections
+
+#### Benefits Achieved ✅ COMPLETED
+- [x] **Better Separation of Concerns**: Clear distinction between preservation and filtering
+- [x] **Improved Readability**: Logical grouping of related terms
+- [x] **Easier Maintenance**: Related terms are now co-located
+- [x] **Future-Ready**: Structure supports database-driven learning
+- [x] **No Breaking Changes**: All tests pass (56 unit tests + integration tests)
+- [x] **Documentation**: Clear comments explain each section's purpose
 
 ### Phase 5: Enhanced Configurability 🔄 PENDING
 **Status**: PENDING

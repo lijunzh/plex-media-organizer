@@ -111,7 +111,7 @@
 //! The library supports configurable behavior through `AppConfig`:
 //!
 //! ```rust
-//! use plex_media_organizer::{AppConfig, ApiConfig, OrganizationConfig, QualityConfig, OriginalTitleConfig, MatchingConfig, TechnicalTermsConfig, ContentFilteringConfig};
+//! use plex_media_organizer::{AppConfig, ApiConfig, OrganizationConfig, QualityConfig, OriginalTitleConfig, MatchingConfig, TitlePreservationConfig, LanguageConfig, TechnicalTermsConfig, ContentFilteringConfig};
 //!
 //! let config = AppConfig {
 //!     apis: ApiConfig {
@@ -133,6 +133,8 @@
 //!             warn_on_low_confidence: true,
 //!             allow_unknown_year: true,
 //!         },
+//!         title_preservation: TitlePreservationConfig::default(),
+//!         language: LanguageConfig::default(),
 //!         technical_terms: TechnicalTermsConfig::default(),
 //!         content_filtering: ContentFilteringConfig::default(),
 //!     },
