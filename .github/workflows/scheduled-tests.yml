@@ -57,7 +57,7 @@ jobs:
           echo "⚡ Running performance tests..."
           
           # Run dynamic tests to validate performance
-          time cargo test --test dynamic_real_world_test -- --nocapture
+          time cargo test --test dynamic_real_world -- --nocapture
           
           echo "🚀 Performance validation completed!"
       
