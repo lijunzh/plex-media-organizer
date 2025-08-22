@@ -12,15 +12,18 @@ Welcome to the Plex Media Organizer documentation. This guide helps you find the
 - **[Examples](user/examples/)** - Real-world usage examples
 
 ### **For Developers** (`developer/`)
-- **[Contributing](developer/contributing.md)** - How to contribute to the project
 - **[Git Practices](developer/git-practices.md)** - Git commit best practices
-- **[Testing](developer/testing.md)** - Testing guidelines and procedures
+- **[Documentation Standards](developer/documentation-standards.md)** - Documentation guidelines
 - **[Architecture](developer/architecture/)** - Technical architecture and design
+- **[Planning](developer/planning/)** - Development planning documents
+- **[Retrospectives](developer/retrospectives/)** - Project retrospectives
 
 ### **Technical Analysis** (`analysis/`)
 - **[Current Limitations](analysis/current-limitations.md)** - Known limitations and trade-offs
 - **[TMDB Matching](analysis/tmdb-matching.md)** - TMDB integration analysis
 - **[Edge Cases](analysis/edge-cases.md)** - Edge case analysis and handling
+- **[Current Issues](analysis/current-issues.md)** - Current issues analysis
+- **[Status](analysis/status.md)** - Project status and metrics
 
 ## 🎯 **Quick Navigation**
 
@@ -36,10 +39,10 @@ Welcome to the Plex Media Organizer documentation. This guide helps you find the
 3. Explore **[Examples](user/examples/)** for advanced usage patterns
 
 ### **Contributors**
-1. Read **[Contributing](developer/contributing.md)** for contribution guidelines
-2. Follow **[Git Practices](developer/git-practices.md)** for proper commits
-3. Review **[Architecture](developer/architecture/)** for technical understanding
-4. Check **[Testing](developer/testing.md)** for testing requirements
+1. Follow **[Git Practices](developer/git-practices.md)** for proper commits
+2. Review **[Architecture](developer/architecture/)** for technical understanding
+3. Check **[Documentation Standards](developer/documentation-standards.md)** for guidelines
+4. Review **[Planning](developer/planning/)** and **[Retrospectives](developer/retrospectives/)** for context
 
 ---
 
