@@ -444,10 +444,10 @@ impl Cli {
             };
 
             // Create TMDB client if available
-            let tmdb_client = config.apis.tmdb_api_key.map(TmdbClient::new);
+            let tmdb_client = config.apis.tmdb_api_key.clone().map(TmdbClient::new);
 
-            // Create movie parser and scanner
-            let movie_parser = MovieParser::new(tmdb_client);
+            // Create movie parser and scanner (use loaded config)
+            let movie_parser = MovieParser::with_config(tmdb_client, config.clone());
             let scanner = Scanner::new(movie_parser);
 
             // Scan directory
@@ -512,10 +512,10 @@ impl Cli {
             };
 
             // Create TMDB client if available
-            let tmdb_client = config.apis.tmdb_api_key.map(TmdbClient::new);
+            let tmdb_client = config.apis.tmdb_api_key.clone().map(TmdbClient::new);
 
-            // Create movie parser and test parsing
-            let movie_parser = MovieParser::new(tmdb_client);
+            // Create movie parser and test parsing (use loaded config)
+            let movie_parser = MovieParser::with_config(tmdb_client, config.clone());
 
             match movie_parser.parse_movie(&path).await {
                 Ok(result) => {
@@ -694,10 +694,10 @@ impl Cli {
         }
 
         // Create TMDB client
-        let tmdb_client = config.apis.tmdb_api_key.map(TmdbClient::new);
+        let tmdb_client = config.apis.tmdb_api_key.clone().map(TmdbClient::new);
 
-        // Create movie parser and scanner
-        let movie_parser = MovieParser::new(tmdb_client);
+        // Create movie parser and scanner (use loaded config)
+        let movie_parser = MovieParser::with_config(tmdb_client, config.clone());
 
         // Create scanner with network optimizations if requested
         let mut scanner = if network_mode {
