@@ -84,6 +84,7 @@ This document outlines an iterative, incremental implementation plan for the Ple
 - [x] Japanese anime movie patterns
 - [x] Enhanced collection detection (TMDB collection API integration)
 - [x] Series movie detection (Iron Man 1, 2, 3 patterns)
+- [x] **Performance Optimization**: Config loading optimized to once per CLI call
 
 #### **2.2 Simple SQLite Storage** ✅ **PHASE 1 COMPLETED**
 - [x] Basic database schema for movies
