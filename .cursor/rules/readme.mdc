@@ -1,0 +1,6 @@
+---
+description: Keep readme clean
+globs:
+alwaysApply: false
+---
+Document user guide and project development related info in docs/ instead of README.md. Keep README.md simple and clean as the porject landing page.

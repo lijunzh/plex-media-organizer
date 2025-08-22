@@ -15,6 +15,16 @@ pub struct FilenameComponents {
     pub confidence: f32,
 }
 
+/// Anime movie information extracted from filename
+#[derive(Debug, Clone)]
+pub struct AnimeInfo {
+    pub is_anime: bool,
+    pub movie_number: Option<u32>,
+    pub has_japanese_title: bool,
+    pub has_chinese_title: bool,
+    pub is_movie_series: bool,
+}
+
 /// Token-based filename parser
 #[derive(Clone, Debug)]
 pub struct FilenameParser {
@@ -156,6 +166,205 @@ impl FilenameParser {
             .map(|cfg| cfg.get_release_groups())
             .unwrap_or_default();
 
+        // Get technical terms from config or use instance terms as fallback
+        let technical_terms = config
+            .map(|cfg| cfg.get_all_technical_terms())
+            .unwrap_or_else(|| {
+                if let Some(ref terms) = self.technical_terms {
+                    terms.clone()
+                } else {
+                    // Fallback to comprehensive default terms if no config is provided
+                    static DEFAULT_TERMS: &[&str] = &[
+                        // Video/audio codecs and quality
+                        "10bit",
+                        "10bits",
+                        "bit",
+                        "bits",
+                        "DDP",
+                        "DTS",
+                        "AC3",
+                        "AAC",
+                        "FLAC",
+                        "THD",
+                        "MA",
+                        "HD",
+                        "x264",
+                        "x265",
+                        "H264",
+                        "H265",
+                        "AVC",
+                        "HEVC",
+                        "Atmos",
+                        "TrueHD",
+                        "DualAudio",
+                        "2Audio",
+                        "2Audios",
+                        "4Audios",
+                        "60fps",
+                        "HQ",
+                        "AAC(5",
+                        "1)",
+                        "Hi10P",
+                        "DD5",
+                        "TrueHD7",
+                        "H",
+                        "264",
+                        "265",
+                        "4Audio",
+                        "3Audio",
+                        "5Audio",
+                        "REPACK",
+                        "Remux",
+                        "VC-1",
+                        "DoVi",
+                        "HDR10",
+                        "EDR",
+                        "MULTi",
+                        "HDTS",
+                        "IMAX",
+                        "DSNP",
+                        "DTS-HD",
+                        "HDR",
+                        "120FPS",
+                        "4K",
+                        "WEB",
+                        "WEBRip",
+                        "UHD",
+                        "Blu-ray",
+                        "Bluray",
+                        "BluRay",
+                        "DD5",
+                        "DD+",
+                        "AC3",
+                        "AAC5",
+                        "AAC1",
+                        "10bit",
+                        "DV",
+                        "MP4",
+                        "MKV",
+                        // Source/platform names
+                        "NF",
+                        "AMZN",
+                        "HKG",
+                        "ESP",
+                        "GBR",
+                        "INT",
+                        "JPN",
+                        "CHN",
+                        "CCTV6HD",
+                        "CHC",
+                        "Movie-HD",
+                        "AKA",
+                        "Chinese",
+                        "iTunes",
+                        "AMZN",
+                        "NF",
+                        "Netflix",
+                        "HMAX",
+                        "NOW",
+                        "ATVP",
+                        "HULU",
+                        "DSNP",
+                        // File formats and containers
+                        "HDTVRip",
+                        "DVDRip",
+                        "BDRip",
+                        "HDRip",
+                        "WEBRip",
+                        "HDTV",
+                        "MP3",
+                        // Special editions and versions
+                        "EXTENDED",
+                        "修复加长版",
+                        "导演剪辑版",
+                        "Extended",
+                        "RERIP",
+                        "Hybrid",
+                        "ES",
+                        // Release groups
+                        "CMCT",
+                        "WiKi",
+                        "FRDS",
+                        "HDS",
+                        "ADWeb",
+                        "TLF",
+                        "CHDWEB",
+                        "PTerWEB",
+                        "GREENOTEA",
+                        "ZmWeb",
+                        "HDVWEB",
+                        "NukeHD",
+                        "TJUPT",
+                        "CMCTV",
+                        "NTG",
+                        "HDWTV",
+                        "NowOur",
+                        "PandaQT",
+                        "HANDJOB",
+                        "npuer",
+                        "BYRHD",
+                        "c0kE",
+                        "TBMovies",
+                        "MNHD",
+                        "YTS",
+                        "MX",
+                        "HDWinG",
+                        "NYPAD",
+                        "ZigZag",
+                        "NTb",
+                        "REMUX",
+                        "iT",
+                        "mUHD",
+                        "IAMABLE",
+                        "KRaLiMaRKo",
+                        "HDChina",
+                        "CtrlHD",
+                        "SWTYBLZ",
+                        "ADE",
+                        "PHOBOS",
+                        "PTHOME",
+                        "SyncUP",
+                        "YIFY",
+                        "SPARKS",
+                        "HiDt",
+                        "Geek",
+                        "TayTO",
+                        "nikt0",
+                        "beAst",
+                        "FoRM",
+                        "CRiME",
+                        "HVAC",
+                        "MaoZhan",
+                        "VietHD",
+                        "JYK",
+                        "GalaxyRG265",
+                        "PaODEQUEiJO",
+                        "SA89",
+                        "FANDANGO",
+                        "PTer",
+                        "ABM",
+                        "MZABI",
+                        "BYRPAD",
+                        "NCmt",
+                        "MTeam",
+                        "playWEB",
+                        "FLUX",
+                        "CMRG",
+                        "MZABARBiE",
+                        "SMURF",
+                        "AREY",
+                        "RABiDS",
+                        "ETHEL",
+                        "RightSiZE",
+                        "CiNEPHiLES",
+                        "Kitsune",
+                        "KBTV",
+                        "EbP",
+                    ];
+                    DEFAULT_TERMS.iter().map(|s| s.to_string()).collect()
+                }
+            });
+
         // Remove file extension
         let filename_without_ext = self.remove_extension(filename);
 
@@ -186,205 +395,7 @@ impl FilenameParser {
             &known_titles,
             &technical_japanese_terms,
             &language_codes,
-            if let Some(ref terms) = self.technical_terms {
-                terms.as_slice()
-            } else {
-                // Fallback to comprehensive default terms if no config is provided
-                static DEFAULT_TERMS: &[&str] = &[
-                    // Video/audio codecs and quality
-                    "10bit",
-                    "10bits",
-                    "bit",
-                    "bits",
-                    "DDP",
-                    "DTS",
-                    "AC3",
-                    "AAC",
-                    "FLAC",
-                    "THD",
-                    "MA",
-                    "HD",
-                    "x264",
-                    "x265",
-                    "H264",
-                    "H265",
-                    "AVC",
-                    "HEVC",
-                    "Atmos",
-                    "TrueHD",
-                    "DualAudio",
-                    "2Audio",
-                    "2Audios",
-                    "4Audios",
-                    "60fps",
-                    "HQ",
-                    "AAC(5",
-                    "1)",
-                    "Hi10P",
-                    "DD5",
-                    "TrueHD7",
-                    "H",
-                    "264",
-                    "265",
-                    "4Audio",
-                    "3Audio",
-                    "5Audio",
-                    "REPACK",
-                    "Remux",
-                    "VC-1",
-                    "DoVi",
-                    "HDR10",
-                    "EDR",
-                    "MULTi",
-                    "HDTS",
-                    "IMAX",
-                    "DSNP",
-                    "DTS-HD",
-                    "HDR",
-                    "120FPS",
-                    "4K",
-                    "WEB",
-                    "WEBRip",
-                    "UHD",
-                    "Blu-ray",
-                    "Bluray",
-                    "BluRay",
-                    "DD5",
-                    "DD+",
-                    "AC3",
-                    "AAC5",
-                    "AAC1",
-                    "10bit",
-                    "DV",
-                    "MP4",
-                    "MKV",
-                    // Source/platform names
-                    "NF",
-                    "AMZN",
-                    "HKG",
-                    "ESP",
-                    "GBR",
-                    "INT",
-                    "JPN",
-                    "CHN",
-                    "CCTV6HD",
-                    "CHC",
-                    "Movie-HD",
-                    "AKA",
-                    "Chinese",
-                    "iTunes",
-                    "AMZN",
-                    "NF",
-                    "Netflix",
-                    "HMAX",
-                    "NOW",
-                    "ATVP",
-                    "HULU",
-                    "DSNP",
-                    // File formats and containers
-                    "HDTVRip",
-                    "DVDRip",
-                    "BDRip",
-                    "HDRip",
-                    "WEBRip",
-                    "HDTV",
-                    "MP3",
-                    // Special editions and versions
-                    "EXTENDED",
-                    "修复加长版",
-                    "导演剪辑版",
-                    "Extended",
-                    "RERIP",
-                    "Hybrid",
-                    "ES",
-                    // Release groups
-                    "CMCT",
-                    "WiKi",
-                    "FRDS",
-                    "HDS",
-                    "ADWeb",
-                    "TLF",
-                    "CHDWEB",
-                    "PTerWEB",
-                    "GREENOTEA",
-                    "ZmWeb",
-                    "HDVWEB",
-                    "NukeHD",
-                    "TJUPT",
-                    "CMCTV",
-                    "NTG",
-                    "HDWTV",
-                    "NowOur",
-                    "PandaQT",
-                    "HANDJOB",
-                    "npuer",
-                    "BYRHD",
-                    "c0kE",
-                    "TBMovies",
-                    "MNHD",
-                    "YTS",
-                    "MX",
-                    "HDWinG",
-                    "NYPAD",
-                    "ZigZag",
-                    "NTb",
-                    "REMUX",
-                    "iT",
-                    "mUHD",
-                    "IAMABLE",
-                    "KRaLiMaRKo",
-                    "HDChina",
-                    "CtrlHD",
-                    "SWTYBLZ",
-                    "ADE",
-                    "PHOBOS",
-                    "PTHOME",
-                    "SyncUP",
-                    "YIFY",
-                    "SPARKS",
-                    "HiDt",
-                    "Geek",
-                    "TayTO",
-                    "nikt0",
-                    "beAst",
-                    "FoRM",
-                    "CRiME",
-                    "HVAC",
-                    "MaoZhan",
-                    "VietHD",
-                    "JYK",
-                    "GalaxyRG265",
-                    "PaODEQUEiJO",
-                    "SA89",
-                    "FANDANGO",
-                    "PTer",
-                    "ABM",
-                    "MZABI",
-                    "BYRPAD",
-                    "NCmt",
-                    "MTeam",
-                    "playWEB",
-                    "FLUX",
-                    "CMRG",
-                    "MZABARBiE",
-                    "SMURF",
-                    "AREY",
-                    "RABiDS",
-                    "ETHEL",
-                    "RightSiZE",
-                    "CiNEPHiLES",
-                    "Kitsune",
-                    "KBTV",
-                    "EbP",
-                ];
-
-                // Convert &[&str] to &[String] for comparison
-                static DEFAULT_TERMS_STRINGS: std::sync::OnceLock<Vec<String>> =
-                    std::sync::OnceLock::new();
-                DEFAULT_TERMS_STRINGS
-                    .get_or_init(|| DEFAULT_TERMS.iter().map(|s| s.to_string()).collect())
-                    .as_slice()
-            },
+            &technical_terms,
             &release_groups,
         );
 
@@ -1197,6 +1208,172 @@ impl FilenameParser {
 
         confidence.min(1.0_f32)
     }
+
+    /// Detect series patterns in a title
+    pub fn detect_series_pattern(&self, title: &str) -> Option<(String, u32)> {
+        // Common series patterns - order matters for precedence
+        // Use regex for precise pattern matching
+        let series_patterns = [
+            // "Part" patterns: "Iron Man Part 2", "Matrix Part 2" (check first to avoid conflicts)
+            (r"^(.+?)\s+Part\s+(\d+)$", 2),
+            // "Chapter" patterns: "Iron Man Chapter 2"
+            (r"^(.+?)\s+Chapter\s+(\d+)$", 2),
+            // "Volume" patterns: "Iron Man Volume 2"
+            (r"^(.+?)\s+Volume\s+(\d+)$", 2),
+            // "Episode" patterns: "Iron Man Episode 2"
+            (r"^(.+?)\s+Episode\s+(\d+)$", 2),
+            // "Season" patterns: "Iron Man Season 2"
+            (r"^(.+?)\s+Season\s+(\d+)$", 2),
+            // Number patterns: "Iron Man 2", "Matrix 2", "Avengers 2" (must end with number)
+            (r"^(.+?)\s+(\d+)$", 2),
+            // Roman numeral patterns: "Iron Man II", "Matrix II"
+            (r"^(.+?)\s+(I{1,3}|IV|V|VI{1,3}|IX|X)$", 2),
+        ];
+
+        for (pattern, capture_group) in series_patterns.iter() {
+            if let Some(captures) = regex::Regex::new(pattern)
+                .ok()
+                .and_then(|re| re.captures(title))
+                && let Some(series_name) = captures.get(1)
+                && let Some(series_num_str) = captures.get(*capture_group)
+            {
+                // Try to parse the series number
+                if let Ok(series_num) = series_num_str.as_str().parse::<u32>() {
+                    let series_name_trimmed = series_name.as_str().trim();
+                    // Validate that the series name doesn't end with a number (to avoid "Iron Man 2 3" -> "Iron Man 2", 3)
+                    if !series_name_trimmed.ends_with(|c: char| c.is_ascii_digit()) {
+                        return Some((series_name_trimmed.to_string(), series_num));
+                    }
+                }
+                // Handle Roman numerals
+                if *capture_group == 2 && pattern.contains("I{1,3}|IV|V|VI{1,3}|IX|X") {
+                    let roman_num = series_num_str.as_str();
+                    if let Some(num) = self.roman_to_arabic(roman_num) {
+                        return Some((series_name.as_str().trim().to_string(), num));
+                    }
+                }
+            }
+        }
+
+        None
+    }
+
+    /// Convert Roman numeral to Arabic number
+    fn roman_to_arabic(&self, roman: &str) -> Option<u32> {
+        let roman_map = [
+            ("I", 1),
+            ("II", 2),
+            ("III", 3),
+            ("IV", 4),
+            ("V", 5),
+            ("VI", 6),
+            ("VII", 7),
+            ("VIII", 8),
+            ("IX", 9),
+            ("X", 10),
+        ];
+
+        for (r, a) in roman_map.iter() {
+            if roman == *r {
+                return Some(*a);
+            }
+        }
+        None
+    }
+
+    /// Detect anime movie patterns and extract enhanced metadata
+    pub fn detect_anime_pattern(&self, title: &str, filename: &str) -> Option<AnimeInfo> {
+        // Check for Japanese characters in both title and filename
+        let has_japanese = title.chars().any(|c| {
+            // Hiragana, Katakana, Kanji ranges
+            ('\u{3040}'..='\u{309F}').contains(&c) || // Hiragana
+            ('\u{30A0}'..='\u{30FF}').contains(&c) || // Katakana
+            ('\u{4E00}'..='\u{9FAF}').contains(&c) // Kanji
+        }) || filename.chars().any(|c| {
+            // Hiragana, Katakana, Kanji ranges
+            ('\u{3040}'..='\u{309F}').contains(&c) || // Hiragana
+            ('\u{30A0}'..='\u{30FF}').contains(&c) || // Katakana
+            ('\u{4E00}'..='\u{9FAF}').contains(&c) // Kanji
+        });
+
+        // Check for Chinese characters in both title and filename
+        let has_chinese = title.chars().any(|c| {
+            ('\u{4E00}'..='\u{9FAF}').contains(&c) // CJK Unified Ideographs (includes Chinese)
+        }) || filename.chars().any(|c| {
+            ('\u{4E00}'..='\u{9FAF}').contains(&c) // CJK Unified Ideographs (includes Chinese)
+        });
+
+        // Look for anime movie series patterns
+        let anime_movie_patterns = [
+            // Detective Conan Movie patterns
+            (r"Detective\.Conan\.Movie\.(\d+)", 1),
+            (r"名探偵コナン.*?劇場版.*?(\d+)", 1),
+            (r"名侦探柯南.*?(\d+)", 1),
+            // Studio Ghibli patterns
+            (r"Ghibli", 0),
+            // Common anime movie indicators
+            (r"劇場版", 0), // "Theatrical version" in Japanese
+            (r"映画", 0),   // "Movie" in Japanese
+            (r"电影", 0),   // "Movie" in Chinese
+        ];
+
+        // Check for anime indicators
+        let mut is_anime = has_japanese || has_chinese;
+        let mut movie_number = None;
+
+        // Check anime movie patterns
+        for (pattern, capture_group) in anime_movie_patterns.iter() {
+            if let Some(captures) = regex::Regex::new(pattern)
+                .ok()
+                .and_then(|re| re.captures(filename))
+            {
+                is_anime = true;
+                if *capture_group > 0
+                    && let Some(num_str) = captures.get(*capture_group)
+                    && let Ok(num) = num_str.as_str().parse::<u32>()
+                {
+                    movie_number = Some(num);
+                }
+            }
+        }
+
+        // Check for common anime keywords
+        let anime_keywords = [
+            "anime",
+            "アニメ",
+            "动画",
+            "動畫",
+            "Studio",
+            "スタジオ",
+            "OVA",
+            "ONA",
+            "OAD",
+            "劇場版",
+            "映画",
+            "电影",
+            "名探偵",
+            "名侦探",
+        ];
+
+        for keyword in anime_keywords.iter() {
+            if filename.contains(keyword) || title.contains(keyword) {
+                is_anime = true;
+                break;
+            }
+        }
+
+        if is_anime {
+            Some(AnimeInfo {
+                is_anime: true,
+                movie_number,
+                has_japanese_title: has_japanese,
+                has_chinese_title: has_chinese,
+                is_movie_series: movie_number.is_some(),
+            })
+        } else {
+            None
+        }
+    }
 }
 
 #[cfg(test)]
@@ -1461,5 +1638,162 @@ mod tests {
                 filename
             );
         }
+    }
+
+    #[test]
+    fn test_series_detection() {
+        let parser = FilenameParser::new();
+
+        // Test number patterns
+        assert_eq!(
+            parser.detect_series_pattern("Iron Man 2"),
+            Some(("Iron Man".to_string(), 2))
+        );
+        assert_eq!(
+            parser.detect_series_pattern("The Matrix 3"),
+            Some(("The Matrix".to_string(), 3))
+        );
+        assert_eq!(
+            parser.detect_series_pattern("Avengers 4"),
+            Some(("Avengers".to_string(), 4))
+        );
+
+        // Test Roman numeral patterns
+        assert_eq!(
+            parser.detect_series_pattern("Iron Man II"),
+            Some(("Iron Man".to_string(), 2))
+        );
+        assert_eq!(
+            parser.detect_series_pattern("The Matrix III"),
+            Some(("The Matrix".to_string(), 3))
+        );
+
+        // Test "Part" patterns
+        assert_eq!(
+            parser.detect_series_pattern("Iron Man Part 2"),
+            Some(("Iron Man".to_string(), 2))
+        );
+        assert_eq!(
+            parser.detect_series_pattern("The Matrix Part 3"),
+            Some(("The Matrix".to_string(), 3))
+        );
+
+        // Test "Chapter" patterns
+        assert_eq!(
+            parser.detect_series_pattern("Iron Man Chapter 2"),
+            Some(("Iron Man".to_string(), 2))
+        );
+
+        // Test "Volume" patterns
+        assert_eq!(
+            parser.detect_series_pattern("Iron Man Volume 2"),
+            Some(("Iron Man".to_string(), 2))
+        );
+
+        // Test non-series patterns
+        assert_eq!(parser.detect_series_pattern("Iron Man"), None);
+        assert_eq!(parser.detect_series_pattern("The Matrix"), None);
+        assert_eq!(parser.detect_series_pattern("Avengers"), None);
+
+        // Test edge cases
+        assert_eq!(parser.detect_series_pattern("Iron Man 2 3"), None); // Multiple numbers
+        assert_eq!(parser.detect_series_pattern("Iron Man Part"), None); // Incomplete pattern
+        assert_eq!(parser.detect_series_pattern("2 Iron Man"), None); // Number at start
+    }
+
+    #[test]
+    fn test_series_detection_real_world() {
+        let parser = FilenameParser::new();
+
+        // Real-world series examples
+        let test_cases = vec![
+            // Marvel Cinematic Universe
+            ("Iron Man 2", ("Iron Man", 2)),
+            ("Iron Man 3", ("Iron Man", 3)),
+            ("Captain America 2", ("Captain America", 2)),
+            ("Thor 2", ("Thor", 2)),
+            ("Avengers 2", ("Avengers", 2)),
+            ("Avengers 3", ("Avengers", 3)),
+            ("Avengers 4", ("Avengers", 4)),
+            // Matrix series
+            ("The Matrix 2", ("The Matrix", 2)),
+            ("The Matrix 3", ("The Matrix", 3)),
+            // Part patterns
+            ("Iron Man Part 2", ("Iron Man", 2)),
+            ("The Matrix Part 3", ("The Matrix", 3)),
+            // Roman numerals
+            ("Iron Man II", ("Iron Man", 2)),
+            ("The Matrix III", ("The Matrix", 3)),
+            // Chapter patterns
+            ("Iron Man Chapter 2", ("Iron Man", 2)),
+            // Volume patterns
+            ("Iron Man Volume 2", ("Iron Man", 2)),
+        ];
+
+        for (input, expected) in test_cases {
+            let result = parser.detect_series_pattern(input);
+            assert_eq!(
+                result,
+                Some((expected.0.to_string(), expected.1)),
+                "Failed to detect series pattern: {}",
+                input
+            );
+        }
+    }
+
+    #[test]
+    fn test_anime_detection() {
+        let parser = FilenameParser::new();
+
+        // Test Detective Conan Movie patterns
+        let anime_info = parser.detect_anime_pattern(
+            "Detective Conan The Scarlet Bullet",
+            "[BD-1080P] [名探偵コナン 緋色の弾丸] Detective Conan The Scarlet Bullet (2021) [BDRip][HEVC-10bit][1080p][CHS&CHT&ENG].mkv"
+        );
+        assert!(anime_info.is_some());
+        let info = anime_info.unwrap();
+        assert!(info.is_anime);
+        assert!(info.has_japanese_title); // Should detect Japanese characters in filename
+
+        // Test Detective Conan Movie series pattern
+        let anime_info = parser.detect_anime_pattern(
+            "Detective Conan Movie 1 The Time Bomb Skyscraper",
+            "Detective.Conan.Movie.1.The.Time.Bomb.Skyscraper.1997.720p.BluRay.x264-WiKi.mkv",
+        );
+        assert!(anime_info.is_some());
+        let info = anime_info.unwrap();
+        assert!(info.is_anime);
+        assert_eq!(info.movie_number, Some(1));
+        assert!(info.is_movie_series);
+
+        // Test Chinese anime pattern
+        let anime_info = parser.detect_anime_pattern(
+            "名侦探柯南：百万美元的五棱星",
+            "[名侦探柯南：百万美元的五棱星].Detective.Conan.The.Million-dollar.Pentagram.2024.JPN.BluRay.1080p.x265.10bit.DD5.1-CMCT.mkv"
+        );
+        assert!(anime_info.is_some());
+        let info = anime_info.unwrap();
+        assert!(info.is_anime);
+        assert!(info.has_chinese_title);
+
+        // Test Studio Ghibli pattern
+        let anime_info = parser.detect_anime_pattern(
+            "Spirited Away",
+            "Spirited.Away.2001.Studio.Ghibli.BluRay.1080p.mkv",
+        );
+        assert!(anime_info.is_some());
+        let info = anime_info.unwrap();
+        assert!(info.is_anime);
+
+        // Test non-anime pattern
+        let anime_info =
+            parser.detect_anime_pattern("The Matrix", "The.Matrix.1999.1080p.BluRay.x264.mkv");
+        assert!(anime_info.is_none());
+
+        // Test Japanese keywords
+        let anime_info = parser.detect_anime_pattern("映画 Test Movie", "映画.Test.Movie.2023.mkv");
+        assert!(anime_info.is_some());
+        let info = anime_info.unwrap();
+        assert!(info.is_anime);
     }
 }

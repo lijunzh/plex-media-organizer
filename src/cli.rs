@@ -63,6 +63,10 @@ enum Commands {
         /// Skip warnings for low confidence matches
         #[arg(long)]
         no_warnings: bool,
+
+        /// Custom database path (overrides config file and environment variable)
+        #[arg(long)]
+        database_path: Option<PathBuf>,
     },
 
     /// Set up configuration interactively
@@ -191,6 +195,7 @@ impl Cli {
                 min_confidence,
                 skip_unmatched,
                 no_warnings,
+                database_path,
             } => {
                 let confidence_settings = ConfidenceSettings {
                     min_confidence,
@@ -204,6 +209,7 @@ impl Cli {
                     batch_size,
                     confidence_settings,
                     verbose,
+                    database_path,
                 )
                 .await
             }
@@ -266,19 +272,26 @@ impl Cli {
         batch_size: usize,
         confidence_settings: ConfidenceSettings,
         verbose: bool,
+        database_path: Option<PathBuf>,
     ) -> Result<()> {
         println!("🎬 Plex Media Organizer - Scanning Directory");
         println!("Directory: {}", directory.display());
         println!();
 
         // Load configuration ONCE at the entry point
-        let config = match AppConfig::load() {
+        let mut config = match AppConfig::load() {
             Ok(config) => config,
             Err(_) => {
                 println!("⚠️  No configuration found. Run 'setup' first.");
                 return Ok(());
             }
         };
+
+        // Override database path if specified via CLI (highest priority)
+        if let Some(db_path) = database_path {
+            config.database.path = db_path.to_string_lossy().to_string();
+            println!("📁 Using custom database path: {}", config.database.path);
+        }
 
         // Validate API keys
         if let Err(e) = config.validate_api_keys() {
@@ -377,6 +390,14 @@ impl Cli {
                         "❌ Not set"
                     }
                 );
+                println!("Database Path: {}", config.database.path);
+                println!(
+                    "Database Directory: {}",
+                    std::path::Path::new(&config.database.path)
+                        .parent()
+                        .unwrap_or_else(|| std::path::Path::new("."))
+                        .display()
+                );
             }
             Err(e) => {
                 println!("❌ Failed to load configuration: {}", e);
@@ -423,10 +444,10 @@ impl Cli {
             };
 
             // Create TMDB client if available
-            let tmdb_client = config.apis.tmdb_api_key.map(TmdbClient::new);
+            let tmdb_client = config.apis.tmdb_api_key.clone().map(TmdbClient::new);
 
-            // Create movie parser and scanner
-            let movie_parser = MovieParser::new(tmdb_client);
+            // Create movie parser and scanner (use loaded config)
+            let movie_parser = MovieParser::with_config(tmdb_client, config.clone());
             let scanner = Scanner::new(movie_parser);
 
             // Scan directory
@@ -491,10 +512,10 @@ impl Cli {
             };
 
             // Create TMDB client if available
-            let tmdb_client = config.apis.tmdb_api_key.map(TmdbClient::new);
+            let tmdb_client = config.apis.tmdb_api_key.clone().map(TmdbClient::new);
 
-            // Create movie parser and test parsing
-            let movie_parser = MovieParser::new(tmdb_client);
+            // Create movie parser and test parsing (use loaded config)
+            let movie_parser = MovieParser::with_config(tmdb_client, config.clone());
 
             match movie_parser.parse_movie(&path).await {
                 Ok(result) => {
@@ -673,10 +694,10 @@ impl Cli {
         }
 
         // Create TMDB client
-        let tmdb_client = config.apis.tmdb_api_key.map(TmdbClient::new);
+        let tmdb_client = config.apis.tmdb_api_key.clone().map(TmdbClient::new);
 
-        // Create movie parser and scanner
-        let movie_parser = MovieParser::new(tmdb_client);
+        // Create movie parser and scanner (use loaded config)
+        let movie_parser = MovieParser::with_config(tmdb_client, config.clone());
 
         // Create scanner with network optimizations if requested
         let mut scanner = if network_mode {
@@ -1136,6 +1157,7 @@ mod tests {
                 min_confidence,
                 skip_unmatched,
                 no_warnings,
+                ..
             } => {
                 assert_eq!(directory, PathBuf::from("/test/dir"));
                 assert!(!verbose);
@@ -1172,6 +1194,7 @@ mod tests {
                 min_confidence,
                 skip_unmatched,
                 no_warnings,
+                ..
             } => {
                 assert_eq!(directory, PathBuf::from("/test/dir"));
                 assert!(!verbose);

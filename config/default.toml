@@ -5,6 +5,20 @@
 # TMDB API key - get one for free at https://www.themoviedb.org/settings/api
 tmdb_api_key = ""
 
+[database]
+# Database file path (will be replaced with platform-appropriate default)
+# macOS: ~/Library/Application Support/plex-media-organizer/movies.db
+# Linux: ~/.local/share/plex-media-organizer/movies.db  
+# Windows: %APPDATA%\plex-media-organizer\movies.db
+# This will be overridden by the platform-specific default in the code
+path = "data/movies.db"
+# Maximum number of database connections in the pool
+max_connections = 10
+# Cache TTL in hours
+cache_ttl_hours = 24
+# Enable WAL mode for better concurrency
+enable_wal = true
+
 [organization]
 # Quality preferences
 [organization.quality]

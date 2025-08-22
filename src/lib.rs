@@ -111,12 +111,13 @@
 //! The library supports configurable behavior through `AppConfig`:
 //!
 //! ```rust
-//! use plex_media_organizer::{AppConfig, ApiConfig, OrganizationConfig, QualityConfig, OriginalTitleConfig, MatchingConfig, TitlePreservationConfig, LanguageConfig, TechnicalTermsConfig, ContentFilteringConfig};
+//! use plex_media_organizer::{AppConfig, ApiConfig, DatabaseConfig, OrganizationConfig, QualityConfig, OriginalTitleConfig, MatchingConfig, TitlePreservationConfig, LanguageConfig, TechnicalTermsConfig, ContentFilteringConfig};
 //!
 //! let config = AppConfig {
 //!     apis: ApiConfig {
 //!         tmdb_api_key: Some("your_key".to_string()),
 //!     },
+//!     database: DatabaseConfig::default(),
 //!     organization: OrganizationConfig {
 //!         quality: QualityConfig {
 //!             preferred_quality: Some("1080p".to_string()),
@@ -205,6 +206,7 @@
 
 pub mod cli;
 pub mod config;
+pub mod database;
 pub mod filename_parser;
 pub mod metadata_extractor;
 pub mod movie_parser;
@@ -215,6 +217,7 @@ pub mod types;
 
 pub use cli::*;
 pub use config::*;
+pub use database::*;
 pub use metadata_extractor::*;
 pub use movie_parser::*;
 pub use organizer::*;

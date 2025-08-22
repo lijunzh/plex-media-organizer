@@ -1,108 +1,49 @@
-# Plex Media Organizer Documentation
+# Documentation
 
-Welcome to the comprehensive documentation for the Plex Media Organizer project. This directory contains all documentation organized into logical sections for easy navigation.
+Welcome to the Plex Media Organizer documentation. This guide helps you find the right documentation for your needs.
 
-## 📁 Directory Structure
+## 📚 **Documentation Structure**
 
-### 🚀 User Guides (`user-guides/`)
-**For end users and basic usage**
+### **For Users** (`user/`)
+- **[Getting Started](user/getting-started.md)** - Quick start guide for new users
+- **[User Guide](user/user-guide.md)** - Comprehensive usage documentation
+- **[Configuration](user/configuration.md)** - All configuration options and settings
+- **[Troubleshooting](user/troubleshooting.md)** - Common issues and solutions
+- **[Examples](user/examples/)** - Real-world usage examples
 
-- **[Installation Guide](user-guides/installation.md)** - How to install and set up the application
-- **[Quick Start Guide](user-guides/quick-start.md)** - Get up and running quickly
-- **[User Guide](user-guides/user-guide.md)** - Comprehensive user manual
-- **[Configuration Guide](user-guides/configuration.md)** - How to configure the application
-- **[Troubleshooting Guide](user-guides/troubleshooting.md)** - Common issues and solutions
+### **For Developers** (`developer/`)
+- **[Git Practices](developer/git-practices.md)** - Git commit best practices
+- **[Documentation Standards](developer/documentation-standards.md)** - Documentation guidelines
+- **[Architecture](developer/architecture/)** - Technical architecture and design
+- **[Planning](developer/planning/)** - Development planning documents
+- **[Retrospectives](developer/retrospectives/)** - Project retrospectives
 
-### 🏗️ Architecture (`architecture/`)
-**System design and technical architecture**
+### **Technical Analysis** (`analysis/`)
+- **[Current Limitations](analysis/current-limitations.md)** - Known limitations and trade-offs
+- **[TMDB Matching](analysis/tmdb-matching.md)** - TMDB integration analysis
+- **[Edge Cases](analysis/edge-cases.md)** - Edge case analysis and handling
+- **[Current Issues](analysis/current-issues.md)** - Current issues analysis
+- **[Status](analysis/status.md)** - Project status and metrics
 
-- **[System Architecture](architecture/architecture.md)** - Overall system design and components
-- **[Roadmap](architecture/roadmap.md)** - Development roadmap and future plans
-- **[Security](architecture/security.md)** - Security considerations and best practices
-- **[Architecture Decisions](architecture/decisions/)** - Design decision records (ADRs)
+## 🎯 **Quick Navigation**
 
-### 🔧 Development (`development/`)
-**For developers and contributors**
+### **New Users**
+1. Start with **[Getting Started](user/getting-started.md)**
+2. Read the **[User Guide](user/user-guide.md)** for comprehensive usage
+3. Check **[Examples](user/examples/)** for real-world scenarios
+4. Use **[Troubleshooting](user/troubleshooting.md)** if you encounter issues
 
-- **[Development Guide](development/README.md)** - Development setup and guidelines
-- **[Planning](development/planning/)** - Development planning documents
-- **[Retrospectives](development/retrospectives/)** - Project retrospectives and lessons learned
-- **[Config Optimization Plan](development/config_optimization_plan.md)** - Configuration system optimization
-- **[Config Design Assessment](development/config_design_assessment.md)** - Assessment of config system strengths/weaknesses
-- **[Iteration 2 Plan](development/ITERATION_2_PLAN.md)** - Plan for the second development iteration
-- **[Network Optimization](development/network-optimization.md)** - Network performance optimization
+### **Existing Users**
+1. Review **[Configuration](user/configuration.md)** for advanced settings
+2. Check **[Troubleshooting](user/troubleshooting.md)** for common issues
+3. Explore **[Examples](user/examples/)** for advanced usage patterns
 
-### 📊 Analysis (`analysis/`)
-**Technical analysis and research**
-
-- **[Current Status](analysis/status.md)** - Current project status and metrics
-- **[Current Limitations](analysis/CURRENT_LIMITATIONS.md)** - Known limitations and constraints
-- **[Current Issues Analysis](analysis/CURRENT_ISSUES_ANALYSIS.md)** - Analysis of current issues
-- **[Edge Cases Analysis](analysis/edge_cases_analysis.md)** - Analysis of edge cases and special scenarios
-- **[TMDB Matching Challenges](analysis/tmdb_matching_challenges.md)** - Challenges with TMDB API matching
-
-### 📚 Examples (`examples/`)
-**Usage examples and tutorials**
-
-- **[Examples Overview](examples/README.md)** - Overview of available examples
-- **[Basic Examples](examples/basic/)** - Basic usage examples
-- **[Advanced Examples](examples/advanced/)** - Advanced usage scenarios
-- **[Integration Examples](examples/integrations/)** - Integration with other systems
-
-## 🎯 Quick Navigation
-
-### For New Users
-1. Start with **[Installation Guide](user-guides/installation.md)**
-2. Follow the **[Quick Start Guide](user-guides/quick-start.md)**
-3. Read the **[User Guide](user-guides/user-guide.md)** for comprehensive usage
-
-### For Developers
-1. Review **[System Architecture](architecture/architecture.md)**
-2. Read **[Development Guide](development/README.md)**
-3. Check **[Current Status](analysis/status.md)** for project state
-4. Review **[Config Design Assessment](development/config_design_assessment.md)**
-
-### For Contributors
-1. Read **[Development Guidelines](development/planning/development-guidelines.md)**
-2. Review **[Testing Strategy](development/planning/testing-strategy.md)**
-3. Check **[Architecture Decisions](architecture/decisions/)** for design context
-4. Read **[Retrospectives](development/retrospectives/)** for lessons learned
-
-## 📈 Project Status
-
-- **Current Phase**: ✅ **Iteration 1 COMPLETED** - Ready for Iteration 2
-- **Performance**: 60x improvement achieved (35s → 560ms)
-- **Test Coverage**: 100% maintained
-- **Documentation**: Comprehensive coverage across all areas
-- **Next Phase**: Enhanced Title Extraction and TMDB Matching
-
-## 🔄 Recent Updates
-
-- **✅ Iteration 1 Completion**: Formal review completed and approved
-- **Config Optimization**: Completed 5-phase optimization plan
-- **Documentation Consolidation**: Merged `docs/` and `project/` directories
-- **Performance**: Achieved 60x performance improvement
-- **Architecture**: Prepared for database-driven learning system
-- **Next**: Enhanced Title Extraction and TMDB Matching (Iteration 2)
-
-## 🤝 Contributing
-
-When contributing to documentation:
-
-1. Follow the established directory structure
-2. Use clear, descriptive file names
-3. Include comprehensive examples where appropriate
-4. Update this README when adding new sections
-5. Maintain consistent formatting and style
-
-## 📝 Documentation Standards
-
-- **Markdown Format**: All documentation uses Markdown
-- **Clear Headers**: Use descriptive headers and subheaders
-- **Code Examples**: Include practical code examples
-- **Cross-References**: Link between related documents
-- **Regular Updates**: Keep documentation current with code changes
+### **Contributors**
+1. Follow **[Git Practices](developer/git-practices.md)** for proper commits
+2. Review **[Architecture](developer/architecture/)** for technical understanding
+3. Check **[Documentation Standards](developer/documentation-standards.md)** for guidelines
+4. Review **[Planning](developer/planning/)** and **[Retrospectives](developer/retrospectives/)** for context
 
 ---
 
-*Last updated: After config optimization completion and documentation consolidation*
+**Need help?** Check the **[Troubleshooting](user/troubleshooting.md)** guide for common issues and solutions.

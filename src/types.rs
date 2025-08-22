@@ -4,6 +4,15 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
+/// TMDB collection information
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct TmdbCollection {
+    pub id: u32,
+    pub name: String,
+    pub poster_path: Option<String>,
+    pub backdrop_path: Option<String>,
+}
+
 /// Represents a media file in the system
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MediaFile {
@@ -166,6 +175,20 @@ pub struct MovieInfo {
     pub is_collection: bool,
     /// Collection name if applicable
     pub collection_name: Option<String>,
+    /// Whether this is part of a series
+    pub is_series: bool,
+    /// Series name if applicable
+    pub series_name: Option<String>,
+    /// Series number/sequence if applicable
+    pub series_number: Option<u32>,
+    /// Whether this is an anime movie
+    pub is_anime: bool,
+    /// Anime movie number if applicable (e.g., Detective Conan Movie 26)
+    pub anime_movie_number: Option<u32>,
+    /// Whether the title contains Japanese characters
+    pub has_japanese_title: bool,
+    /// Whether the title contains Chinese characters
+    pub has_chinese_title: bool,
     /// Video quality
     pub quality: Option<String>,
     /// Source
@@ -197,6 +220,7 @@ pub struct TmdbMovie {
     pub vote_average: Option<f32>,
     pub vote_count: Option<u32>,
     pub popularity: Option<f32>,
+    pub belongs_to_collection: Option<TmdbCollection>,
 }
 
 /// Scan result for a directory

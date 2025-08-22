@@ -11,6 +11,8 @@ use std::path::PathBuf;
 pub struct AppConfig {
     /// API configuration for external services
     pub apis: ApiConfig,
+    /// Database configuration
+    pub database: DatabaseConfig,
     /// Organization preferences
     pub organization: OrganizationConfig,
 }
@@ -20,6 +22,59 @@ pub struct AppConfig {
 pub struct ApiConfig {
     /// TMDB API key for movie data
     pub tmdb_api_key: Option<String>,
+}
+
+/// Database configuration
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct DatabaseConfig {
+    /// Database file path
+    pub path: String,
+    /// Maximum number of database connections in the pool
+    pub max_connections: usize,
+    /// Cache TTL in hours
+    pub cache_ttl_hours: i64,
+    /// Enable WAL mode for better concurrency
+    pub enable_wal: bool,
+}
+
+impl Default for DatabaseConfig {
+    fn default() -> Self {
+        Self {
+            path: Self::get_default_database_path(),
+            max_connections: 10,
+            cache_ttl_hours: 24,
+            enable_wal: true,
+        }
+    }
+}
+
+impl DatabaseConfig {
+    /// Get the platform-appropriate default database path
+    pub fn get_default_database_path() -> String {
+        let config_dir = if cfg!(target_os = "macos") {
+            dirs::home_dir()
+                .map(|home| home.join("Library/Application Support/plex-media-organizer"))
+                .unwrap_or_else(|| PathBuf::from("data"))
+        } else if cfg!(target_os = "linux") {
+            dirs::data_local_dir()
+                .map(|data_dir| data_dir.join("plex-media-organizer"))
+                .unwrap_or_else(|| {
+                    dirs::home_dir()
+                        .unwrap_or_else(|| PathBuf::from("."))
+                        .join(".plex-media-organizer")
+                })
+        } else if cfg!(target_os = "windows") {
+            dirs::config_dir()
+                .map(|config_dir| config_dir.join("plex-media-organizer"))
+                .unwrap_or_else(|| PathBuf::from("data"))
+        } else {
+            dirs::home_dir()
+                .map(|home| home.join(".plex-media-organizer"))
+                .unwrap_or_else(|| PathBuf::from("data"))
+        };
+
+        config_dir.join("movies.db").to_string_lossy().to_string()
+    }
 }
 
 /// Organization preferences
@@ -508,9 +563,19 @@ impl AppConfig {
 
         // Build and deserialize configuration
         let config = config_builder.build()?;
-        let app_config: AppConfig = config
+        let mut app_config: AppConfig = config
             .try_deserialize()
             .context("Failed to deserialize configuration")?;
+
+        // Override database path with platform-specific default if it's still the old default
+        if app_config.database.path == "data/movies.db" {
+            app_config.database.path = DatabaseConfig::get_default_database_path();
+        }
+
+        // Override database path with environment variable if set (highest priority)
+        if let Ok(db_path) = std::env::var("PLEX_MEDIA_ORGANIZER_DATABASE_PATH") {
+            app_config.database.path = db_path;
+        }
 
         Ok(app_config)
     }
@@ -659,9 +724,40 @@ impl AppConfig {
             config.apis.tmdb_api_key = Some(tmdb_key.trim().to_string());
         }
 
+        // Get database path
+        println!("\nDatabase Configuration:");
+        println!("The application stores movie data and API cache in a SQLite database.");
+        println!("Current default location: {}", config.database.path);
+
+        let db_path = Self::prompt_input(&format!(
+            "Database path (press Enter for default '{}'): ",
+            config.database.path
+        ))?;
+        if !db_path.trim().is_empty() {
+            config.database.path = db_path.trim().to_string();
+        }
+
+        // Validate database path
+        if let Some(parent) = std::path::Path::new(&config.database.path).parent()
+            && !parent.exists()
+        {
+            let create_dir = Self::prompt_input(&format!(
+                "Directory '{}' doesn't exist. Create it? (y/N): ",
+                parent.display()
+            ))?;
+            if create_dir.trim().to_lowercase() == "y" || create_dir.trim().to_lowercase() == "yes"
+            {
+                std::fs::create_dir_all(parent)?;
+                println!("✅ Directory created successfully!");
+            } else {
+                println!("⚠️  Please ensure the directory exists before running the application.");
+            }
+        }
+
         // Save configuration
         config.save()?;
         println!("\nConfiguration saved successfully!");
+        println!("Database will be stored at: {}", config.database.path);
 
         Ok(config)
     }
