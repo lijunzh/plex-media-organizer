@@ -5,6 +5,16 @@
 # TMDB API key - get one for free at https://www.themoviedb.org/settings/api
 tmdb_api_key = ""
 
+[database]
+# Database file path
+path = "data/movies.db"
+# Maximum number of database connections in the pool
+max_connections = 10
+# Cache TTL in hours
+cache_ttl_hours = 24
+# Enable WAL mode for better concurrency
+enable_wal = true
+
 [organization]
 # Quality preferences
 [organization.quality]

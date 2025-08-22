@@ -11,6 +11,8 @@ use std::path::PathBuf;
 pub struct AppConfig {
     /// API configuration for external services
     pub apis: ApiConfig,
+    /// Database configuration
+    pub database: DatabaseConfig,
     /// Organization preferences
     pub organization: OrganizationConfig,
 }
@@ -20,6 +22,30 @@ pub struct AppConfig {
 pub struct ApiConfig {
     /// TMDB API key for movie data
     pub tmdb_api_key: Option<String>,
+}
+
+/// Database configuration
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct DatabaseConfig {
+    /// Database file path
+    pub path: String,
+    /// Maximum number of database connections in the pool
+    pub max_connections: usize,
+    /// Cache TTL in hours
+    pub cache_ttl_hours: i64,
+    /// Enable WAL mode for better concurrency
+    pub enable_wal: bool,
+}
+
+impl Default for DatabaseConfig {
+    fn default() -> Self {
+        Self {
+            path: "data/movies.db".to_string(),
+            max_connections: 10,
+            cache_ttl_hours: 24,
+            enable_wal: true,
+        }
+    }
 }
 
 /// Organization preferences
