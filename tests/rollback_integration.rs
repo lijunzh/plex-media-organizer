@@ -16,10 +16,10 @@ async fn test_rollback_integration() -> Result<()> {
     fs::create_dir_all(&source_dir)?;
     fs::create_dir_all(&organized_dir)?;
 
-    // Create test movie files
+    // Create test movie files with realistic names that will get high confidence
     let test_files = vec![
-        "The.Matrix.1999.1080p.BluRay.mkv",
-        "Avengers.Endgame.2019.2160p.UHD.mkv",
+        "The.Matrix.1999.1080p.BluRay.x264.mkv",
+        "Avengers.Endgame.2019.2160p.UHD.BluRay.x265.mkv",
     ];
 
     for file_name in &test_files {
@@ -31,7 +31,10 @@ async fn test_rollback_integration() -> Result<()> {
     let movie_parser = MovieParser::new(None);
     let mut scanner = Scanner::new(movie_parser);
     
-    // Lower confidence threshold for tests and allow unmatched movies
+    // For testing rollback functionality, we need files to be processed
+    // Lower confidence threshold temporarily to allow test files through
+    // NOTE: In production, we should be conservative and skip low-confidence files
+    // This is only for testing the rollback mechanism itself
     scanner.config.organization.matching.min_confidence_threshold = 0.1;
     scanner.config.organization.matching.skip_unmatched_movies = false;
 
@@ -181,7 +184,10 @@ async fn test_rollback_dry_run_operation() -> Result<()> {
     let movie_parser = MovieParser::new(None);
     let mut scanner = Scanner::new(movie_parser);
     
-    // Lower confidence threshold for tests and allow unmatched movies
+    // For testing rollback functionality, we need files to be processed
+    // Lower confidence threshold temporarily to allow test files through
+    // NOTE: In production, we should be conservative and skip low-confidence files
+    // This is only for testing the rollback mechanism itself
     scanner.config.organization.matching.min_confidence_threshold = 0.1;
     scanner.config.organization.matching.skip_unmatched_movies = false;
     let scan_result = scanner.scan_directory(&source_dir).await?;
