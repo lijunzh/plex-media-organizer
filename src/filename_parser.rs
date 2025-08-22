@@ -152,6 +152,10 @@ impl FilenameParser {
                 ]
             });
 
+        let release_groups = config
+            .map(|cfg| cfg.get_release_groups())
+            .unwrap_or_default();
+
         // Remove file extension
         let filename_without_ext = self.remove_extension(filename);
 
@@ -164,7 +168,7 @@ impl FilenameParser {
         let source = self.extract_source(&tokens);
         let audio = self.extract_audio(&tokens);
         let codec = self.extract_codec(&tokens);
-        let group = self.extract_group(&tokens);
+        let group = self.extract_group_with_params(&tokens, &release_groups);
         let language = self.extract_language_with_params(&tokens, &language_codes);
 
         // Extract title and original title
@@ -181,6 +185,207 @@ impl FilenameParser {
             &common_words,
             &known_titles,
             &technical_japanese_terms,
+            &language_codes,
+            if let Some(ref terms) = self.technical_terms {
+                terms.as_slice()
+            } else {
+                // Fallback to comprehensive default terms if no config is provided
+                static DEFAULT_TERMS: &[&str] = &[
+                    // Video/audio codecs and quality
+                    "10bit",
+                    "10bits",
+                    "bit",
+                    "bits",
+                    "DDP",
+                    "DTS",
+                    "AC3",
+                    "AAC",
+                    "FLAC",
+                    "THD",
+                    "MA",
+                    "HD",
+                    "x264",
+                    "x265",
+                    "H264",
+                    "H265",
+                    "AVC",
+                    "HEVC",
+                    "Atmos",
+                    "TrueHD",
+                    "DualAudio",
+                    "2Audio",
+                    "2Audios",
+                    "4Audios",
+                    "60fps",
+                    "HQ",
+                    "AAC(5",
+                    "1)",
+                    "Hi10P",
+                    "DD5",
+                    "TrueHD7",
+                    "H",
+                    "264",
+                    "265",
+                    "4Audio",
+                    "3Audio",
+                    "5Audio",
+                    "REPACK",
+                    "Remux",
+                    "VC-1",
+                    "DoVi",
+                    "HDR10",
+                    "EDR",
+                    "MULTi",
+                    "HDTS",
+                    "IMAX",
+                    "DSNP",
+                    "DTS-HD",
+                    "HDR",
+                    "120FPS",
+                    "4K",
+                    "WEB",
+                    "WEBRip",
+                    "UHD",
+                    "Blu-ray",
+                    "Bluray",
+                    "BluRay",
+                    "DD5",
+                    "DD+",
+                    "AC3",
+                    "AAC5",
+                    "AAC1",
+                    "10bit",
+                    "DV",
+                    "MP4",
+                    "MKV",
+                    // Source/platform names
+                    "NF",
+                    "AMZN",
+                    "HKG",
+                    "ESP",
+                    "GBR",
+                    "INT",
+                    "JPN",
+                    "CHN",
+                    "CCTV6HD",
+                    "CHC",
+                    "Movie-HD",
+                    "AKA",
+                    "Chinese",
+                    "iTunes",
+                    "AMZN",
+                    "NF",
+                    "Netflix",
+                    "HMAX",
+                    "NOW",
+                    "ATVP",
+                    "HULU",
+                    "DSNP",
+                    // File formats and containers
+                    "HDTVRip",
+                    "DVDRip",
+                    "BDRip",
+                    "HDRip",
+                    "WEBRip",
+                    "HDTV",
+                    "MP3",
+                    // Special editions and versions
+                    "EXTENDED",
+                    "修复加长版",
+                    "导演剪辑版",
+                    "Extended",
+                    "RERIP",
+                    "Hybrid",
+                    "ES",
+                    // Release groups
+                    "CMCT",
+                    "WiKi",
+                    "FRDS",
+                    "HDS",
+                    "ADWeb",
+                    "TLF",
+                    "CHDWEB",
+                    "PTerWEB",
+                    "GREENOTEA",
+                    "ZmWeb",
+                    "HDVWEB",
+                    "NukeHD",
+                    "TJUPT",
+                    "CMCTV",
+                    "NTG",
+                    "HDWTV",
+                    "NowOur",
+                    "PandaQT",
+                    "HANDJOB",
+                    "npuer",
+                    "BYRHD",
+                    "c0kE",
+                    "TBMovies",
+                    "MNHD",
+                    "YTS",
+                    "MX",
+                    "HDWinG",
+                    "NYPAD",
+                    "ZigZag",
+                    "NTb",
+                    "REMUX",
+                    "iT",
+                    "mUHD",
+                    "IAMABLE",
+                    "KRaLiMaRKo",
+                    "HDChina",
+                    "CtrlHD",
+                    "SWTYBLZ",
+                    "ADE",
+                    "PHOBOS",
+                    "PTHOME",
+                    "SyncUP",
+                    "YIFY",
+                    "SPARKS",
+                    "HiDt",
+                    "Geek",
+                    "TayTO",
+                    "nikt0",
+                    "beAst",
+                    "FoRM",
+                    "CRiME",
+                    "HVAC",
+                    "MaoZhan",
+                    "VietHD",
+                    "JYK",
+                    "GalaxyRG265",
+                    "PaODEQUEiJO",
+                    "SA89",
+                    "FANDANGO",
+                    "PTer",
+                    "ABM",
+                    "MZABI",
+                    "BYRPAD",
+                    "NCmt",
+                    "MTeam",
+                    "playWEB",
+                    "FLUX",
+                    "CMRG",
+                    "MZABARBiE",
+                    "SMURF",
+                    "AREY",
+                    "RABiDS",
+                    "ETHEL",
+                    "RightSiZE",
+                    "CiNEPHiLES",
+                    "Kitsune",
+                    "KBTV",
+                    "EbP",
+                ];
+
+                // Convert &[&str] to &[String] for comparison
+                static DEFAULT_TERMS_STRINGS: std::sync::OnceLock<Vec<String>> =
+                    std::sync::OnceLock::new();
+                DEFAULT_TERMS_STRINGS
+                    .get_or_init(|| DEFAULT_TERMS.iter().map(|s| s.to_string()).collect())
+                    .as_slice()
+            },
+            &release_groups,
         );
 
         // Calculate confidence
@@ -384,8 +589,12 @@ impl FilenameParser {
         None
     }
 
-    /// Extract release group from tokens (usually at the end)
-    fn extract_group(&self, tokens: &[String]) -> Option<String> {
+    /// Extract release group from tokens with parameters
+    fn extract_group_with_params(
+        &self,
+        tokens: &[String],
+        release_groups: &[String],
+    ) -> Option<String> {
         // Look for common group patterns at the end
         if let Some(last_token) = tokens.last()
             && (last_token.contains('@') || last_token.contains('-'))
@@ -393,99 +602,27 @@ impl FilenameParser {
             return Some(last_token.clone());
         }
 
-        // Look for known release group patterns
-        // TODO: This array is duplicated with config/default.toml release_groups
-        // Should be removed in favor of config values in future iterations
-        let known_groups = [
-            "DON",
-            "D-Z0N3",
-            "Silence",
-            "CMCT",
-            "WiKi",
-            "FRDS",
-            "HDS",
-            "ADWeb",
-            "TLF",
-            "CHDWEB",
-            "PTerWEB",
-            "GREENOTEA",
-            "ZmWeb",
-            "HDVWEB",
-            "NukeHD",
-            "TJUPT",
-            "CMCTV",
-            "NTG",
-            "HDWTV",
-            "NowOur",
-            "PandaQT",
-            "HANDJOB",
-            "npuer",
-            "BYRHD",
-            "c0kE",
-            "TBMovies",
-            "MNHD",
-            "YTS",
-            "MX",
-            "HDWinG",
-            "NYPAD",
-            "ZigZag",
-            "NTb",
-            "REMUX",
-            "iT",
-            "mUHD",
-            "IAMABLE",
-            "KRaLiMaRKo",
-            "HDChina",
-            "CtrlHD",
-            "SWTYBLZ",
-            "ADE",
-            "PHOBOS",
-            "PTHOME",
-            "SyncUP",
-            "YIFY",
-            "SPARKS",
-            "HiDt",
-            "Geek",
-            "TayTO",
-            "nikt0",
-            "beAst",
-            "FoRM",
-            "CRiME",
-            "HVAC",
-            "MaoZhan",
-            "VietHD",
-            "JYK",
-            "GalaxyRG265",
-            "PaODEQUEiJO",
-            "SA89",
-            "FANDANGO",
-            "PTer",
-            "ABM",
-            "MZABI",
-            "BYRPAD",
-            "NCmt",
-            "MTeam",
-            "playWEB",
-            "FLUX",
-            "CMRG",
-            "MZABARBiE",
-            "SMURF",
-            "AREY",
-            "RABiDS",
-            "ETHEL",
-            "RightSiZE",
-            "CiNEPHiLES",
-            "Kitsune",
-            "KBTV",
-            "EbP",
-        ];
-
+        // Look for exact matches first
         for token in tokens {
-            if known_groups
+            if release_groups
                 .iter()
                 .any(|group| token.to_uppercase() == group.to_uppercase())
             {
                 return Some(token.clone());
+            }
+        }
+
+        // Then, try to find hyphenated sources by combining adjacent tokens
+        if tokens.len() < 2 {
+            return None;
+        }
+        for i in 0..tokens.len() - 1 {
+            let combined = format!("{}-{}", tokens[i], tokens[i + 1]);
+            if release_groups
+                .iter()
+                .any(|group| combined.to_uppercase() == group.to_uppercase())
+            {
+                return Some(combined);
             }
         }
 
@@ -578,6 +715,9 @@ impl FilenameParser {
         common_words: &[String],
         known_titles: &[String],
         technical_japanese_terms: &[String],
+        language_codes: &[String],
+        technical_terms: &[String],
+        release_groups: &[String],
     ) -> (String, Option<String>) {
         let mut title_tokens = Vec::new();
         let mut japanese_tokens = Vec::new();
@@ -595,6 +735,9 @@ impl FilenameParser {
                 group,
                 common_words,
                 known_titles,
+                language_codes,
+                technical_terms,
+                release_groups,
             );
             if should_include {
                 title_tokens.push(token.clone());
@@ -602,9 +745,13 @@ impl FilenameParser {
                 // Separate Japanese, Chinese, and English tokens
                 if self.is_japanese_title_token_with_params(token, technical_japanese_terms) {
                     japanese_tokens.push(token.clone());
-                } else if self.is_chinese_title_token(token) {
+                } else if self.is_chinese_title_token_with_params(
+                    token,
+                    technical_japanese_terms,
+                    known_titles,
+                ) {
                     chinese_tokens.push(token.clone());
-                } else if self.is_english_title_token(token) {
+                } else if self.is_english_title_token_with_params(token, technical_terms) {
                     english_tokens.push(token.clone());
                 }
             }
@@ -688,8 +835,13 @@ impl FilenameParser {
         token.chars().any(|c| self.is_specifically_japanese(c))
     }
 
-    /// Check if a token looks like a Chinese title (should be preserved)
-    fn is_chinese_title_token(&self, token: &str) -> bool {
+    /// Check if a token looks like a Chinese title (should be preserved) with parameters
+    fn is_chinese_title_token_with_params(
+        &self,
+        token: &str,
+        technical_japanese_terms: &[String],
+        known_titles: &[String],
+    ) -> bool {
         // Must contain Chinese characters (Kanji)
         if !token.chars().any(|c| {
             let code = c as u32;
@@ -699,28 +851,14 @@ impl FilenameParser {
         }
 
         // Must not be purely technical terms
-        // TODO: This array is duplicated with config/default.toml technical_japanese_terms
-        // Should be removed in favor of config values in future iterations
-        let technical_chinese = [
-            "国日双语",
-            "双语",
-            "国日",
-            "日英",
-            "英日",
-            "中日",
-            "日中",
-            "晨曦",
-            "老M制作",
-            "剧场版",
-        ];
-        if technical_chinese.iter().any(|term| token.contains(term)) {
+        if technical_japanese_terms
+            .iter()
+            .any(|term| token.contains(term))
+        {
             return false;
         }
 
-        // Use hardcoded known titles
-        // TODO: This array is duplicated with config/default.toml known_titles
-        // Should be removed in favor of config values in future iterations
-        let known_titles = ["灌篮高手", "灌篮", "Slam", "Dunk"];
+        // Use provided known titles
         if known_titles.iter().any(|title| token.contains(title)) {
             return true;
         }
@@ -735,8 +873,12 @@ impl FilenameParser {
         !token.chars().any(|c| self.is_specifically_japanese(c))
     }
 
-    /// Check if a token looks like an English title
-    fn is_english_title_token(&self, token: &str) -> bool {
+    /// Check if a token looks like an English title with parameters
+    fn is_english_title_token_with_params(
+        &self,
+        token: &str,
+        video_audio_terms: &[String],
+    ) -> bool {
         // Must be all ASCII alphabetic characters
         if !token.chars().all(|c| c.is_ascii_alphabetic()) {
             return false;
@@ -748,14 +890,7 @@ impl FilenameParser {
         }
 
         // Must not be a common technical term
-        // TODO: This array is duplicated with config/default.toml video_audio_terms
-        // Should be removed in favor of config values in future iterations
-        let technical_words = [
-            "WEB", "DL", "REMUX", "BluRay", "HDTV", "DVDRip", "BRRip", "HDRip", "WEBRip", "ATVP",
-            "Netflix", "Amazon", "iT", "UHD", "HDR", "4K", "HD", "SD", "iPad", "HDH", "H",
-        ];
-
-        !technical_words
+        !video_audio_terms
             .iter()
             .any(|word| token.to_uppercase() == *word)
     }
@@ -773,6 +908,9 @@ impl FilenameParser {
         group: &Option<String>,
         common_words: &[String],
         known_titles: &[String],
+        language_codes: &[String],
+        technical_terms: &[String],
+        release_groups: &[String],
     ) -> bool {
         // Special case: preserve known movie titles that should not be treated as metadata
         if known_titles.iter().any(|title| token.contains(title)) {
@@ -835,18 +973,7 @@ impl FilenameParser {
             return true;
         }
 
-        // Use hardcoded language codes for now (could be passed as parameter if needed)
-        // TODO: This array is duplicated with config/default.toml language_codes
-        // Should be removed in favor of config values in future iterations
-        let language_codes = [
-            "JPN".to_string(),
-            "ENG".to_string(),
-            "CHI".to_string(),
-            "KOR".to_string(),
-            "JAP".to_string(),
-            "EN".to_string(),
-            "CN".to_string(),
-        ];
+        // Use provided language codes
         if language_codes
             .iter()
             .any(|code| token.to_uppercase() == *code)
@@ -855,206 +982,6 @@ impl FilenameParser {
         }
 
         // Check for common technical terms that should be excluded
-        let technical_terms = if let Some(ref terms) = self.technical_terms {
-            terms.as_slice()
-        } else {
-            // Fallback to comprehensive default terms if no config is provided
-            static DEFAULT_TERMS: &[&str] = &[
-                // Video/audio codecs and quality
-                "10bit",
-                "10bits",
-                "bit",
-                "bits",
-                "DDP",
-                "DTS",
-                "AC3",
-                "AAC",
-                "FLAC",
-                "THD",
-                "MA",
-                "HD",
-                "x264",
-                "x265",
-                "H264",
-                "H265",
-                "AVC",
-                "HEVC",
-                "Atmos",
-                "TrueHD",
-                "DualAudio",
-                "2Audio",
-                "2Audios",
-                "4Audios",
-                "60fps",
-                "HQ",
-                "AAC(5",
-                "1)",
-                "Hi10P",
-                "DD5",
-                "TrueHD7",
-                "H",
-                "264",
-                "265",
-                "4Audio",
-                "3Audio",
-                "5Audio",
-                "REPACK",
-                "Remux",
-                "VC-1",
-                "DoVi",
-                "HDR10",
-                "EDR",
-                "MULTi",
-                "HDTS",
-                "IMAX",
-                "DSNP",
-                "DTS-HD",
-                "HDR",
-                "120FPS",
-                "4K",
-                "WEB",
-                "WEBRip",
-                "UHD",
-                "Blu-ray",
-                "Bluray",
-                "BluRay",
-                "DD5",
-                "DD+",
-                "AC3",
-                "AAC5",
-                "AAC1",
-                "10bit",
-                "DV",
-                "MP4",
-                "MKV",
-                // Source/platform names
-                "NF",
-                "AMZN",
-                "HKG",
-                "ESP",
-                "GBR",
-                "INT",
-                "JPN",
-                "CHN",
-                "CCTV6HD",
-                "CHC",
-                "Movie-HD",
-                "AKA",
-                "Chinese",
-                "iTunes",
-                "AMZN",
-                "NF",
-                "Netflix",
-                "HMAX",
-                "NOW",
-                "ATVP",
-                "HULU",
-                "DSNP",
-                // File formats and containers
-                "HDTVRip",
-                "DVDRip",
-                "BDRip",
-                "HDRip",
-                "WEBRip",
-                "HDTV",
-                "MP3",
-                // Special editions and versions
-                "EXTENDED",
-                "修复加长版",
-                "导演剪辑版",
-                "Extended",
-                "RERIP",
-                "Hybrid",
-                "ES",
-                // Release groups
-                "CMCT",
-                "WiKi",
-                "FRDS",
-                "HDS",
-                "ADWeb",
-                "TLF",
-                "CHDWEB",
-                "PTerWEB",
-                "GREENOTEA",
-                "ZmWeb",
-                "HDVWEB",
-                "NukeHD",
-                "TJUPT",
-                "CMCTV",
-                "NTG",
-                "HDWTV",
-                "NowOur",
-                "PandaQT",
-                "HANDJOB",
-                "npuer",
-                "BYRHD",
-                "c0kE",
-                "TBMovies",
-                "MNHD",
-                "YTS",
-                "MX",
-                "HDWinG",
-                "NYPAD",
-                "ZigZag",
-                "NTb",
-                "REMUX",
-                "iT",
-                "mUHD",
-                "IAMABLE",
-                "KRaLiMaRKo",
-                "HDChina",
-                "CtrlHD",
-                "SWTYBLZ",
-                "ADE",
-                "PHOBOS",
-                "PTHOME",
-                "SyncUP",
-                "YIFY",
-                "SPARKS",
-                "HiDt",
-                "Geek",
-                "TayTO",
-                "nikt0",
-                "beAst",
-                "FoRM",
-                "CRiME",
-                "HVAC",
-                "MaoZhan",
-                "VietHD",
-                "JYK",
-                "GalaxyRG265",
-                "PaODEQUEiJO",
-                "SA89",
-                "FANDANGO",
-                "PTer",
-                "ABM",
-                "MZABI",
-                "BYRPAD",
-                "NCmt",
-                "MTeam",
-                "playWEB",
-                "FLUX",
-                "CMRG",
-                "MZABARBiE",
-                "SMURF",
-                "AREY",
-                "RABiDS",
-                "ETHEL",
-                "RightSiZE",
-                "CiNEPHiLES",
-                "Kitsune",
-                "KBTV",
-                "EbP",
-            ];
-
-            // Convert &[&str] to &[String] for comparison
-            static DEFAULT_TERMS_STRINGS: std::sync::OnceLock<Vec<String>> =
-                std::sync::OnceLock::new();
-            DEFAULT_TERMS_STRINGS
-                .get_or_init(|| DEFAULT_TERMS.iter().map(|s| s.to_string()).collect())
-                .as_slice()
-        };
-
         if technical_terms
             .iter()
             .any(|term| token.to_lowercase() == term.to_lowercase())
@@ -1072,102 +999,20 @@ impl FilenameParser {
             return true;
         }
 
-        // Check for known release group names
-        // TODO: This array is duplicated with config/default.toml release_groups
-        // Should be removed in favor of config values in future iterations
-        let known_groups = [
-            "DON",
-            "D-Z0N3",
-            "Silence",
-            "CMCT",
-            "WiKi",
-            "FRDS",
-            "HDS",
-            "ADWeb",
-            "TLF",
-            "CHDWEB",
-            "PTerWEB",
-            "GREENOTEA",
-            "ZmWeb",
-            "HDVWEB",
-            "NukeHD",
-            "TJUPT",
-            "CMCTV",
-            "NTG",
-            "HDWTV",
-            "NowOur",
-            "PandaQT",
-            "HANDJOB",
-            "npuer",
-            "BYRHD",
-            "c0kE",
-            "TBMovies",
-            "MNHD",
-            "YTS",
-            "MX",
-            "HDWinG",
-            "NYPAD",
-            "ZigZag",
-            "NTb",
-            "REMUX",
-            "iT",
-            "mUHD",
-            "IAMABLE",
-            "KRaLiMaRKo",
-            "HDChina",
-            "CtrlHD",
-            "SWTYBLZ",
-            "ADE",
-            "PHOBOS",
-            "PTHOME",
-            "SyncUP",
-            "YIFY",
-            "SPARKS",
-            "HiDt",
-            "Geek",
-            "TayTO",
-            "nikt0",
-            "beAst",
-            "FoRM",
-            "CRiME",
-            "HVAC",
-            "MaoZhan",
-            "VietHD",
-            "JYK",
-            "GalaxyRG265",
-            "PaODEQUEiJO",
-            "SA89",
-            "FANDANGO",
-            "PTer",
-            "ABM",
-            "MZABI",
-            "BYRPAD",
-            "NCmt",
-            "MTeam",
-            "playWEB",
-            "FLUX",
-            "CMRG",
-            "MZABARBiE",
-            "SMURF",
-            "AREY",
-            "RABiDS",
-            "ETHEL",
-            "RightSiZE",
-            "CiNEPHiLES",
-            "Kitsune",
-            "KBTV",
-            "EbP",
-        ];
+        // Check for release group patterns (handled by extract_group_with_params)
+        // This is now handled by the group extraction logic
 
-        if known_groups.contains(&token) {
+        // Check for release group names
+        if release_groups
+            .iter()
+            .any(|group| token.to_uppercase() == group.to_uppercase())
+        {
             return true;
         }
 
-        // Check for partial release group matches (for cases like "D" and "Z0N3" from "D-Z0N3")
-        // TODO: This array contains terms that should be in config/default.toml release_groups
-        // Should be removed in favor of config values in future iterations
-        let partial_groups = ["D", "Z0N3", "DON", "Silence"];
-        if partial_groups.contains(&token) {
+        // Check for hyphenated release groups (for cases like "D-Z0N3" split into "D" and "Z0N3")
+        // This is a simplified check - the full hyphenated logic is in extract_group_with_params
+        if token == "D" || token == "Z0N3" || token == "DON" {
             return true;
         }
 
