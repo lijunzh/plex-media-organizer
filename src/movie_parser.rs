@@ -145,6 +145,16 @@ impl MovieParser {
             .filename_parser
             .parse_with_config(filename, Some(&self.config))?;
 
+        // Detect series patterns
+        let (is_series, series_name, series_number) = if let Some((name, number)) = self
+            .filename_parser
+            .detect_series_pattern(&components.title)
+        {
+            (true, Some(name), Some(number))
+        } else {
+            (false, None, None)
+        };
+
         // Convert to MovieInfo
         let movie_info = MovieInfo {
             title: components.title,
@@ -154,6 +164,9 @@ impl MovieParser {
             part_number: None, // Could be extracted from title if needed
             is_collection: false,
             collection_name: None,
+            is_series,
+            series_name,
+            series_number,
             quality: components.quality,
             source: components.source,
             language: components.language,
@@ -179,8 +192,11 @@ impl MovieParser {
             part_number: base.part_number, // Keep from filename
             is_collection: base.is_collection,
             collection_name: base.collection_name,
-            quality: base.quality, // Keep from filename
-            source: base.source,   // Keep from filename
+            is_series: base.is_series,         // Keep from filename
+            series_name: base.series_name,     // Keep from filename
+            series_number: base.series_number, // Keep from filename
+            quality: base.quality,             // Keep from filename
+            source: base.source,               // Keep from filename
             language: tmdb.language.or(base.language),
         }
     }
@@ -396,6 +412,9 @@ mod tests {
             part_number: None,
             is_collection: false,
             collection_name: None,
+            is_series: false,
+            series_name: None,
+            series_number: None,
             quality: Some("1080p".to_string()),
             source: Some("BluRay".to_string()),
             language: None,
@@ -409,6 +428,9 @@ mod tests {
             part_number: None,
             is_collection: false,
             collection_name: None,
+            is_series: false,
+            series_name: None,
+            series_number: None,
             quality: None,
             source: None,
             language: None,

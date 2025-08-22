@@ -175,6 +175,12 @@ pub struct MovieInfo {
     pub is_collection: bool,
     /// Collection name if applicable
     pub collection_name: Option<String>,
+    /// Whether this is part of a series
+    pub is_series: bool,
+    /// Series name if applicable
+    pub series_name: Option<String>,
+    /// Series number/sequence if applicable
+    pub series_number: Option<u32>,
     /// Video quality
     pub quality: Option<String>,
     /// Source

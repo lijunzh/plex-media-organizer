@@ -1197,6 +1197,78 @@ impl FilenameParser {
 
         confidence.min(1.0_f32)
     }
+
+    /// Detect series patterns in a title
+    pub fn detect_series_pattern(&self, title: &str) -> Option<(String, u32)> {
+        // Common series patterns - order matters for precedence
+        // Use regex for precise pattern matching
+        let series_patterns = [
+            // "Part" patterns: "Iron Man Part 2", "Matrix Part 2" (check first to avoid conflicts)
+            (r"^(.+?)\s+Part\s+(\d+)$", 2),
+            // "Chapter" patterns: "Iron Man Chapter 2"
+            (r"^(.+?)\s+Chapter\s+(\d+)$", 2),
+            // "Volume" patterns: "Iron Man Volume 2"
+            (r"^(.+?)\s+Volume\s+(\d+)$", 2),
+            // "Episode" patterns: "Iron Man Episode 2"
+            (r"^(.+?)\s+Episode\s+(\d+)$", 2),
+            // "Season" patterns: "Iron Man Season 2"
+            (r"^(.+?)\s+Season\s+(\d+)$", 2),
+            // Number patterns: "Iron Man 2", "Matrix 2", "Avengers 2" (must end with number)
+            (r"^(.+?)\s+(\d+)$", 2),
+            // Roman numeral patterns: "Iron Man II", "Matrix II"
+            (r"^(.+?)\s+(I{1,3}|IV|V|VI{1,3}|IX|X)$", 2),
+        ];
+
+        for (pattern, capture_group) in series_patterns.iter() {
+            if let Some(captures) = regex::Regex::new(pattern)
+                .ok()
+                .and_then(|re| re.captures(title))
+                && let Some(series_name) = captures.get(1)
+                && let Some(series_num_str) = captures.get(*capture_group)
+            {
+                // Try to parse the series number
+                if let Ok(series_num) = series_num_str.as_str().parse::<u32>() {
+                    let series_name_trimmed = series_name.as_str().trim();
+                    // Validate that the series name doesn't end with a number (to avoid "Iron Man 2 3" -> "Iron Man 2", 3)
+                    if !series_name_trimmed.ends_with(|c: char| c.is_ascii_digit()) {
+                        return Some((series_name_trimmed.to_string(), series_num));
+                    }
+                }
+                // Handle Roman numerals
+                if *capture_group == 2 && pattern.contains("I{1,3}|IV|V|VI{1,3}|IX|X") {
+                    let roman_num = series_num_str.as_str();
+                    if let Some(num) = self.roman_to_arabic(roman_num) {
+                        return Some((series_name.as_str().trim().to_string(), num));
+                    }
+                }
+            }
+        }
+
+        None
+    }
+
+    /// Convert Roman numeral to Arabic number
+    fn roman_to_arabic(&self, roman: &str) -> Option<u32> {
+        let roman_map = [
+            ("I", 1),
+            ("II", 2),
+            ("III", 3),
+            ("IV", 4),
+            ("V", 5),
+            ("VI", 6),
+            ("VII", 7),
+            ("VIII", 8),
+            ("IX", 9),
+            ("X", 10),
+        ];
+
+        for (r, a) in roman_map.iter() {
+            if roman == *r {
+                return Some(*a);
+            }
+        }
+        None
+    }
 }
 
 #[cfg(test)]
@@ -1459,6 +1531,107 @@ mod tests {
                 result.title, expected_title,
                 "Failed to parse: {}",
                 filename
+            );
+        }
+    }
+
+    #[test]
+    fn test_series_detection() {
+        let parser = FilenameParser::new();
+
+        // Test number patterns
+        assert_eq!(
+            parser.detect_series_pattern("Iron Man 2"),
+            Some(("Iron Man".to_string(), 2))
+        );
+        assert_eq!(
+            parser.detect_series_pattern("The Matrix 3"),
+            Some(("The Matrix".to_string(), 3))
+        );
+        assert_eq!(
+            parser.detect_series_pattern("Avengers 4"),
+            Some(("Avengers".to_string(), 4))
+        );
+
+        // Test Roman numeral patterns
+        assert_eq!(
+            parser.detect_series_pattern("Iron Man II"),
+            Some(("Iron Man".to_string(), 2))
+        );
+        assert_eq!(
+            parser.detect_series_pattern("The Matrix III"),
+            Some(("The Matrix".to_string(), 3))
+        );
+
+        // Test "Part" patterns
+        assert_eq!(
+            parser.detect_series_pattern("Iron Man Part 2"),
+            Some(("Iron Man".to_string(), 2))
+        );
+        assert_eq!(
+            parser.detect_series_pattern("The Matrix Part 3"),
+            Some(("The Matrix".to_string(), 3))
+        );
+
+        // Test "Chapter" patterns
+        assert_eq!(
+            parser.detect_series_pattern("Iron Man Chapter 2"),
+            Some(("Iron Man".to_string(), 2))
+        );
+
+        // Test "Volume" patterns
+        assert_eq!(
+            parser.detect_series_pattern("Iron Man Volume 2"),
+            Some(("Iron Man".to_string(), 2))
+        );
+
+        // Test non-series patterns
+        assert_eq!(parser.detect_series_pattern("Iron Man"), None);
+        assert_eq!(parser.detect_series_pattern("The Matrix"), None);
+        assert_eq!(parser.detect_series_pattern("Avengers"), None);
+
+        // Test edge cases
+        assert_eq!(parser.detect_series_pattern("Iron Man 2 3"), None); // Multiple numbers
+        assert_eq!(parser.detect_series_pattern("Iron Man Part"), None); // Incomplete pattern
+        assert_eq!(parser.detect_series_pattern("2 Iron Man"), None); // Number at start
+    }
+
+    #[test]
+    fn test_series_detection_real_world() {
+        let parser = FilenameParser::new();
+
+        // Real-world series examples
+        let test_cases = vec![
+            // Marvel Cinematic Universe
+            ("Iron Man 2", ("Iron Man", 2)),
+            ("Iron Man 3", ("Iron Man", 3)),
+            ("Captain America 2", ("Captain America", 2)),
+            ("Thor 2", ("Thor", 2)),
+            ("Avengers 2", ("Avengers", 2)),
+            ("Avengers 3", ("Avengers", 3)),
+            ("Avengers 4", ("Avengers", 4)),
+            // Matrix series
+            ("The Matrix 2", ("The Matrix", 2)),
+            ("The Matrix 3", ("The Matrix", 3)),
+            // Part patterns
+            ("Iron Man Part 2", ("Iron Man", 2)),
+            ("The Matrix Part 3", ("The Matrix", 3)),
+            // Roman numerals
+            ("Iron Man II", ("Iron Man", 2)),
+            ("The Matrix III", ("The Matrix", 3)),
+            // Chapter patterns
+            ("Iron Man Chapter 2", ("Iron Man", 2)),
+            // Volume patterns
+            ("Iron Man Volume 2", ("Iron Man", 2)),
+        ];
+
+        for (input, expected) in test_cases {
+            let result = parser.detect_series_pattern(input);
+            assert_eq!(
+                result,
+                Some((expected.0.to_string(), expected.1)),
+                "Failed to detect series pattern: {}",
+                input
             );
         }
     }

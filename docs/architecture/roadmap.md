@@ -78,11 +78,11 @@ This document outlines an iterative, incremental implementation plan for the Ple
 ### **Goal**: Robust movie parsing with learning capabilities and collection support
 
 #### **2.1 Enhanced Movie Parsing**
-- [ ] Handle Chinese-English bilingual titles
-- [ ] Support bracketed Chinese titles
-- [ ] Multi-part movie detection (CD1, CD2, Part 1, Part 2)
+- [x] Handle Chinese-English bilingual titles
+- [x] Support bracketed Chinese titles
+- [x] Multi-part movie detection (CD1, CD2, Part 1, Part 2)
 - [ ] Japanese anime movie patterns
-- [ ] Enhanced collection detection (TMDB collection API integration)
+- [x] Enhanced collection detection (TMDB collection API integration)
 - [ ] Series movie detection (Iron Man 1, 2, 3 patterns)
 
 #### **2.2 Simple SQLite Storage** ✅ **PHASE 1 COMPLETED**
