@@ -6,7 +6,11 @@
 tmdb_api_key = ""
 
 [database]
-# Database file path
+# Database file path (will be replaced with platform-appropriate default)
+# macOS: ~/Library/Application Support/plex-media-organizer/movies.db
+# Linux: ~/.local/share/plex-media-organizer/movies.db  
+# Windows: %APPDATA%\plex-media-organizer\movies.db
+# This will be overridden by the platform-specific default in the code
 path = "data/movies.db"
 # Maximum number of database connections in the pool
 max_connections = 10
