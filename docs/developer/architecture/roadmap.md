@@ -118,6 +118,46 @@ This document outlines an iterative, incremental implementation plan for the Ple
 
 ---
 
+## 🏗️ **Architecture Refactoring (Current)**
+
+### **Goal**: Transform monolithic codebase into modular, maintainable architecture
+
+#### **Phase 1A: CLI Refactoring** 🔄 **IN PROGRESS**
+- [ ] Extract command handlers to separate modules
+- [ ] Create output utilities for progress reporting
+- [ ] Update imports and module declarations
+- [ ] Remove monolithic `src/cli.rs`
+
+#### **Phase 1B: Parser Unification** ⏸️ **PLANNED**
+- [ ] Merge `movie_parser.rs` and `filename_parser.rs`
+- [ ] Extract pattern detection to separate modules
+- [ ] Update all parser-related imports
+- [ ] Remove artificial separation between parsers
+
+#### **Phase 1C: External API Restructuring** ⏸️ **PLANNED**
+- [ ] Split `tmdb_client.rs` into focused modules
+- [ ] Create external API abstraction layer
+- [ ] Update TMDB-related imports
+- [ ] Improve separation of API client and search logic
+
+#### **Phase 1D: Core Logic Separation** ⏸️ **PLANNED**
+- [ ] Refactor `scanner.rs` and `organizer.rs`
+- [ ] Create processing orchestration layer
+- [ ] Update core module imports
+- [ ] Separate file discovery from processing orchestration
+
+#### **Phase 2: Testing & Validation** ⏸️ **PLANNED**
+- [ ] Update all tests to work with new structure
+- [ ] Validate functionality remains intact
+- [ ] Performance testing and optimization
+- [ ] Integration testing
+
+**Deliverable**: Modular, maintainable codebase with clear separation of concerns
+
+**Benefits**: Improved maintainability, better testing, easier extension, reduced complexity
+
+---
+
 ## 📺 **Iteration 3: TV Shows (Weeks 5-6)**
 
 ### **Goal**: Add TV show support while keeping movies working

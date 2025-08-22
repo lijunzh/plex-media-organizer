@@ -13,11 +13,12 @@ The Plex Media Organizer is a database-driven media management system that intel
 ### **Current Implementation Status (Phase 2.1 Complete)**
 - **✅ Movie Parsing**: Complete with TMDB integration and fuzzy matching
 - **✅ File Organization**: Plex naming conventions with dry-run and rollback
-- **✅ CLI Interface**: Full subcommand support with progress reporting and modular structure
+- **✅ CLI Interface**: Full subcommand support with progress reporting
 - **✅ Testing**: Comprehensive test suite with real-world validation (110+ tests, 100% success rate)
 - **✅ Database Layer**: SQLite with connection pooling, WAL mode, and unified cache
 - **✅ Configuration System**: Flexible configuration with environment variable overrides
 - **✅ Safety Features**: Dry-run mode, complete rollback functionality, backup management
+- **🔄 Architecture Refactoring**: In progress - transforming to modular structure
 - **⏸️ TV Support**: Planned for Iteration 3
 - **⏸️ Music Support**: Planned for Iteration 4
 - **⏸️ Learning System**: Planned for Phase 2.2
@@ -176,6 +177,74 @@ The Plex Media Organizer is a database-driven media management system that intel
 - **User Feedback Integration**: Learn from manual corrections
 - **Confidence Building**: Improve accuracy over time
 - **A/B Testing**: Evaluate different parsing strategies
+
+## Architecture Refactoring
+
+### **Current Status: Refactoring in Progress**
+The codebase is currently undergoing a comprehensive refactoring to improve modularity and maintainability. The refactoring transforms the current monolithic structure into a well-organized, modular architecture.
+
+### **Refactoring Goals**
+- **Reduce file sizes**: Break down large files (>1000 lines) into focused modules
+- **Improve separation of concerns**: Each module has a single, well-defined responsibility
+- **Enhance maintainability**: Easier to understand, modify, and extend
+- **Better testing**: Smaller modules are easier to test independently
+- **Clearer dependencies**: Well-defined module boundaries and import structure
+
+### **Target Architecture**
+The refactoring will result in the following module structure:
+
+```
+📁 src/
+├── 🎯 main.rs (13 lines) - Entry point
+├── 📄 lib.rs (232 lines) - Library exports
+├── 📄 types.rs (271 lines) - Shared data structures
+├── 📄 config.rs (804 lines) - Configuration management
+├── 📁 cli/ (1,306 lines → modular)
+│   ├── 📄 mod.rs
+│   ├── 📄 commands.rs
+│   ├── 📁 handlers/ (7 command handlers)
+│   └── 📄 output.rs
+├── 📁 parsers/ (2,283 lines → unified)
+│   ├── 📄 mod.rs
+│   ├── 📄 movie.rs (merged movie_parser + filename_parser)
+│   ├── 📁 patterns/ (series, anime, technical)
+│   └── 📄 types.rs
+├── 📁 external/ (883 lines → focused)
+│   ├── 📄 mod.rs
+│   ├── 📁 tmdb/ (client, search)
+│   └── 📄 types.rs
+├── 📁 core/ (1,653 lines → orchestration)
+│   ├── 📄 mod.rs
+│   ├── 📄 scanner.rs (file discovery only)
+│   ├── 📄 processor.rs (processing orchestration)
+│   └── 📄 organizer.rs (file organization only)
+├── 📁 media/ (363 lines → focused)
+│   ├── 📄 mod.rs
+│   ├── 📄 extractor.rs
+│   └── 📄 types.rs
+└── 📁 database/ (1,241 lines → keep as-is)
+    ├── 📄 mod.rs
+    ├── 📄 schema.rs
+    ├── 📄 connection.rs
+    ├── 📄 cache.rs
+    └── 📄 movies.rs
+```
+
+### **Refactoring Phases**
+1. **Phase 1A**: CLI Refactoring - Extract command handlers to separate modules
+2. **Phase 1B**: Parser Unification - Merge movie_parser and filename_parser
+3. **Phase 1C**: External API Restructuring - Split tmdb_client into focused modules
+4. **Phase 1D**: Core Logic Separation - Refactor scanner and organizer
+5. **Phase 2**: Testing & Validation - Update tests and validate functionality
+
+### **Benefits of Refactoring**
+- **Improved maintainability**: Smaller, focused modules
+- **Better organization**: Clear separation of concerns
+- **Enhanced testability**: Each module can be tested independently
+- **Easier extension**: Clear extension points for new features
+- **Reduced complexity**: Easier to understand and navigate
+
+For detailed information about the refactoring strategy, see [Holistic Refactoring Strategy](./holistic-refactoring-strategy.md) and [Module Structure Documentation](./module-structure.md).
 
 ## Implementation Status
 
