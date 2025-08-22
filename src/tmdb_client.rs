@@ -1,6 +1,6 @@
 //! TMDB API client for movie data
 
-use crate::types::{MovieInfo, TmdbMovie};
+use crate::types::{MovieInfo, TmdbCollection, TmdbMovie};
 use anyhow::{Context, Result};
 use fuzzy_matcher::FuzzyMatcher;
 use fuzzy_matcher::skim::SkimMatcherV2;
@@ -76,6 +76,7 @@ struct TmdbMovieResponse {
     vote_average: Option<f32>,
     vote_count: Option<u32>,
     popularity: Option<f32>,
+    belongs_to_collection: Option<TmdbCollection>,
 }
 
 impl TmdbClient {
@@ -234,9 +235,35 @@ impl TmdbClient {
             vote_average: movie_response.vote_average,
             vote_count: movie_response.vote_count,
             popularity: movie_response.popularity,
+            belongs_to_collection: movie_response.belongs_to_collection,
         };
 
         Ok(movie)
+    }
+
+    /// Get collection details by TMDB collection ID
+    pub async fn get_collection(&self, collection_id: u32) -> Result<TmdbCollection> {
+        let url = format!("{}/collection/{}", self.base_url, collection_id);
+        let query_params = vec![("api_key", self.api_key.as_str()), ("language", "en-US")];
+
+        let response = self
+            .client
+            .get(&url)
+            .query(&query_params)
+            .send()
+            .await
+            .context("Failed to send TMDB collection request")?;
+
+        if !response.status().is_success() {
+            anyhow::bail!("TMDB API request failed with status: {}", response.status());
+        }
+
+        let collection: TmdbCollection = response
+            .json()
+            .await
+            .context("Failed to parse TMDB collection response")?;
+
+        Ok(collection)
     }
 
     /// Enhanced search with multiple fallback strategies and config parameters
@@ -599,14 +626,21 @@ impl TmdbClient {
             }
         });
 
+        // Check if movie belongs to a collection
+        let is_collection = tmdb_movie.belongs_to_collection.is_some();
+        let collection_name = tmdb_movie
+            .belongs_to_collection
+            .as_ref()
+            .map(|c| c.name.clone());
+
         MovieInfo {
             title: tmdb_movie.title.clone(),
             original_title: tmdb_movie.original_title.clone(),
             original_language: tmdb_movie.original_language.clone(),
             year,
             part_number: None,
-            is_collection: false,
-            collection_name: None,
+            is_collection,
+            collection_name,
             quality: None,
             source: None,
             language: None,
@@ -710,6 +744,7 @@ mod tests {
             vote_average: None,
             vote_count: None,
             popularity: None,
+            belongs_to_collection: None,
         };
 
         let movie_info = client.tmdb_to_movie_info(&tmdb_movie);
@@ -732,6 +767,7 @@ mod tests {
             vote_average: None,
             vote_count: None,
             popularity: None,
+            belongs_to_collection: None,
         };
 
         let movie_info = client.tmdb_to_movie_info(&tmdb_movie);
@@ -754,6 +790,7 @@ mod tests {
             vote_average: None,
             vote_count: None,
             popularity: None,
+            belongs_to_collection: None,
         };
 
         let movie_info = client.tmdb_to_movie_info(&tmdb_movie);
@@ -764,6 +801,40 @@ mod tests {
         );
         assert_eq!(movie_info.original_language, Some("en".to_string()));
         assert_eq!(movie_info.year, Some(2023));
+    }
+
+    #[test]
+    fn test_tmdb_to_movie_info_with_collection() {
+        let client = TmdbClient::new("test_key".to_string());
+        let collection = TmdbCollection {
+            id: 123,
+            name: "Test Collection".to_string(),
+            poster_path: Some("/test_poster.jpg".to_string()),
+            backdrop_path: Some("/test_backdrop.jpg".to_string()),
+        };
+        let tmdb_movie = TmdbMovie {
+            id: 1,
+            title: "Test Movie".to_string(),
+            original_title: None,
+            original_language: None,
+            release_date: Some("2023-01-01".to_string()),
+            overview: None,
+            poster_path: None,
+            backdrop_path: None,
+            vote_average: None,
+            vote_count: None,
+            popularity: None,
+            belongs_to_collection: Some(collection),
+        };
+
+        let movie_info = client.tmdb_to_movie_info(&tmdb_movie);
+        assert_eq!(movie_info.title, "Test Movie");
+        assert_eq!(movie_info.year, Some(2023));
+        assert!(movie_info.is_collection);
+        assert_eq!(
+            movie_info.collection_name,
+            Some("Test Collection".to_string())
+        );
     }
 
     #[tokio::test]
