@@ -565,6 +565,11 @@ impl AppConfig {
         self.organization.content_filtering.language_codes.clone()
     }
 
+    /// Get release groups for filtering
+    pub fn get_release_groups(&self) -> Vec<String> {
+        self.organization.technical_terms.release_groups.clone()
+    }
+
     /// Get Japanese technical terms to filter out
     pub fn get_technical_japanese_terms(&self) -> Vec<String> {
         self.organization

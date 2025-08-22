@@ -394,6 +394,8 @@ impl FilenameParser {
         }
 
         // Look for known release group patterns
+        // TODO: This array is duplicated with config/default.toml release_groups
+        // Should be removed in favor of config values in future iterations
         let known_groups = [
             "DON",
             "D-Z0N3",
@@ -697,6 +699,8 @@ impl FilenameParser {
         }
 
         // Must not be purely technical terms
+        // TODO: This array is duplicated with config/default.toml technical_japanese_terms
+        // Should be removed in favor of config values in future iterations
         let technical_chinese = [
             "国日双语",
             "双语",
@@ -714,6 +718,8 @@ impl FilenameParser {
         }
 
         // Use hardcoded known titles
+        // TODO: This array is duplicated with config/default.toml known_titles
+        // Should be removed in favor of config values in future iterations
         let known_titles = ["灌篮高手", "灌篮", "Slam", "Dunk"];
         if known_titles.iter().any(|title| token.contains(title)) {
             return true;
@@ -742,6 +748,8 @@ impl FilenameParser {
         }
 
         // Must not be a common technical term
+        // TODO: This array is duplicated with config/default.toml video_audio_terms
+        // Should be removed in favor of config values in future iterations
         let technical_words = [
             "WEB", "DL", "REMUX", "BluRay", "HDTV", "DVDRip", "BRRip", "HDRip", "WEBRip", "ATVP",
             "Netflix", "Amazon", "iT", "UHD", "HDR", "4K", "HD", "SD", "iPad", "HDH", "H",
@@ -828,6 +836,8 @@ impl FilenameParser {
         }
 
         // Use hardcoded language codes for now (could be passed as parameter if needed)
+        // TODO: This array is duplicated with config/default.toml language_codes
+        // Should be removed in favor of config values in future iterations
         let language_codes = [
             "JPN".to_string(),
             "ENG".to_string(),
@@ -1063,6 +1073,8 @@ impl FilenameParser {
         }
 
         // Check for known release group names
+        // TODO: This array is duplicated with config/default.toml release_groups
+        // Should be removed in favor of config values in future iterations
         let known_groups = [
             "DON",
             "D-Z0N3",
@@ -1152,6 +1164,8 @@ impl FilenameParser {
         }
 
         // Check for partial release group matches (for cases like "D" and "Z0N3" from "D-Z0N3")
+        // TODO: This array contains terms that should be in config/default.toml release_groups
+        // Should be removed in favor of config values in future iterations
         let partial_groups = ["D", "Z0N3", "DON", "Silence"];
         if partial_groups.contains(&token) {
             return true;
