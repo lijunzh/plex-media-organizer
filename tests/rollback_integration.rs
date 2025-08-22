@@ -29,7 +29,11 @@ async fn test_rollback_integration() -> Result<()> {
 
     // Create movie parser without TMDB (to avoid API dependency in tests)
     let movie_parser = MovieParser::new(None);
-    let scanner = Scanner::new(movie_parser);
+    let mut scanner = Scanner::new(movie_parser);
+    
+    // Lower confidence threshold for tests and allow unmatched movies
+    scanner.config.organization.matching.min_confidence_threshold = 0.1;
+    scanner.config.organization.matching.skip_unmatched_movies = false;
 
     // Step 1: Scan the source directory
     let scan_result = scanner.scan_directory(&source_dir).await?;
@@ -175,7 +179,11 @@ async fn test_rollback_dry_run_operation() -> Result<()> {
 
     // Create movie parser and scan
     let movie_parser = MovieParser::new(None);
-    let scanner = Scanner::new(movie_parser);
+    let mut scanner = Scanner::new(movie_parser);
+    
+    // Lower confidence threshold for tests and allow unmatched movies
+    scanner.config.organization.matching.min_confidence_threshold = 0.1;
+    scanner.config.organization.matching.skip_unmatched_movies = false;
     let scan_result = scanner.scan_directory(&source_dir).await?;
 
     // Organize with dry-run
