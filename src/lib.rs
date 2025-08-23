@@ -214,7 +214,6 @@ pub mod movie_parser;
 pub mod organizer;
 pub mod parsers;
 pub mod scanner;
-pub mod tmdb_client;
 pub mod types;
 
 pub use cli::*;

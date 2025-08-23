@@ -134,10 +134,10 @@ This document outlines an iterative, incremental implementation plan for the Ple
 - [ ] Update all parser-related imports
 - [ ] Remove artificial separation between parsers
 
-#### **Phase 1C: External API Restructuring** ⏸️ **PLANNED**
-- [ ] Split `tmdb_client.rs` into focused modules
-- [ ] Create external API abstraction layer
-- [ ] Update TMDB-related imports
+#### **Phase 1C: External API Restructuring** ✅ **COMPLETED**
+- [x] Split `tmdb_client.rs` into focused modules
+- [x] Create external API abstraction layer
+- [x] Update TMDB-related imports
 - [ ] Improve separation of API client and search logic
 
 #### **Phase 1D: Core Logic Separation** ⏸️ **PLANNED**

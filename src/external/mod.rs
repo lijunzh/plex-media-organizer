@@ -2,4 +2,4 @@
 
 pub mod tmdb;
 
-pub use tmdb::TmdbClient;
+pub use tmdb::UnifiedTmdbClient;
