@@ -1,94 +1,267 @@
 # Plex Media Organizer
 
-An intelligent media file organizer that follows Plex naming conventions and uses TMDB for accurate movie metadata.
+A powerful, intelligent media file organizer that follows Plex naming conventions. Built in Rust for performance and reliability.
+
+## 🎬 Features
+
+### Core Functionality
+- **Intelligent Parsing**: Advanced filename parsing with confidence scoring
+- **Plex Compatibility**: Follows Plex naming conventions for optimal media server integration
+- **Multi-language Support**: Handles English, Chinese, Japanese, Arabic, and other languages
+- **TMDB Integration**: Enhanced metadata using The Movie Database API
+- **Database Backed**: Persistent operation history with rollback capabilities
+
+### CLI Commands
+- **`setup`** - Interactive configuration setup
+- **`config`** - View and modify configuration
+- **`scan`** - Analyze media directories
+- **`test`** - Test parsing functionality
+- **`organize`** - Organize media files
+- **`rollback`** - Revert previous operations
+- **`cleanup`** - Database maintenance
 
 ## 🚀 Quick Start
 
-### 1. Setup
+### Installation
+
 ```bash
-# Run interactive setup
+# Clone the repository
+git clone https://github.com/lijunzh/plex-media-organizer.git
+cd plex-media-organizer
+
+# Build the project
+cargo build --release
+
+# Install (optional)
+cargo install --path .
+```
+
+### First Time Setup
+
+```bash
+# Run the interactive setup
 plex-media-organizer setup
 
-# This will prompt for your TMDB API key
-# Get one at: https://www.themoviedb.org/settings/api
+# This will guide you through:
+# - Database configuration
+# - TMDB API key (optional)
+# - Default output directory
+# - Confidence thresholds
 ```
 
-### 2. Organize Movies
-```bash
-# Preview organization (recommended first)
-plex-media-organizer organize /path/to/movies --preview --verbose
+### Basic Usage
 
-# Apply organization
-plex-media-organizer organize /path/to/movies --backup /path/to/backup
+```bash
+# Scan a directory to see what's there
+plex-media-organizer scan /path/to/movies
+
+# Test parsing without making changes
+plex-media-organizer test /path/to/movies
+
+# Organize files (preview first!)
+plex-media-organizer organize /path/to/movies --preview
+
+# Actually organize the files
+plex-media-organizer organize /path/to/movies
 ```
 
-### 3. Test Parsing
-```bash
-# Test a single file
-plex-media-organizer test /path/to/movie.mkv --verbose
+## 📋 Command Reference
 
-# Test entire directory
-plex-media-organizer test /path/to/movies --organize --preview
+### Setup Command
+Configure the application for first use.
+```bash
+plex-media-organizer setup [OPTIONS]
 ```
 
-## ✨ Key Features
-
-- **TMDB Integration**: Uses The Movie Database for accurate movie information
-- **Plex-Compatible Naming**: Follows Plex naming conventions for optimal indexing
-- **Multilingual Support**: Handles Chinese, Japanese, and English titles
-- **Conservative Approach**: Prioritizes accuracy over completeness
-- **Preview Mode**: Dry-run mode to preview changes before applying
-- **Rollback Support**: Easy rollback of organization operations
-- **Network Drive Optimization**: Optimized for SMB/NFS network drives
-
-## 📚 Documentation
-
-### For Users
-- [User Guide](docs/user-guide.md) - Comprehensive usage tutorial
-- [Quick Start](docs/quick-start.md) - Get started quickly
-- [Configuration](docs/configuration.md) - All configuration options
-- [Troubleshooting](docs/troubleshooting.md) - Common issues and solutions
-- [Examples](docs/examples/) - Real-world usage examples
-
-### For Developers
-- [Development Guide](docs/development/README.md) - Complete developer documentation
-- [Architecture](docs/architecture/) - System design and architecture
-- [Roadmap](docs/architecture/roadmap.md) - Development timeline and planning
-- [Git Commit Practices](docs/development/git-commit-practices.md) - Best practices for contributors
-
-## 🛠️ Installation
-
-### From Source
+### Scan Command
+Analyze a directory for media files.
 ```bash
-git clone https://github.com/your-repo/plex-media-organizer.git
-cd plex-media-organizer
+plex-media-organizer scan <DIRECTORY> [OPTIONS]
+```
+
+### Test Command
+Test parsing functionality without moving files.
+```bash
+plex-media-organizer test <DIRECTORY> [OPTIONS]
+```
+
+### Organize Command
+Organize media files according to Plex conventions.
+```bash
+plex-media-organizer organize <DIRECTORY> [OPTIONS]
+```
+
+### Rollback Command
+Revert a previous organization operation.
+```bash
+plex-media-organizer rollback <OPERATION_ID> [OPTIONS]
+```
+
+### Cleanup Command
+Maintain database health and clean up old operations.
+```bash
+plex-media-organizer cleanup [OPTIONS]
+```
+
+For detailed command documentation, see [CLI Commands Reference](docs/user-guide/cli-commands.md).
+
+## 🎯 Key Features
+
+### Intelligent Parsing
+- **Pattern Recognition**: Detects movies, series, anime, and other media types
+- **Quality Detection**: Identifies resolution, source, and codec information
+- **Language Support**: Handles multi-language titles and metadata
+- **Confidence Scoring**: Provides confidence levels for parsing accuracy
+
+### Plex Integration
+- **Naming Conventions**: Follows Plex's recommended naming structure
+- **Flat Organization**: Optimized for Plex's flat directory structure
+- **Metadata Support**: Extracts and preserves metadata for Plex indexing
+
+### Database Features
+- **Operation History**: Tracks all organization operations
+- **Rollback Support**: Revert any previous operation safely
+- **Caching**: Intelligent caching for improved performance
+- **Maintenance**: Built-in cleanup and optimization tools
+
+### TMDB Integration
+- **Enhanced Metadata**: Uses TMDB API for accurate movie information
+- **Confidence Boosting**: Improves parsing confidence with external data
+- **Fallback Support**: Works without API key for basic functionality
+
+## 📁 Supported File Types
+
+- **Movies**: `.mkv`, `.mp4`, `.avi`, `.mov`, `.wmv`
+- **TV Shows**: `.mkv`, `.mp4`, `.avi`, `.mov`
+- **Documentaries**: `.mkv`, `.mp4`, `.avi`
+- **Anime**: `.mkv`, `.mp4`, `.avi`
+
+## 🌍 Language Support
+
+- **English**: Primary language with full support
+- **Chinese**: Simplified and Traditional Chinese
+- **Japanese**: Hiragana, Katakana, and Kanji
+- **Arabic**: Arabic script support
+- **Russian**: Cyrillic script support
+- **Other Languages**: Latin-based scripts
+
+## 🔧 Configuration
+
+### Configuration File Location
+- **macOS**: `~/Library/Application Support/plex-media-organizer/config.toml`
+- **Linux**: `~/.config/plex-media-organizer/config.toml`
+- **Windows**: `%APPDATA%\plex-media-organizer\config.toml`
+
+### Example Configuration
+```toml
+[database]
+path = "/path/to/database.db"
+
+[apis]
+tmdb_api_key = "your-tmdb-api-key"
+
+[organization]
+default_output_directory = "/path/to/organized/media"
+confidence_threshold = 0.7
+network_mode = false
+max_parallel_operations = 16
+batch_size = 100
+```
+
+## 🛠️ Development
+
+### Prerequisites
+- Rust 1.70+ (stable)
+- Cargo (comes with Rust)
+
+### Building
+```bash
+# Development build
+cargo build
+
+# Release build
 cargo build --release
+
+# Run tests
+cargo test
+
+# Run with specific features
+cargo run --features tmdb
 ```
 
-### Requirements
-- Rust 1.70+
-- TMDB API key (free at https://www.themoviedb.org/settings/api)
+### Project Structure
+```
+src/
+├── cli/           # Command-line interface
+├── config/        # Configuration management
+├── database/      # Database operations
+├── external/      # External API integrations
+├── parsers/       # Media parsing logic
+├── scanner/       # File scanning
+└── types/         # Common types and structures
+```
+
+## 📊 Performance
+
+- **Fast Parsing**: Optimized algorithms for quick filename analysis
+- **Parallel Processing**: Configurable parallel operations for large directories
+- **Intelligent Caching**: Database-backed caching for repeated operations
+- **Memory Efficient**: Minimal memory footprint for large media libraries
+
+## 🔒 Safety Features
+
+- **Preview Mode**: Test operations before making changes
+- **Rollback Support**: Revert any operation with full history
+- **Error Handling**: Graceful handling of file system errors
+- **Validation**: Comprehensive input validation and error checking
 
 ## 🤝 Contributing
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests
-5. Submit a pull request
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
 
-See [Development Guide](docs/development/README.md) for detailed contribution guidelines.
+### Development Setup
+```bash
+# Fork and clone the repository
+git clone https://github.com/your-username/plex-media-organizer.git
+cd plex-media-organizer
 
-## 📄 License
+# Install development dependencies
+cargo install cargo-watch  # For development
+cargo install cargo-tarpaulin  # For coverage
 
-MIT License - see LICENSE file for details.
+# Run tests
+cargo test
 
-## 🆘 Support
+# Run with watch mode
+cargo watch -x test
+```
 
-- **Issues**: Report bugs and feature requests on GitHub
-- **Documentation**: Check the docs/ directory for detailed information
-- **Trade-offs**: Understand the conservative approach in [User Guide](docs/user-guide.md)
+## 📝 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- **Plex Media Server**: For naming conventions and inspiration
+- **The Movie Database (TMDB)**: For movie metadata API
+- **Rust Community**: For excellent tooling and ecosystem
+
+## 📞 Support
+
+- **Issues**: [GitHub Issues](https://github.com/lijunzh/plex-media-organizer/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/lijunzh/plex-media-organizer/discussions)
+- **Documentation**: [User Guide](docs/user-guide/)
+
+## 🚀 Roadmap
+
+- [ ] TV Show support with episode detection
+- [ ] Music file organization
+- [ ] Web interface
+- [ ] Scheduled organization
+- [ ] Cloud storage integration
+- [ ] Advanced metadata extraction
+- [ ] Plugin system for custom parsers
 
 ---
 
-**Remember**: It's always better to skip a movie than to organize it incorrectly!
+**Made with ❤️ in Rust**
