@@ -171,10 +171,10 @@ jobs:
       - name: Verify Binary
         run: |
           echo "📦 Binary details for Windows:"
-          ls target/release/
+          Get-ChildItem target/release/
           echo ""
           echo "📊 Binary size:"
-          ls -lh target/release/plex-media-organizer.exe
+          Get-ChildItem target/release/plex-media-organizer.exe | Select-Object Name, Length, @{Name="Size(MB)";Expression={[math]::Round($_.Length/1MB,2)}}
           echo ""
           echo "✅ Binary verification passed for Windows"
       
