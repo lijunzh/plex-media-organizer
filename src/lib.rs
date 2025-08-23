@@ -1,5 +1,9 @@
 //! # Plex Media Organizer
 //!
+//! Note: During migration phase, we allow deprecated code for gradual transition
+#![allow(deprecated)]
+
+//!
 //! An intelligent media file organization library built in Rust that automatically parses and organizes
 //! your media collection according to Plex naming conventions.
 //!
@@ -14,14 +18,14 @@
 //! ## Quick Start
 //!
 //! ```rust,no_run
-//! use plex_media_organizer::{MovieParser, Scanner, Organizer, external::tmdb::UnifiedTmdbClient};
+//! use plex_media_organizer::{parsers::UnifiedMovieParser, Scanner, Organizer, external::tmdb::UnifiedTmdbClient};
 //! use std::path::PathBuf;
 //!
 //! #[tokio::main]
 //! async fn main() -> Result<(), Box<dyn std::error::Error>> {
 //!     // Create a movie parser with TMDB integration
 //!     let tmdb_client = UnifiedTmdbClient::new("your_api_key".to_string())?;
-//!     let parser = MovieParser::new(Some(tmdb_client));
+//!     let parser = UnifiedMovieParser::new();
 //!
 //!     // Scan a directory for media files
 //!     let scanner = Scanner::new(parser);
@@ -46,12 +50,12 @@
 //! The `MovieParser` handles intelligent parsing of movie filenames:
 //!
 //! ```rust,no_run
-//! use plex_media_organizer::MovieParser;
+//! use plex_media_organizer::parsers::UnifiedMovieParser;
 //! use std::path::PathBuf;
 //!
 //! #[tokio::main]
 //! async fn main() -> Result<(), Box<dyn std::error::Error>> {
-//!     let parser = MovieParser::new(None);
+//!     let parser = UnifiedMovieParser::new();
 //!     let result = parser.parse_movie(&PathBuf::from("The.Matrix.1999.1080p.BluRay.mkv")).await?;
 //!
 //!     println!("Title: {}", result.parsed_metadata.title.unwrap());
@@ -65,12 +69,12 @@
 //! The `Scanner` discovers and processes media files in directories:
 //!
 //! ```rust,no_run
-//! use plex_media_organizer::{Scanner, MovieParser};
+//! use plex_media_organizer::{Scanner, parsers::UnifiedMovieParser};
 //! use std::path::PathBuf;
 //!
 //! #[tokio::main]
 //! async fn main() -> Result<(), Box<dyn std::error::Error>> {
-//!     let parser = MovieParser::new(None);
+//!     let parser = UnifiedMovieParser::new();
 //!     let scanner = Scanner::new(parser);
 //!     let scan_result = scanner.scan_directory(&PathBuf::from("/movies")).await?;
 //!
@@ -85,13 +89,13 @@
 //! The `Organizer` renames and organizes files according to Plex conventions:
 //!
 //! ```rust,no_run
-//! use plex_media_organizer::{Organizer, Scanner, MovieParser};
+//! use plex_media_organizer::{Organizer, Scanner, parsers::UnifiedMovieParser};
 //! use std::path::PathBuf;
 //!
 //! #[tokio::main]
 //! async fn main() -> Result<(), Box<dyn std::error::Error>> {
 //!     // First scan the directory
-//!     let parser = MovieParser::new(None);
+//!     let parser = UnifiedMovieParser::new();
 //!     let scanner = Scanner::new(parser);
 //!     let scan_result = scanner.scan_directory(&PathBuf::from("/movies")).await?;
 //!
@@ -156,12 +160,12 @@
 //! The library uses `anyhow` for comprehensive error handling:
 //!
 //! ```rust,no_run
-//! use plex_media_organizer::{Result, MovieParser};
+//! use plex_media_organizer::{Result, parsers::UnifiedMovieParser};
 //! use std::path::PathBuf;
 //!
 //! #[tokio::main]
 //! async fn main() -> Result<()> {
-//!     let parser = MovieParser::new(None);
+//!     let parser = UnifiedMovieParser::new();
 //!     let files = vec![PathBuf::from("movie1.mkv"), PathBuf::from("movie2.mkv")];
 //!     
 //!     for file in &files {
@@ -208,9 +212,7 @@ pub mod cli;
 pub mod config;
 pub mod database;
 pub mod external;
-pub mod filename_parser;
 pub mod metadata_extractor;
-pub mod movie_parser;
 pub mod organizer;
 pub mod parsers;
 pub mod scanner;

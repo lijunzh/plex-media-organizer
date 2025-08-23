@@ -1,5 +1,5 @@
-use plex_media_organizer::movie_parser::MovieParser;
 use plex_media_organizer::organizer::Organizer;
+use plex_media_organizer::parsers::UnifiedMovieParser;
 use plex_media_organizer::scanner::Scanner;
 use plex_media_organizer::types::MovieInfo;
 use std::fs;
@@ -7,13 +7,13 @@ use std::path::Path;
 
 /// Test utilities for dynamic testing against real-world data
 pub struct DynamicTestRunner {
-    parser: MovieParser,
+    parser: UnifiedMovieParser,
 }
 
 impl DynamicTestRunner {
     pub fn new() -> Self {
         Self {
-            parser: MovieParser::new(None),
+            parser: UnifiedMovieParser::new(),
         }
     }
 
@@ -112,8 +112,29 @@ impl DynamicTestRunner {
         let mut results = DynamicTestResults::new();
 
         for filename in filenames {
-            match self.parser.parse_filename(filename) {
-                Ok(movie_info) => {
+            match self.parser.parse(filename) {
+                Ok(parser_result) => {
+                    // Convert ParserResult<FilenameComponents> to MovieInfo
+                    let components = parser_result.data;
+                    let movie_info = plex_media_organizer::types::MovieInfo {
+                        title: components.title,
+                        original_title: components.original_title,
+                        original_language: components.language.clone(),
+                        year: components.year,
+                        part_number: None,    // TODO: Extract from series detection
+                        is_collection: false, // TODO: Extract from series detection
+                        collection_name: None, // TODO: Extract from series detection
+                        is_series: false,     // TODO: Extract from series detection
+                        series_name: None,    // TODO: Extract from series detection
+                        series_number: None,  // TODO: Extract from series detection
+                        is_anime: false,      // TODO: Extract from anime detection
+                        anime_movie_number: None, // TODO: Extract from anime detection
+                        has_japanese_title: false, // TODO: Extract from language detection
+                        has_chinese_title: false, // TODO: Extract from language detection
+                        quality: components.quality,
+                        source: components.source,
+                        language: components.language,
+                    };
                     results.add_success(filename, movie_info);
                 }
                 Err(e) => {

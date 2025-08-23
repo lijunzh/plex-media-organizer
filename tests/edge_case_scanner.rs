@@ -1,4 +1,4 @@
-use plex_media_organizer::{MovieInfo, MovieParser};
+use plex_media_organizer::{MovieInfo, parsers::UnifiedMovieParser};
 use std::collections::HashMap;
 use std::fs;
 use std::path::Path;
@@ -13,7 +13,7 @@ fn test_scan_entire_movie_directory() {
         return;
     }
 
-    let parser = MovieParser::new(None);
+    let parser = UnifiedMovieParser::new();
     let mut results = Vec::new();
     let mut error_cases = Vec::new();
     let mut edge_cases = Vec::new();
@@ -98,7 +98,7 @@ fn test_scan_entire_movie_directory() {
 
 fn scan_directory(
     dir: &Path,
-    parser: &MovieParser,
+    parser: &UnifiedMovieParser,
     results: &mut Vec<Result<MovieInfo, String>>,
     error_cases: &mut Vec<(String, String)>,
     edge_cases: &mut Vec<(String, String)>,
@@ -115,8 +115,30 @@ fn scan_directory(
                         let filename = path.file_name().unwrap().to_string_lossy().to_string();
 
                         // Parse the file
-                        match parser.parse_filename(&filename) {
-                            Ok(result) => {
+                        match parser.parse(&filename) {
+                            Ok(parser_result) => {
+                                // Convert ParserResult<FilenameComponents> to MovieInfo
+                                let components = parser_result.data;
+                                let result = MovieInfo {
+                                    title: components.title,
+                                    original_title: components.original_title,
+                                    original_language: components.language.clone(),
+                                    year: components.year,
+                                    part_number: None, // TODO: Extract from series detection
+                                    is_collection: false, // TODO: Extract from series detection
+                                    collection_name: None, // TODO: Extract from series detection
+                                    is_series: false,  // TODO: Extract from series detection
+                                    series_name: None, // TODO: Extract from series detection
+                                    series_number: None, // TODO: Extract from series detection
+                                    is_anime: false,   // TODO: Extract from anime detection
+                                    anime_movie_number: None, // TODO: Extract from anime detection
+                                    has_japanese_title: false, // TODO: Extract from language detection
+                                    has_chinese_title: false, // TODO: Extract from language detection
+                                    quality: components.quality,
+                                    source: components.source,
+                                    language: components.language,
+                                };
+
                                 results.push(Ok(result.clone()));
 
                                 // Check for potential edge cases

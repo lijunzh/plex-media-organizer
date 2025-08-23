@@ -11,12 +11,14 @@ Welcome to the Plex Media Organizer documentation. This guide helps you find the
 - **[Troubleshooting](user/troubleshooting.md)** - Common issues and solutions
 - **[Examples](user/examples/)** - Real-world usage examples
 
+### **For Users** (`user-guide/`)
+- **[CLI Commands Reference](user-guide/cli-commands.md)** - Complete CLI command documentation
+
 ### **For Developers** (`developer/`)
 - **[Git Practices](developer/git-practices.md)** - Git commit best practices
 - **[Documentation Standards](developer/documentation-standards.md)** - Documentation guidelines
 - **[Architecture](developer/architecture/)** - Technical architecture and design
   - **[Current Architecture](developer/architecture/architecture.md)** - Existing system design
-  - **[Refactoring Strategy](developer/architecture/holistic-refactoring-strategy.md)** - Holistic refactoring plan
   - **[Module Structure](developer/architecture/module-structure.md)** - Target architecture
   - **[Roadmap](developer/architecture/roadmap.md)** - Development phases and planning
   - **[Decisions](developer/architecture/decisions/)** - Architecture decision records
@@ -30,28 +32,53 @@ Welcome to the Plex Media Organizer documentation. This guide helps you find the
 - **[Current Issues](analysis/current-issues.md)** - Current issues analysis
 - **[Status](analysis/status.md)** - Project status and metrics
 
-## 🔄 **Current Status: Architecture Refactoring**
+## 🎯 **Current Status: Complete CLI Workflow**
 
-The Plex Media Organizer is currently undergoing a comprehensive architecture refactoring to improve modularity and maintainability. This refactoring:
+The Plex Media Organizer now provides a **complete, production-ready CLI application** with comprehensive media organization capabilities:
 
-- **Transforms monolithic files** into focused, modular components
-- **Improves code organization** with clear separation of concerns
-- **Enhances maintainability** and developer productivity
-- **Maintains backward compatibility** - all existing functionality continues to work
+### **✅ Completed Features**
+- **7 Core CLI Commands**: Complete workflow from setup to cleanup
+- **Database-Backed Operations**: SQLite database with rollback capabilities
+- **TMDB Integration**: Enhanced metadata using The Movie Database API
+- **Multi-language Support**: English, Chinese, Japanese, Arabic, Russian
+- **Safety Features**: Preview mode, rollback, comprehensive error handling
+- **Performance Optimization**: Caching, parallel processing, network optimization
 
-### **What This Means for You**
-- **Users**: No changes to functionality or usage - everything works as before
-- **Contributors**: New modular structure makes development easier and more organized
-- **Documentation**: Updated to reflect both current and target architecture
+### **🎬 CLI Commands**
+1. **`setup`** - Interactive configuration setup
+2. **`config`** - View and modify configuration
+3. **`scan`** - Analyze media directories
+4. **`test`** - Test parsing functionality
+5. **`organize`** - Organize media files
+6. **`rollback`** - Revert previous operations
+7. **`cleanup`** - Database maintenance
 
-For detailed information about the refactoring, see:
-- **[Refactoring Strategy](developer/architecture/holistic-refactoring-strategy.md)** - Comprehensive refactoring plan
-- **[Module Structure](developer/architecture/module-structure.md)** - Target architecture documentation
-- **[Roadmap](developer/architecture/roadmap.md)** - Current progress and phases
+### **📊 Technical Achievements**
+- **96+ Unit Tests**: Comprehensive test coverage
+- **Database Integration**: SQLite with operation history
+- **Modular Architecture**: Clean separation of concerns
+- **Performance Optimized**: Fast parsing and organization
+- **Production Ready**: Conservative defaults and safety features
+
+## 🚀 **Next Steps**
+
+### **Immediate Priority: TV Show Support**
+- Episode detection and season organization
+- TVDB API integration
+- Extend existing CLI commands for TV shows
+- Mixed content handling (movies + TV shows)
+
+### **Future Iterations**
+- **Web Interface**: Browser-based management
+- **Advanced Features**: Scheduled operations, batch processing
+- **Music Support**: Music file organization and metadata
+- **Production Optimization**: Performance and monitoring
 
 ## 🎯 **Quick Navigation**
+
+### **New Users**
 1. Start with **[Getting Started](user/getting-started.md)**
-2. Read the **[User Guide](user/user-guide.md)** for comprehensive usage
+2. Read the **[CLI Commands Reference](user-guide/cli-commands.md)** for detailed usage
 3. Check **[Examples](user/examples/)** for real-world scenarios
 4. Use **[Troubleshooting](user/troubleshooting.md)** if you encounter issues
 
@@ -65,6 +92,28 @@ For detailed information about the refactoring, see:
 2. Review **[Architecture](developer/architecture/)** for technical understanding
 3. Check **[Documentation Standards](developer/documentation-standards.md)** for guidelines
 4. Review **[Planning](developer/planning/)** and **[Retrospectives](developer/retrospectives/)** for context
+
+## 📋 **Quick Start Example**
+
+```bash
+# 1. Setup (first time only)
+plex-media-organizer setup
+
+# 2. Scan directory
+plex-media-organizer scan /path/to/movies
+
+# 3. Test parsing
+plex-media-organizer test /path/to/movies --use-cache
+
+# 4. Preview organization
+plex-media-organizer organize /path/to/movies --preview
+
+# 5. Organize files
+plex-media-organizer organize /path/to/movies
+
+# 6. Cleanup old operations
+plex-media-organizer cleanup --keep-count 10
+```
 
 ---
 
