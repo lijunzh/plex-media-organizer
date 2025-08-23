@@ -1,7 +1,7 @@
 //! Integration test for rollback functionality
 
 use anyhow::Result;
-use plex_media_organizer::{MovieParser, Organizer, Scanner};
+use plex_media_organizer::{Organizer, Scanner, parsers::UnifiedMovieParser};
 use std::fs;
 use tempfile::TempDir;
 
@@ -28,7 +28,7 @@ async fn test_rollback_integration() -> Result<()> {
     }
 
     // Create movie parser without TMDB (to avoid API dependency in tests)
-    let movie_parser = MovieParser::new(None);
+    let movie_parser = UnifiedMovieParser::new();
     let mut scanner = Scanner::new(movie_parser);
 
     // For testing rollback functionality, we need files to be processed
@@ -185,7 +185,7 @@ async fn test_rollback_dry_run_operation() -> Result<()> {
     fs::write(&test_file, "test content")?;
 
     // Create movie parser and scan
-    let movie_parser = MovieParser::new(None);
+    let movie_parser = UnifiedMovieParser::new();
     let mut scanner = Scanner::new(movie_parser);
 
     // For testing rollback functionality, we need files to be processed

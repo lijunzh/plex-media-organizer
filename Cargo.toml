@@ -52,6 +52,7 @@ uuid = { version = "1.0", features = ["v4"] }
 
 # Fuzzy search for better TMDB matching
 fuzzy-matcher = "0.3"
+md5 = "0.8.0"
 
 [dev-dependencies]
 tempfile = "3.6"

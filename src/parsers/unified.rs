@@ -2,6 +2,7 @@
 
 use crate::config::AppConfig;
 use anyhow::Result;
+use chrono;
 
 use super::{
     extraction::TitleExtractor,
@@ -140,6 +141,100 @@ impl UnifiedMovieParser {
 
         // Create parser result
         let result = ParserResult::new(components, confidence, "unified".to_string());
+
+        Ok(result)
+    }
+
+    /// Parse a movie file and return a full ParsingResult (compatibility with MovieParser)
+    pub async fn parse_movie(
+        &self,
+        file_path: &std::path::Path,
+    ) -> Result<crate::types::ParsingResult> {
+        let filename = file_path
+            .file_name()
+            .and_then(|name| name.to_str())
+            .ok_or_else(|| anyhow::anyhow!("Invalid filename"))?;
+
+        // Parse the filename using the unified parser
+        let parser_result = self.parse(filename)?;
+        let components = parser_result.data;
+
+        // Convert to MovieInfo
+        let movie_info = crate::types::MovieInfo {
+            title: components.title,
+            original_title: components.original_title,
+            original_language: components.language.clone(),
+            year: components.year,
+            part_number: None,         // TODO: Extract from series detection
+            is_collection: false,      // TODO: Extract from series detection
+            collection_name: None,     // TODO: Extract from series detection
+            is_series: false,          // TODO: Extract from series detection
+            series_name: None,         // TODO: Extract from series detection
+            series_number: None,       // TODO: Extract from series detection
+            is_anime: false,           // TODO: Extract from anime detection
+            anime_movie_number: None,  // TODO: Extract from anime detection
+            has_japanese_title: false, // TODO: Extract from language detection
+            has_chinese_title: false,  // TODO: Extract from language detection
+            quality: components.quality,
+            source: components.source,
+            language: components.language,
+        };
+
+        // Create MediaFile
+        let metadata = std::fs::metadata(file_path)
+            .map_err(|e| anyhow::anyhow!("Failed to get file metadata: {}", e))?;
+
+        let file_name = file_path
+            .file_name()
+            .and_then(|name| name.to_str())
+            .unwrap_or("unknown")
+            .to_string();
+
+        let media_file = crate::types::MediaFile {
+            id: format!("movie_{}", uuid::Uuid::new_v4()),
+            file_path: file_path.to_path_buf(),
+            file_name,
+            file_size: metadata.len(),
+            media_type: crate::types::MediaType::Movie,
+            content_hash: format!("{:x}", md5::compute(filename.as_bytes())),
+            last_modified: chrono::DateTime::from(
+                metadata
+                    .modified()
+                    .unwrap_or_else(|_| std::time::SystemTime::now()),
+            ),
+            metadata: crate::types::MediaMetadata::default(), // Will be filled below
+        };
+
+        // Create MediaMetadata
+        let parsed_metadata = crate::types::MediaMetadata {
+            title: Some(movie_info.title.clone()),
+            original_title: movie_info.original_title.clone(),
+            year: movie_info.year,
+            language: movie_info
+                .language
+                .as_ref()
+                .map(|l| vec![l.clone()])
+                .unwrap_or_default(),
+            quality: movie_info.quality,
+            source: movie_info.source,
+            duration: None,
+            resolution: None,
+            codec: components.codec,
+            audio_tracks: Vec::new(),
+            subtitle_tracks: Vec::new(),
+        };
+
+        // Create ParsingResult
+        let result = crate::types::ParsingResult {
+            media_file,
+            parsed_metadata,
+            confidence_score: components.confidence,
+            parsing_strategy: crate::types::ParsingStrategy::FilenameOnly,
+            external_sources: Vec::new(),
+            user_corrections: Vec::new(),
+            created_at: chrono::Utc::now(),
+            updated_at: chrono::Utc::now(),
+        };
 
         Ok(result)
     }

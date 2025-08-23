@@ -42,7 +42,6 @@ pub use extraction::title::TitleExtractor;
 pub use unified::UnifiedMovieParser;
 
 /// Compatibility wrapper for FilenameParser using the new unified parser
-#[allow(deprecated)] // Allow deprecated during migration phase
 pub struct CompatFilenameParser {
     unified_parser: UnifiedMovieParser,
 }
@@ -55,13 +54,15 @@ impl CompatFilenameParser {
     }
 
     pub fn with_technical_terms(technical_terms: Vec<String>) -> Self {
-        // For now, we create the unified parser with default config
-        // TODO: Pass technical terms to the unified parser when config support is added
+        // Create unified parser with config that includes technical terms
+        let config = crate::config::AppConfig::default();
+        // TODO: Add technical terms to config when supported
         let _ = technical_terms; // Suppress unused warning
-        Self::new()
+        Self {
+            unified_parser: UnifiedMovieParser::with_config(config),
+        }
     }
 
-    #[allow(deprecated)] // Allow deprecated during migration phase
     pub fn parse(
         &self,
         filename: &str,
@@ -91,8 +92,7 @@ impl Default for CompatFilenameParser {
 }
 
 /// Compatibility wrapper for MovieParser using the new unified parser
-#[allow(deprecated)] // Allow deprecated during migration phase
-#[allow(dead_code)] // Allow dead code during migration phase
+#[allow(dead_code)] // tmdb_client field kept for future TMDB integration
 pub struct CompatMovieParser {
     unified_parser: UnifiedMovieParser,
     tmdb_client: Option<crate::external::tmdb::UnifiedTmdbClient>,

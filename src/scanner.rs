@@ -1,8 +1,7 @@
 //! Directory scanning and file discovery
 
 use crate::config::AppConfig;
-#[allow(deprecated)] // Allow deprecated during migration phase
-use crate::parsers::MovieParser;
+use crate::parsers::UnifiedMovieParser;
 use crate::types::{FailedFile, MediaFile, MediaType, ScanResult, ScanStatistics};
 use anyhow::Result;
 use chrono::Utc;
@@ -14,9 +13,8 @@ use walkdir::WalkDir;
 
 /// Media file scanner with network drive optimizations
 #[derive(Debug)]
-#[allow(deprecated)] // Allow deprecated during migration phase
 pub struct Scanner {
-    movie_parser: MovieParser,
+    movie_parser: UnifiedMovieParser,
     /// Application configuration
     pub config: AppConfig,
     /// Maximum number of concurrent parsing operations
@@ -29,7 +27,7 @@ pub struct Scanner {
 
 impl Scanner {
     /// Create a new scanner with default concurrency limit
-    pub fn new(movie_parser: MovieParser) -> Self {
+    pub fn new(movie_parser: UnifiedMovieParser) -> Self {
         let config = AppConfig::load().unwrap_or_default();
         Self {
             movie_parser,
@@ -41,7 +39,7 @@ impl Scanner {
     }
 
     /// Create a new scanner with custom concurrency limit
-    pub fn with_concurrency(movie_parser: MovieParser, concurrency_limit: usize) -> Self {
+    pub fn with_concurrency(movie_parser: UnifiedMovieParser, concurrency_limit: usize) -> Self {
         let config = AppConfig::load().unwrap_or_default();
         Self {
             movie_parser,
@@ -53,7 +51,7 @@ impl Scanner {
     }
 
     /// Create a scanner optimized for network drives
-    pub fn for_network_drive(movie_parser: MovieParser) -> Self {
+    pub fn for_network_drive(movie_parser: UnifiedMovieParser) -> Self {
         let config = AppConfig::load().unwrap_or_default();
         Self {
             movie_parser,
@@ -66,7 +64,7 @@ impl Scanner {
 
     /// Create a new scanner with custom concurrency limit and config (single load)
     pub fn with_concurrency_and_config(
-        movie_parser: MovieParser,
+        movie_parser: UnifiedMovieParser,
         concurrency_limit: usize,
         config: &AppConfig,
     ) -> Self {
@@ -80,7 +78,10 @@ impl Scanner {
     }
 
     /// Create a scanner optimized for network drives with config (single load)
-    pub fn for_network_drive_with_config(movie_parser: MovieParser, config: &AppConfig) -> Self {
+    pub fn for_network_drive_with_config(
+        movie_parser: UnifiedMovieParser,
+        config: &AppConfig,
+    ) -> Self {
         Self {
             movie_parser,
             config: config.clone(),
@@ -862,7 +863,7 @@ impl Scanner {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::parsers::MovieParser;
+    use crate::parsers::UnifiedMovieParser;
 
     #[test]
     fn test_network_drive_detection() {
@@ -893,7 +894,7 @@ mod tests {
 
     #[test]
     fn test_network_mode_settings() {
-        let movie_parser = MovieParser::new(None);
+        let movie_parser = UnifiedMovieParser::new();
         let scanner = Scanner::for_network_drive(movie_parser.clone());
 
         assert_eq!(scanner.concurrency_limit(), 4);
@@ -911,7 +912,7 @@ mod tests {
 
     #[test]
     fn test_media_extension_detection() {
-        let scanner = Scanner::new(MovieParser::new(None));
+        let scanner = Scanner::new(UnifiedMovieParser::new());
 
         assert!(scanner.is_media_extension(std::ffi::OsStr::new("mkv")));
         assert!(scanner.is_media_extension(std::ffi::OsStr::new("MP4")));
@@ -922,7 +923,7 @@ mod tests {
 
     #[test]
     fn test_extras_content_detection() {
-        let scanner = Scanner::new(MovieParser::new(None));
+        let scanner = Scanner::new(UnifiedMovieParser::new());
 
         // Directory-based detection (most reliable)
         assert!(scanner.is_extras_content(Path::new("/path/to/extras/BDMenu(JPGLBL).mkv")));
