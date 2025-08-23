@@ -3,6 +3,7 @@
 pub mod extraction;
 pub mod patterns;
 pub mod types;
+pub mod unified;
 
 // Re-export existing parsers for now (will be removed in Task 1.5)
 pub use crate::filename_parser::FilenameParser;
@@ -22,6 +23,9 @@ pub use patterns::series::SeriesDetector;
 // Re-export legacy title extraction methods for backward compatibility
 pub use extraction::title::TitleExtractor;
 
+// Re-export unified movie parser
+pub use unified::UnifiedMovieParser;
+
 // TODO: Gradually migrate to unified parser structure
-// Phase 1.4: Create unified movie parser
+// Phase 1.4: Create unified movie parser - COMPLETED
 // Phase 1.5: Remove old parser files
