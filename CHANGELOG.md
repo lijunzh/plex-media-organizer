@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.0] - 2025-08-23
+
 ### Added
 - Complete CLI workflow implementation with 7 core commands
 - Database-backed operation history with rollback capabilities
