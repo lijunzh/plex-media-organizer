@@ -181,7 +181,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **Linux**: [plex-media-organizer-v1.0.0-x86_64-unknown-linux-gnu.tar.gz](https://github.com/lijunzh/plex-media-organizer/releases/download/v1.0.0/plex-media-organizer-v1.0.0-x86_64-unknown-linux-gnu.tar.gz)
 - **Windows**: [plex-media-organizer-v1.0.0-x86_64-pc-windows-msvc.zip](https://github.com/lijunzh/plex-media-organizer/releases/download/v1.0.0/plex-media-organizer-v1.0.0-x86_64-pc-windows-msvc.zip)
 
-**Note**: Multi-platform binaries will be available starting from the next release (v1.1.0). The current v1.0.0 release includes a Linux binary only.
+**Note**: This release includes multi-platform binaries for Linux, macOS, and Windows.
 
 ### Build from Source
 ```bash

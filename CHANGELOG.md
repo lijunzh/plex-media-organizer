@@ -7,15 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [1.0.1] - 2025-08-23
+## [1.0.0] - 2025-08-23
 
 ### Added
 - **Multi-platform Build Support**: GitHub Actions now builds for Linux, macOS, and Windows
 - **Native Platform Builds**: Separate build jobs for each platform for better reliability
 - **Platform-specific Archives**: .tar.gz for Linux/macOS, .zip for Windows
 - **Updated Documentation**: Installation instructions for all platforms
-
-## [1.0.0] - 2025-08-23
+- **Complete CLI Workflow**: Setup, scan, test, organize, rollback, and cleanup commands
+- **TMDB Integration**: Enhanced movie metadata from The Movie Database
+- **Database-backed Operations**: Persistent storage for parsing results and operation history
+- **Intelligent Caching**: Performance optimization with database caching
+- **Safety Features**: Preview mode, rollback functionality, and operation history
+- **Non-English Title Support**: Comprehensive handling of Chinese, Japanese, Korean, Arabic, and Cyrillic scripts
+- **Plex-optimized Organization**: Flat directory structure for optimal Plex indexing
+- **Bilingual Title Format**: "Original Title - English Title" format for better Plex recognition
 
 ### Added
 - Complete CLI workflow implementation with 7 core commands
