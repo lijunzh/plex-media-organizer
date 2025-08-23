@@ -1,5 +1,6 @@
 //! CLI command handlers
 
+pub mod cleanup;
 pub mod config;
 pub mod organize;
 pub mod rollback;

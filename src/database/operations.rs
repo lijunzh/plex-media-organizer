@@ -216,6 +216,45 @@ impl OperationHistoryManager {
         Ok(operations_deleted)
     }
 
+    /// Delete old operations keeping only the most recent N operations
+    pub fn cleanup_old_operations_by_count(&self, keep_count: usize) -> Result<usize> {
+        // Get total number of operations
+        let total_operations: i64 =
+            self.conn
+                .query_row("SELECT COUNT(*) FROM operations", [], |row| row.get(0))?;
+
+        if total_operations <= keep_count as i64 {
+            return Ok(0); // No operations to delete
+        }
+
+        let _operations_to_delete = total_operations - keep_count as i64;
+
+        // Delete operation files first (due to foreign key constraint)
+        let _files_deleted = self.conn.execute(
+            "DELETE FROM operation_files WHERE operation_id IN (
+                SELECT operation_id FROM operations 
+                WHERE operation_id NOT IN (
+                    SELECT operation_id FROM operations 
+                    ORDER BY created_at DESC 
+                    LIMIT ?
+                )
+            )",
+            [keep_count as i64],
+        )?;
+
+        // Delete operations
+        let operations_deleted = self.conn.execute(
+            "DELETE FROM operations WHERE operation_id NOT IN (
+                SELECT operation_id FROM operations 
+                ORDER BY created_at DESC 
+                LIMIT ?
+            )",
+            [keep_count as i64],
+        )?;
+
+        Ok(operations_deleted)
+    }
+
     /// Get operation statistics
     pub fn get_operation_stats(&self) -> Result<OperationStats> {
         let total_operations: i64 =
