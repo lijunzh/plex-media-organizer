@@ -1,7 +1,7 @@
 //! Movie parsing and organization logic
 
 use crate::config::AppConfig;
-use crate::external::TmdbClient;
+use crate::external::tmdb::UnifiedTmdbClient;
 use crate::filename_parser::FilenameParser;
 use crate::types::{
     ExternalSource, MediaFile, MediaMetadata, MediaType, MovieInfo, ParsingResult, ParsingStrategy,
@@ -13,14 +13,14 @@ use std::path::Path;
 /// Movie parser that handles various filename patterns
 #[derive(Clone, Debug)]
 pub struct MovieParser {
-    tmdb_client: Option<TmdbClient>,
+    tmdb_client: Option<UnifiedTmdbClient>,
     filename_parser: FilenameParser, // Cache the filename parser
     config: AppConfig,               // Store the full config for passing to filename parser
 }
 
 impl MovieParser {
     /// Create a new movie parser with default configuration
-    pub fn new(tmdb_client: Option<TmdbClient>) -> Self {
+    pub fn new(tmdb_client: Option<UnifiedTmdbClient>) -> Self {
         // Load config once and extract parameters
         let config = AppConfig::load().unwrap_or_default();
         let technical_terms = config.get_all_technical_terms();
@@ -35,7 +35,7 @@ impl MovieParser {
 
     /// Create a movie parser with specific parameters (no config loading)
     pub fn with_parameters(
-        tmdb_client: Option<TmdbClient>,
+        tmdb_client: Option<UnifiedTmdbClient>,
         technical_terms: Vec<String>,
         language_codes: Vec<String>,
         common_words: Vec<String>,
@@ -56,7 +56,7 @@ impl MovieParser {
     }
 
     /// Create a movie parser with full configuration
-    pub fn with_config(tmdb_client: Option<TmdbClient>, config: AppConfig) -> Self {
+    pub fn with_config(tmdb_client: Option<UnifiedTmdbClient>, config: AppConfig) -> Self {
         let technical_terms = config.get_all_technical_terms();
         let filename_parser = FilenameParser::with_technical_terms(technical_terms);
 

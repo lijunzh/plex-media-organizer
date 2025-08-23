@@ -144,31 +144,6 @@ impl UnifiedTmdbClient {
         Ok(best_match)
     }
 
-    /// Enhanced search with multiple strategies
-    pub async fn enhanced_search(
-        &self,
-        title: &str,
-        year: Option<u32>,
-    ) -> Result<Option<TmdbMatchResult>> {
-        // Generate title variations for better matching
-        let title_variations = self.search_engine.generate_title_variations(title);
-
-        let mut best_match: Option<TmdbMatchResult> = None;
-        let mut best_score = 0.0;
-
-        // Try each title variation
-        for variation in title_variations {
-            if let Some(match_result) = self.find_best_match(&variation, year).await?
-                && match_result.confidence_score > best_score
-            {
-                best_score = match_result.confidence_score;
-                best_match = Some(match_result);
-            }
-        }
-
-        Ok(best_match)
-    }
-
     /// Get movie details by ID
     pub async fn get_movie(&self, movie_id: u32) -> Result<TmdbMovie> {
         self.api_client.get_movie(movie_id).await
@@ -182,6 +157,158 @@ impl UnifiedTmdbClient {
     /// Make a generic API request
     pub async fn api_request(&self, endpoint: &str) -> Result<serde_json::Value> {
         self.api_client.get(endpoint).await
+    }
+
+    /// Enhanced search with multiple fallback strategies and config parameters
+    pub async fn enhanced_search_with_config(
+        &self,
+        title: &str,
+        year: Option<u32>,
+        _problematic_patterns: &[String],
+    ) -> Result<Option<crate::types::TmdbMatchResult>> {
+        // Validate input - reject empty or whitespace-only titles
+        if title.trim().is_empty() {
+            return Ok(None);
+        }
+
+        // Strategy 1: Try exact search with year
+        if let Some(result) = self.find_best_match(title, year).await? {
+            return Ok(Some(result));
+        }
+
+        // Strategy 2: Try search without year (broader search)
+        if let Some(result) = self.find_best_match(title, None).await? {
+            return Ok(Some(result));
+        }
+
+        // Strategy 3: Try with cleaned title (remove common suffixes/prefixes)
+        let cleaned_title = self.clean_title_for_search(title);
+        if cleaned_title != title
+            && let Some(result) = self.find_best_match(&cleaned_title, year).await?
+        {
+            return Ok(Some(result));
+        }
+
+        // Strategy 4: Try with alternative title variations
+        for alt_title in self.generate_title_variations(title) {
+            if let Some(result) = self.find_best_match(&alt_title, year).await? {
+                return Ok(Some(result));
+            }
+        }
+
+        Ok(None)
+    }
+
+    /// Enhanced search with multiple fallback strategies (legacy method)
+    pub async fn enhanced_search(
+        &self,
+        title: &str,
+        year: Option<u32>,
+    ) -> Result<Option<crate::types::TmdbMatchResult>> {
+        self.enhanced_search_with_config(title, year, &[]).await
+    }
+
+    /// Clean title for better search matching
+    fn clean_title_for_search(&self, title: &str) -> String {
+        let mut cleaned = title.to_string();
+
+        // Remove common file suffixes
+        let suffixes_to_remove = [
+            " (director's cut)",
+            " (extended)",
+            " (uncut)",
+            " (unrated)",
+            " (rated)",
+            " (special edition)",
+            " (collector's edition)",
+            " (deluxe edition)",
+            " (limited edition)",
+            " (anniversary edition)",
+        ];
+
+        for suffix in &suffixes_to_remove {
+            if cleaned.to_lowercase().ends_with(&suffix.to_lowercase()) {
+                cleaned = cleaned[..cleaned.len() - suffix.len()].trim().to_string();
+                break;
+            }
+        }
+
+        // Remove common prefixes
+        let prefixes_to_remove = ["the ", "a ", "an "];
+        for prefix in &prefixes_to_remove {
+            if cleaned.to_lowercase().starts_with(prefix) {
+                cleaned = cleaned[prefix.len()..].trim().to_string();
+                break;
+            }
+        }
+
+        cleaned
+    }
+
+    /// Generate title variations for better matching
+    fn generate_title_variations(&self, title: &str) -> Vec<String> {
+        let mut variations = Vec::new();
+        let title_lower = title.to_lowercase();
+
+        // Add "The" prefix if not present
+        if !title_lower.starts_with("the ") {
+            variations.push(format!("The {}", title));
+        }
+
+        // Remove "The" prefix if present
+        if title_lower.starts_with("the ") {
+            variations.push(title[4..].trim().to_string());
+        }
+
+        // Handle sequel numbers (e.g., "Matrix 2" -> "Matrix")
+        if let Some(last_space) = title.rfind(' ')
+            && let Ok(_number) = title[last_space + 1..].parse::<u32>()
+        {
+            variations.push(title[..last_space].trim().to_string());
+        }
+
+        variations
+    }
+
+    /// Convert TMDB movie to our MovieInfo format
+    pub fn tmdb_to_movie_info(
+        &self,
+        tmdb_movie: &crate::types::TmdbMovie,
+    ) -> crate::types::MovieInfo {
+        let year = tmdb_movie.release_date.as_ref().and_then(|date| {
+            if date.len() >= 4 {
+                date[..4].parse::<u32>().ok()
+            } else {
+                None
+            }
+        });
+
+        // Check if movie belongs to a collection
+        let is_collection = tmdb_movie.belongs_to_collection.is_some();
+        let collection_name = tmdb_movie
+            .belongs_to_collection
+            .as_ref()
+            .map(|c| c.name.clone());
+
+        crate::types::MovieInfo {
+            title: tmdb_movie.title.clone(),
+            original_title: tmdb_movie.original_title.clone(),
+            original_language: tmdb_movie.original_language.clone(),
+            year,
+            part_number: None,
+            is_collection,
+            collection_name,
+            is_series: false,
+            series_name: None,
+            series_number: None,
+            is_anime: false,
+            anime_movie_number: None,
+            has_japanese_title: false,
+            has_chinese_title: false,
+            quality: None,
+            source: None,
+            language: None,
+        }
     }
 }
 

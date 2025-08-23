@@ -1,7 +1,7 @@
 //! Directory scanning and file discovery
 
 use crate::config::AppConfig;
-use crate::movie_parser::MovieParser;
+use crate::parsers::MovieParser;
 use crate::types::{FailedFile, MediaFile, MediaType, ScanResult, ScanStatistics};
 use anyhow::Result;
 use chrono::Utc;
@@ -860,7 +860,7 @@ impl Scanner {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::movie_parser::MovieParser;
+    use crate::parsers::MovieParser;
 
     #[test]
     fn test_network_drive_detection() {

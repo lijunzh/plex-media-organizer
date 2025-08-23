@@ -34,11 +34,12 @@ src/external/tmdb/
 - [x] Create unified.rs module
 - [x] Maintain backward compatibility with re-exports
 
-### Phase 2: Gradual Migration 🔄 **IN PROGRESS**
-- [ ] Update movie_parser.rs to use UnifiedTmdbClient
-- [ ] Update scanner.rs to use UnifiedTmdbClient
-- [ ] Update CLI handlers to use UnifiedTmdbClient
-- [ ] Add tests for new modules
+### Phase 2: Gradual Migration ✅ **COMPLETED**
+- [x] Update movie_parser.rs to use UnifiedTmdbClient
+- [x] Update scanner.rs to use UnifiedTmdbClient (no changes needed)
+- [x] Update CLI handlers to use UnifiedTmdbClient (no changes needed)
+- [x] Add tests for new modules
+- [x] Update documentation examples
 
 ### Phase 3: Cleanup ⏸️ **PLANNED**
 - [ ] Remove old tmdb_client.rs

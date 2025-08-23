@@ -14,13 +14,13 @@
 //! ## Quick Start
 //!
 //! ```rust,no_run
-//! use plex_media_organizer::{MovieParser, Scanner, Organizer, TmdbClient};
+//! use plex_media_organizer::{MovieParser, Scanner, Organizer, external::tmdb::UnifiedTmdbClient};
 //! use std::path::PathBuf;
 //!
 //! #[tokio::main]
 //! async fn main() -> Result<(), Box<dyn std::error::Error>> {
 //!     // Create a movie parser with TMDB integration
-//!     let tmdb_client = TmdbClient::new("your_api_key".to_string());
+//!     let tmdb_client = UnifiedTmdbClient::new("your_api_key".to_string())?;
 //!     let parser = MovieParser::new(Some(tmdb_client));
 //!
 //!     // Scan a directory for media files
