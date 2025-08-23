@@ -160,12 +160,12 @@
 //! The library uses `anyhow` for comprehensive error handling:
 //!
 //! ```rust,no_run
-//! use plex_media_organizer::{Result, MovieParser};
+//! use plex_media_organizer::{Result, parsers::UnifiedMovieParser};
 //! use std::path::PathBuf;
 //!
 //! #[tokio::main]
 //! async fn main() -> Result<()> {
-//!     let parser = MovieParser::new(None);
+//!     let parser = UnifiedMovieParser::new();
 //!     let files = vec![PathBuf::from("movie1.mkv"), PathBuf::from("movie2.mkv")];
 //!     
 //!     for file in &files {
@@ -212,14 +212,7 @@ pub mod cli;
 pub mod config;
 pub mod database;
 pub mod external;
-// Legacy parsers - use parsers::UnifiedMovieParser instead for new code
-#[deprecated(since = "0.2.0", note = "Use parsers::UnifiedMovieParser instead")]
-#[allow(deprecated)] // Allow deprecated during migration phase
-pub mod filename_parser;
 pub mod metadata_extractor;
-#[deprecated(since = "0.2.0", note = "Use parsers::UnifiedMovieParser instead")]
-#[allow(deprecated)] // Allow deprecated during migration phase
-pub mod movie_parser;
 pub mod organizer;
 pub mod parsers;
 pub mod scanner;

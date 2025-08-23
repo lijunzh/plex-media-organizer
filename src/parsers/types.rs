@@ -1,7 +1,9 @@
 //! Parser-specific types and data structures
 
+use serde::{Deserialize, Serialize};
+
 /// Tokenized components of a filename
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct FilenameComponents {
     pub title: String,
     pub original_title: Option<String>,

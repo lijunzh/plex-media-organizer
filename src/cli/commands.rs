@@ -1,7 +1,13 @@
 //! CLI command definitions
 
 use clap::{Parser, Subcommand};
-use std::path::PathBuf;
+
+use crate::cli::handlers::config::{ConfigArgs, handle_config};
+use crate::cli::handlers::organize::{OrganizeArgs, handle_organize};
+use crate::cli::handlers::rollback::{RollbackArgs, handle_rollback};
+use crate::cli::handlers::scan::{ScanArgs, handle_scan};
+use crate::cli::handlers::setup::{SetupArgs, handle_setup};
+use crate::cli::handlers::test::{TestArgs, handle_test};
 
 /// Plex Media Organizer - Intelligent media file organization
 #[derive(Parser)]
@@ -17,134 +23,22 @@ pub struct Cli {
 #[derive(Debug, Subcommand)]
 pub enum Commands {
     /// Scan a directory for media files
-    Scan {
-        /// Directory to scan
-        #[arg(value_name = "DIRECTORY")]
-        directory: PathBuf,
-
-        /// Show detailed output
-        #[arg(short, long)]
-        verbose: bool,
-
-        /// Optimize for network drives (SMB, NFS, etc.)
-        #[arg(long)]
-        network_mode: bool,
-
-        /// Maximum number of concurrent operations
-        #[arg(long, default_value = "16")]
-        max_parallel: usize,
-
-        /// Batch size for processing (smaller for network drives)
-        #[arg(long, default_value = "100")]
-        batch_size: usize,
-
-        /// Minimum confidence threshold (0.0-1.0) for organizing movies
-        #[arg(long, default_value = "0.7")]
-        min_confidence: f32,
-
-        /// Skip movies with no TMDB match instead of using fallback data
-        #[arg(long, default_value = "true")]
-        skip_unmatched: bool,
-
-        /// Skip warnings for low confidence matches
-        #[arg(long)]
-        no_warnings: bool,
-
-        /// Custom database path (overrides config file and environment variable)
-        #[arg(long)]
-        database_path: Option<PathBuf>,
-    },
+    Scan(ScanArgs),
 
     /// Set up configuration interactively
-    Setup {
-        /// Force reconfiguration even if config exists
-        #[arg(short, long)]
-        force: bool,
-    },
+    Setup(SetupArgs),
 
     /// Show current configuration
-    Config {
-        /// Show configuration file path
-        #[arg(short, long)]
-        path: bool,
-    },
+    Config(ConfigArgs),
 
     /// Test parsing and organization
-    Test {
-        /// File or directory to test
-        #[arg(value_name = "PATH")]
-        path: PathBuf,
-
-        /// Test organization (scan + parse + organize)
-        #[arg(short, long)]
-        organize: bool,
-
-        /// Preview organization changes (dry-run)
-        #[arg(short, long)]
-        preview: bool,
-
-        /// Show detailed output
-        #[arg(short, long)]
-        verbose: bool,
-    },
+    Test(TestArgs),
 
     /// Organize media files
-    Organize {
-        /// Directory to organize
-        #[arg(value_name = "DIRECTORY")]
-        directory: PathBuf,
-
-        /// Preview organization changes (dry-run)
-        #[arg(short, long)]
-        preview: bool,
-
-        /// Create backup before organizing
-        #[arg(short, long)]
-        backup: bool,
-
-        /// Show detailed output
-        #[arg(short, long)]
-        verbose: bool,
-
-        /// Optimize for network drives (SMB, NFS, etc.)
-        #[arg(long)]
-        network_mode: bool,
-
-        /// Maximum number of concurrent operations
-        #[arg(long, default_value = "16")]
-        max_parallel: usize,
-
-        /// Batch size for processing (smaller for network drives)
-        #[arg(long, default_value = "100")]
-        batch_size: usize,
-
-        /// Minimum confidence threshold (0.0-1.0) for organizing movies
-        #[arg(long, default_value = "0.7")]
-        min_confidence: f32,
-
-        /// Skip movies with no TMDB match instead of using fallback data
-        #[arg(long, default_value = "true")]
-        skip_unmatched: bool,
-
-        /// Skip warnings for low confidence matches
-        #[arg(long)]
-        no_warnings: bool,
-    },
+    Organize(OrganizeArgs),
 
     /// Rollback previous organization operation
-    Rollback {
-        /// Operation file to rollback
-        #[arg(value_name = "OPERATION_FILE")]
-        operation_file: PathBuf,
-
-        /// Preview rollback changes (dry-run)
-        #[arg(short, long)]
-        preview: bool,
-
-        /// Show detailed output
-        #[arg(short, long)]
-        verbose: bool,
-    },
+    Rollback(RollbackArgs),
 
     /// Clean up old operation files and backups
     Cleanup {
@@ -172,36 +66,12 @@ impl Cli {
         let cli = Cli::parse();
 
         match cli.command {
-            Commands::Scan { .. } => {
-                // TODO: Implement scan handler
-                println!("Scan command - implementation in progress");
-                Ok(())
-            }
-            Commands::Setup { .. } => {
-                // TODO: Implement setup handler
-                println!("Setup command - implementation in progress");
-                Ok(())
-            }
-            Commands::Config { .. } => {
-                // TODO: Implement config handler
-                println!("Config command - implementation in progress");
-                Ok(())
-            }
-            Commands::Test { .. } => {
-                // TODO: Implement test handler
-                println!("Test command - implementation in progress");
-                Ok(())
-            }
-            Commands::Organize { .. } => {
-                // TODO: Implement organize handler
-                println!("Organize command - implementation in progress");
-                Ok(())
-            }
-            Commands::Rollback { .. } => {
-                // TODO: Implement rollback handler
-                println!("Rollback command - implementation in progress");
-                Ok(())
-            }
+            Commands::Scan(args) => handle_scan(args).await,
+            Commands::Setup(args) => handle_setup(args).await,
+            Commands::Config(args) => handle_config(args).await,
+            Commands::Test(args) => handle_test(args).await,
+            Commands::Organize(args) => handle_organize(args).await,
+            Commands::Rollback(args) => handle_rollback(args).await,
             Commands::Cleanup { .. } => {
                 // TODO: Implement cleanup handler
                 println!("Cleanup command - implementation in progress");

@@ -9,6 +9,7 @@
 pub mod cache;
 pub mod connection;
 pub mod movies;
+pub mod operations;
 pub mod schema;
 
 use anyhow::Result;
@@ -18,6 +19,7 @@ use std::sync::Arc;
 use tokio::sync::Mutex;
 
 /// Database manager that handles all database operations
+#[derive(Debug, Clone)]
 pub struct DatabaseManager {
     connection: Arc<Mutex<Connection>>,
 }

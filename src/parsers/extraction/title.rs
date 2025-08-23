@@ -181,7 +181,7 @@ impl TitleExtractor {
         codec: &Option<String>,
         group: &Option<String>,
         _language: &Option<String>,
-        original_filename: &str,
+        _original_filename: &str,
         common_words: &[String],
         known_titles: &[String],
         technical_japanese_terms: &[String],
@@ -234,7 +234,7 @@ impl TitleExtractor {
         // Post-process: remove multi-token technical terms that might have been missed
         let title = self.remove_multi_token_technical_terms(&title);
 
-        // Format title with brackets around English title if we have both Chinese and English
+        // Format title for better Plex indexing with original title - English title format
         let title = if !chinese_tokens.is_empty() && !english_tokens.is_empty() {
             let chinese_title = chinese_tokens.join(" ");
             let english_title = english_tokens.join(" ");
@@ -242,19 +242,21 @@ impl TitleExtractor {
             // Check if we have Japanese tokens too (trilingual case)
             if !japanese_tokens.is_empty() {
                 let japanese_title = japanese_tokens.join(" ");
-                // For trilingual, include all three: Chinese Japanese English
-                format!("{} {} {}", chinese_title, japanese_title, english_title)
+                // For trilingual, format as "Chinese - Japanese - English"
+                format!("{} - {} - {}", chinese_title, japanese_title, english_title)
             } else {
-                // Check if the original filename had brackets around the Chinese title
-                let original_has_brackets =
-                    original_filename.contains('[') && original_filename.contains(']');
+                // Clean the Chinese title to remove any existing brackets
+                let clean_chinese_title =
+                    chinese_title.trim_start_matches('[').trim_end_matches(']');
 
-                if original_has_brackets {
-                    format!("[{}] [{}]", chinese_title, english_title)
-                } else {
-                    format!("{} [{}]", chinese_title, english_title)
-                }
+                // Format as "Original Title - English Title" for better Plex indexing
+                format!("{} - {}", clean_chinese_title, english_title)
             }
+        } else if !japanese_tokens.is_empty() && !english_tokens.is_empty() {
+            // Japanese + English case
+            let japanese_title = japanese_tokens.join(" ");
+            let english_title = english_tokens.join(" ");
+            format!("{} - {}", japanese_title, english_title)
         } else {
             title
         };

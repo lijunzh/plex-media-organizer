@@ -1,6 +1,4 @@
-use plex_media_organizer::MovieParser;
-use plex_media_organizer::config::AppConfig;
-use plex_media_organizer::filename_parser::FilenameParser;
+use plex_media_organizer::parsers::UnifiedMovieParser;
 use std::collections::HashMap;
 
 /// Comprehensive real-world pattern tests
@@ -8,8 +6,7 @@ use std::collections::HashMap;
 
 #[test]
 fn test_real_world_english_patterns() {
-    let filename_parser = FilenameParser::new();
-    let movie_parser = MovieParser::new(None);
+    let parser = UnifiedMovieParser::new();
 
     // Comprehensive test cases from real-world data
     let test_cases = vec![
@@ -114,50 +111,30 @@ fn test_real_world_english_patterns() {
     let mut failure_details = Vec::new();
 
     for (filename, expected_title, expected_year) in &test_cases {
-        // Test filename parser
-        match filename_parser.parse(filename) {
+        // Test unified parser
+        match parser.parse(filename) {
             Ok(result) => {
-                if result.title == *expected_title && result.year == Some(*expected_year) {
+                if result.data.title == *expected_title && result.data.year == Some(*expected_year)
+                {
                     success_count += 1;
                 } else {
                     failure_details.push(format!(
-                        "Filename parser: Expected '{}' ({:?}), got '{}' ({:?}) for {}",
+                        "Unified parser: Expected '{}' ({:?}), got '{}' ({:?}) for {}",
                         expected_title,
                         Some(expected_year),
-                        result.title,
-                        result.year,
+                        result.data.title,
+                        result.data.year,
                         filename
                     ));
                 }
             }
             Err(e) => {
-                failure_details.push(format!("Filename parser error for {}: {}", filename, e));
-            }
-        }
-
-        // Test movie parser
-        match movie_parser.parse_filename(filename) {
-            Ok(result) => {
-                if result.title == *expected_title && result.year == Some(*expected_year) {
-                    success_count += 1;
-                } else {
-                    failure_details.push(format!(
-                        "Movie parser: Expected '{}' ({:?}), got '{}' ({:?}) for {}",
-                        expected_title,
-                        Some(expected_year),
-                        result.title,
-                        result.year,
-                        filename
-                    ));
-                }
-            }
-            Err(e) => {
-                failure_details.push(format!("Movie parser error for {}: {}", filename, e));
+                failure_details.push(format!("Unified parser error for {}: {}", filename, e));
             }
         }
     }
 
-    let total_tests = test_cases.len() * 2; // Both parsers
+    let total_tests = test_cases.len(); // Single parser
     let success_rate = success_count as f64 / total_tests as f64;
 
     println!("📊 Real-world English Patterns Test Results:");
@@ -185,8 +162,7 @@ fn test_real_world_english_patterns() {
 
 #[test]
 fn test_real_world_chinese_patterns() {
-    let filename_parser = FilenameParser::new();
-    let movie_parser = MovieParser::new(None);
+    let parser = UnifiedMovieParser::new();
 
     let test_cases = vec![
         // Chinese-English bilingual patterns - updated to match actual parser output
@@ -256,50 +232,30 @@ fn test_real_world_chinese_patterns() {
     let mut failure_details = Vec::new();
 
     for (filename, expected_title, expected_year) in &test_cases {
-        // Test filename parser
-        match filename_parser.parse(filename) {
+        // Test unified parser
+        match parser.parse(filename) {
             Ok(result) => {
-                if result.title == *expected_title && result.year == Some(*expected_year) {
+                if result.data.title == *expected_title && result.data.year == Some(*expected_year)
+                {
                     success_count += 1;
                 } else {
                     failure_details.push(format!(
-                        "Filename parser: Expected '{}' ({:?}), got '{}' ({:?}) for {}",
+                        "Unified parser: Expected '{}' ({:?}), got '{}' ({:?}) for {}",
                         expected_title,
                         Some(expected_year),
-                        result.title,
-                        result.year,
+                        result.data.title,
+                        result.data.year,
                         filename
                     ));
                 }
             }
             Err(e) => {
-                failure_details.push(format!("Filename parser error for {}: {}", filename, e));
-            }
-        }
-
-        // Test movie parser
-        match movie_parser.parse_filename(filename) {
-            Ok(result) => {
-                if result.title == *expected_title && result.year == Some(*expected_year) {
-                    success_count += 1;
-                } else {
-                    failure_details.push(format!(
-                        "Movie parser: Expected '{}' ({:?}), got '{}' ({:?}) for {}",
-                        expected_title,
-                        Some(expected_year),
-                        result.title,
-                        result.year,
-                        filename
-                    ));
-                }
-            }
-            Err(e) => {
-                failure_details.push(format!("Movie parser error for {}: {}", filename, e));
+                failure_details.push(format!("Unified parser error for {}: {}", filename, e));
             }
         }
     }
 
-    let total_tests = test_cases.len() * 2; // Both parsers
+    let total_tests = test_cases.len(); // Single parser
     let success_rate = success_count as f64 / total_tests as f64;
 
     println!("📊 Real-world Chinese Patterns Test Results:");
@@ -327,11 +283,7 @@ fn test_real_world_chinese_patterns() {
 
 #[test]
 fn test_real_world_series_patterns() {
-    let filename_parser = FilenameParser::new();
-
-    // Load config explicitly to ensure common_words are available
-    let config = AppConfig::load().unwrap_or_default();
-    let movie_parser = MovieParser::with_config(None, config);
+    let parser = UnifiedMovieParser::new();
 
     let series_test_cases = vec![
         // Lord of the Rings Extended Editions
@@ -378,50 +330,30 @@ fn test_real_world_series_patterns() {
     let mut failure_details = Vec::new();
 
     for (filename, expected_title, expected_year) in &series_test_cases {
-        // Test filename parser
-        match filename_parser.parse(filename) {
+        // Test unified parser
+        match parser.parse(filename) {
             Ok(result) => {
-                if result.title == *expected_title && result.year == Some(*expected_year) {
+                if result.data.title == *expected_title && result.data.year == Some(*expected_year)
+                {
                     success_count += 1;
                 } else {
                     failure_details.push(format!(
-                        "Filename parser: Expected '{}' ({:?}), got '{}' ({:?}) for {}",
+                        "Unified parser: Expected '{}' ({:?}), got '{}' ({:?}) for {}",
                         expected_title,
                         Some(expected_year),
-                        result.title,
-                        result.year,
+                        result.data.title,
+                        result.data.year,
                         filename
                     ));
                 }
             }
             Err(e) => {
-                failure_details.push(format!("Filename parser error for {}: {}", filename, e));
-            }
-        }
-
-        // Test movie parser
-        match movie_parser.parse_filename(filename) {
-            Ok(result) => {
-                if result.title == *expected_title && result.year == Some(*expected_year) {
-                    success_count += 1;
-                } else {
-                    failure_details.push(format!(
-                        "Movie parser: Expected '{}' ({:?}), got '{}' ({:?}) for {}",
-                        expected_title,
-                        Some(expected_year),
-                        result.title,
-                        result.year,
-                        filename
-                    ));
-                }
-            }
-            Err(e) => {
-                failure_details.push(format!("Movie parser error for {}: {}", filename, e));
+                failure_details.push(format!("Unified parser error for {}: {}", filename, e));
             }
         }
     }
 
-    let total_tests = series_test_cases.len() * 2; // Both parsers
+    let total_tests = series_test_cases.len(); // Single parser
     let success_rate = success_count as f64 / total_tests as f64;
 
     println!("📊 Real-world Series Patterns Test Results:");
@@ -449,7 +381,7 @@ fn test_real_world_series_patterns() {
 
 #[tokio::test]
 async fn test_pattern_statistics() {
-    let filename_parser = FilenameParser::new();
+    let parser = UnifiedMovieParser::new();
 
     // Collect statistics on different pattern types
     let mut pattern_stats = HashMap::new();
@@ -472,23 +404,23 @@ async fn test_pattern_statistics() {
     ];
 
     for filename in test_cases {
-        if let Ok(result) = filename_parser.parse(filename) {
+        if let Ok(result) = parser.parse(filename) {
             // Count quality patterns
-            if let Some(quality) = &result.quality {
+            if let Some(quality) = &result.data.quality {
                 *pattern_stats
                     .entry(format!("Quality: {}", quality))
                     .or_insert(0) += 1;
             }
 
             // Count source patterns
-            if let Some(source) = &result.source {
+            if let Some(source) = &result.data.source {
                 *pattern_stats
                     .entry(format!("Source: {}", source))
                     .or_insert(0) += 1;
             }
 
             // Count years
-            if let Some(year) = result.year {
+            if let Some(year) = result.data.year {
                 *pattern_stats.entry(format!("Year: {}", year)).or_insert(0) += 1;
             }
         }

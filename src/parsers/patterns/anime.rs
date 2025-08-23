@@ -176,11 +176,7 @@ impl AnimeDetector {
 
     /// Legacy method: Detect anime movie patterns and extract enhanced metadata (from filename_parser.rs)
     #[allow(deprecated)] // Allow deprecated during migration phase
-    pub fn detect_anime_pattern(
-        &self,
-        title: &str,
-        filename: &str,
-    ) -> Option<crate::filename_parser::AnimeInfo> {
+    pub fn detect_anime_pattern(&self, title: &str, filename: &str) -> Option<AnimeInfo> {
         // Check for Japanese characters in both title and filename
         let has_japanese = title.chars().any(|c| {
             // Hiragana, Katakana, Kanji ranges
@@ -263,7 +259,7 @@ impl AnimeDetector {
         }
 
         if is_anime {
-            Some(crate::filename_parser::AnimeInfo {
+            Some(AnimeInfo {
                 is_anime: true,
                 movie_number,
                 has_japanese_title: has_japanese,
