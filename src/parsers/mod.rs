@@ -15,6 +15,10 @@ pub use types::{
     AnimeInfo, FilenameComponents, LanguageInfo, ParserConfig, ParserResult, SeriesInfo,
 };
 
+// Re-export legacy pattern detection methods for backward compatibility
+pub use patterns::anime::AnimeDetector;
+pub use patterns::series::SeriesDetector;
+
 // TODO: Gradually migrate to unified parser structure
 // Phase 1.4: Create unified movie parser
 // Phase 1.5: Remove old parser files

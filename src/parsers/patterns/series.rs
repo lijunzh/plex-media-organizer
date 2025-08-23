@@ -212,6 +212,78 @@ impl SeriesDetector {
 
         title.trim().to_string()
     }
+
+    /// Legacy method: Detect series patterns in a title (from filename_parser.rs)
+    pub fn detect_series_pattern(&self, title: &str) -> Option<(String, u32)> {
+        // Common series patterns - order matters for precedence
+        // Use regex for precise pattern matching
+        let series_patterns = [
+            // "Part" patterns: "Iron Man Part 2", "Matrix Part 2" (check first to avoid conflicts)
+            (r"^(.+?)\s+Part\s+(\d+)$", 2),
+            // "Chapter" patterns: "Iron Man Chapter 2"
+            (r"^(.+?)\s+Chapter\s+(\d+)$", 2),
+            // "Volume" patterns: "Iron Man Volume 2"
+            (r"^(.+?)\s+Volume\s+(\d+)$", 2),
+            // "Episode" patterns: "Iron Man Episode 2"
+            (r"^(.+?)\s+Episode\s+(\d+)$", 2),
+            // "Season" patterns: "Iron Man Season 2"
+            (r"^(.+?)\s+Season\s+(\d+)$", 2),
+            // Number patterns: "Iron Man 2", "Matrix 2", "Avengers 2" (must end with number)
+            (r"^(.+?)\s+(\d+)$", 2),
+            // Roman numeral patterns: "Iron Man II", "Matrix II"
+            (r"^(.+?)\s+(I{1,3}|IV|V|VI{1,3}|IX|X)$", 2),
+        ];
+
+        for (pattern, capture_group) in series_patterns.iter() {
+            if let Some(captures) = regex::Regex::new(pattern)
+                .ok()
+                .and_then(|re| re.captures(title))
+                && let Some(series_name) = captures.get(1)
+                && let Some(series_num_str) = captures.get(*capture_group)
+            {
+                // Try to parse the series number
+                if let Ok(series_num) = series_num_str.as_str().parse::<u32>() {
+                    let series_name_trimmed = series_name.as_str().trim();
+                    // Validate that the series name doesn't end with a number (to avoid "Iron Man 2 3" -> "Iron Man 2", 3)
+                    if !series_name_trimmed.ends_with(|c: char| c.is_ascii_digit()) {
+                        return Some((series_name_trimmed.to_string(), series_num));
+                    }
+                }
+                // Handle Roman numerals
+                if *capture_group == 2 && pattern.contains("I{1,3}|IV|V|VI{1,3}|IX|X") {
+                    let roman_num = series_num_str.as_str();
+                    if let Some(num) = self.roman_to_arabic(roman_num) {
+                        return Some((series_name.as_str().trim().to_string(), num));
+                    }
+                }
+            }
+        }
+
+        None
+    }
+
+    /// Convert Roman numeral to Arabic number (from filename_parser.rs)
+    fn roman_to_arabic(&self, roman: &str) -> Option<u32> {
+        let roman_map = [
+            ("I", 1),
+            ("II", 2),
+            ("III", 3),
+            ("IV", 4),
+            ("V", 5),
+            ("VI", 6),
+            ("VII", 7),
+            ("VIII", 8),
+            ("IX", 9),
+            ("X", 10),
+        ];
+
+        for (r, a) in roman_map.iter() {
+            if roman == *r {
+                return Some(*a);
+            }
+        }
+        None
+    }
 }
 
 /// Collection analysis result
@@ -272,5 +344,26 @@ mod tests {
         let base_title = detector.extract_base_title("Lord.of.the.Rings.Collection.1080p.mkv");
 
         assert_eq!(base_title, "Lord of the Rings");
+    }
+
+    #[test]
+    fn test_legacy_detect_series_pattern() {
+        let detector = SeriesDetector::new();
+
+        // Test "Part" pattern
+        let result = detector.detect_series_pattern("Iron Man Part 2");
+        assert_eq!(result, Some(("Iron Man".to_string(), 2)));
+
+        // Test number pattern
+        let result = detector.detect_series_pattern("Matrix 2");
+        assert_eq!(result, Some(("Matrix".to_string(), 2)));
+
+        // Test Roman numeral pattern
+        let result = detector.detect_series_pattern("Avengers II");
+        assert_eq!(result, Some(("Avengers".to_string(), 2)));
+
+        // Test no pattern
+        let result = detector.detect_series_pattern("The Matrix");
+        assert_eq!(result, None);
     }
 }

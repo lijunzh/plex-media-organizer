@@ -1,9 +1,9 @@
 //! Pattern detection for filename parsing
 
-mod anime;
-mod language;
-mod series;
-mod technical;
+pub mod anime;
+pub mod language;
+pub mod series;
+pub mod technical;
 
 pub use anime::AnimeDetector;
 pub use language::LanguageDetector;

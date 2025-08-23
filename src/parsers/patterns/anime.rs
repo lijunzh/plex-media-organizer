@@ -173,6 +173,106 @@ impl AnimeDetector {
             || self.has_chinese_characters(text)
             || self.has_korean_characters(text)
     }
+
+    /// Legacy method: Detect anime movie patterns and extract enhanced metadata (from filename_parser.rs)
+    pub fn detect_anime_pattern(
+        &self,
+        title: &str,
+        filename: &str,
+    ) -> Option<crate::filename_parser::AnimeInfo> {
+        // Check for Japanese characters in both title and filename
+        let has_japanese = title.chars().any(|c| {
+            // Hiragana, Katakana, Kanji ranges
+            ('\u{3040}'..='\u{309F}').contains(&c) || // Hiragana
+            ('\u{30A0}'..='\u{30FF}').contains(&c) || // Katakana
+            ('\u{4E00}'..='\u{9FAF}').contains(&c) // Kanji
+        }) || filename.chars().any(|c| {
+            // Hiragana, Katakana, Kanji ranges
+            ('\u{3040}'..='\u{309F}').contains(&c) || // Hiragana
+            ('\u{30A0}'..='\u{30FF}').contains(&c) || // Katakana
+            ('\u{4E00}'..='\u{9FAF}').contains(&c) // Kanji
+        });
+
+        // Check for Chinese characters in both title and filename
+        let has_chinese = title.chars().any(|c| {
+            ('\u{4E00}'..='\u{9FAF}').contains(&c) // CJK Unified Ideographs (includes Chinese)
+        }) || filename.chars().any(|c| {
+            ('\u{4E00}'..='\u{9FAF}').contains(&c) // CJK Unified Ideographs (includes Chinese)
+        });
+
+        // Look for anime movie series patterns
+        let anime_movie_patterns = [
+            // Detective Conan Movie patterns
+            (r"Detective\.Conan\.Movie\.(\d+)", 1),
+            (r"名探偵コナン.*?劇場版.*?(\d+)", 1),
+            (r"名侦探柯南.*?(\d+)", 1),
+            // Studio Ghibli patterns
+            (r"Ghibli", 0),
+            // Common anime movie indicators
+            (r"劇場版", 0), // "Theatrical version" in Japanese
+            (r"映画", 0),   // "Movie" in Japanese
+            (r"电影", 0),   // "Movie" in Chinese
+        ];
+
+        // Check for anime indicators
+        let mut is_anime = has_japanese || has_chinese;
+        let mut movie_number = None;
+
+        // Check anime movie patterns
+        for (pattern, capture_group) in anime_movie_patterns.iter() {
+            if let Some(captures) = regex::Regex::new(pattern)
+                .ok()
+                .and_then(|re| re.captures(filename))
+            {
+                is_anime = true;
+                if *capture_group > 0
+                    && let Some(num_str) = captures.get(*capture_group)
+                    && let Ok(num) = num_str.as_str().parse::<u32>()
+                {
+                    movie_number = Some(num);
+                }
+            }
+        }
+
+        // Check for common anime keywords
+        let anime_keywords = [
+            "anime",
+            "Anime",
+            "ANIME",
+            "アニメ",
+            "动画",
+            "動畫",
+            "Studio",
+            "スタジオ",
+            "OVA",
+            "ONA",
+            "OAD",
+            "劇場版",
+            "映画",
+            "电影",
+            "名探偵",
+            "名侦探",
+        ];
+
+        for keyword in anime_keywords.iter() {
+            if filename.contains(keyword) || title.contains(keyword) {
+                is_anime = true;
+                break;
+            }
+        }
+
+        if is_anime {
+            Some(crate::filename_parser::AnimeInfo {
+                is_anime: true,
+                movie_number,
+                has_japanese_title: has_japanese,
+                has_chinese_title: has_chinese,
+                is_movie_series: movie_number.is_some(),
+            })
+        } else {
+            None
+        }
+    }
 }
 
 #[cfg(test)]
@@ -243,5 +343,34 @@ mod tests {
         let detector = AnimeDetector::new();
         assert!(detector.has_korean_characters("애니메이션"));
         assert!(!detector.has_korean_characters("Anime"));
+    }
+
+    #[test]
+    fn test_legacy_detect_anime_pattern() {
+        let detector = AnimeDetector::new();
+
+        // Test Japanese anime - the method checks both title and filename for Japanese characters
+        let result = detector.detect_anime_pattern("アニメ", "アニメ.Movie.1080p.mkv");
+        assert!(result.is_some(), "Japanese anime should be detected");
+        let anime_info = result.unwrap();
+        assert!(anime_info.is_anime);
+        assert!(anime_info.has_japanese_title);
+
+        // Test Chinese anime - the method checks both title and filename for Chinese characters
+        let result = detector.detect_anime_pattern("动画", "动画.Movie.1080p.mkv");
+        assert!(result.is_some(), "Chinese anime should be detected");
+        let anime_info = result.unwrap();
+        assert!(anime_info.is_anime);
+        assert!(anime_info.has_chinese_title);
+
+        // Test English anime keyword - the method checks for "anime" keyword in filename
+        let result = detector.detect_anime_pattern("Movie", "Anime.Movie.1080p.mkv");
+        assert!(result.is_some(), "English anime keyword should be detected");
+        let anime_info = result.unwrap();
+        assert!(anime_info.is_anime);
+
+        // Test no anime - no Japanese/Chinese characters or anime keywords
+        let result = detector.detect_anime_pattern("Movie", "The.Matrix.1080p.mkv");
+        assert!(result.is_none(), "Non-anime should not be detected");
     }
 }
