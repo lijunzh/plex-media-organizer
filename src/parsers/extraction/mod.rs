@@ -2,7 +2,7 @@
 
 mod non_english;
 mod technical_terms;
-mod title;
+pub mod title;
 
 pub use non_english::NonEnglishProcessor;
 pub use technical_terms::TechnicalTermsFilter;

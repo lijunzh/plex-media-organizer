@@ -19,6 +19,9 @@ pub use types::{
 pub use patterns::anime::AnimeDetector;
 pub use patterns::series::SeriesDetector;
 
+// Re-export legacy title extraction methods for backward compatibility
+pub use extraction::title::TitleExtractor;
+
 // TODO: Gradually migrate to unified parser structure
 // Phase 1.4: Create unified movie parser
 // Phase 1.5: Remove old parser files
