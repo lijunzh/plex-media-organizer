@@ -6,7 +6,7 @@ on:
       - 'v*'
 
 jobs:
-  release:
+  build-linux:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
@@ -29,7 +29,7 @@ jobs:
             ~/.cargo/registry
             ~/.cargo/git
             target
-          key: ${{ runner.os }}-cargo-release-${{ hashFiles('**/Cargo.lock') }}
+          key: ${{ runner.os }}-cargo-release-linux-${{ hashFiles('**/Cargo.lock') }}
       
       - name: Install System Dependencies
         run: |
@@ -38,18 +38,19 @@ jobs:
       
       - name: Build Release
         run: |
+          echo "🔨 Building for Linux (x86_64)"
           cargo build --release
-          echo "🚀 Release build completed successfully!"
+          echo "✅ Build completed for Linux"
       
       - name: Verify Binary
         run: |
-          echo "📦 Binary details:"
+          echo "📦 Binary details for Linux:"
           ls -la target/release/
           echo ""
           echo "📊 Binary size:"
           ls -lh target/release/plex-media-organizer
           echo ""
-          echo "✅ Binary verification passed"
+          echo "✅ Binary verification passed for Linux"
       
       - name: Test Release Binary
         env:
@@ -58,16 +59,173 @@ jobs:
           # Quick test of release binary
           ./target/release/plex-media-organizer --help
           ./target/release/plex-media-organizer setup --help
-          echo "✅ Release binary test passed"
+          echo "✅ Release binary test passed for Linux"
+      
+      - name: Create Archive
+        run: |
+          echo "📦 Creating archive for Linux"
+          tar -czf plex-media-organizer-v${{ github.ref_name }}-x86_64-unknown-linux-gnu.tar.gz -C target/release plex-media-organizer
+          echo "✅ Archive created: plex-media-organizer-v${{ github.ref_name }}-x86_64-unknown-linux-gnu.tar.gz"
+      
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: linux-binary
+          path: plex-media-organizer-v${{ github.ref_name }}-x86_64-unknown-linux-gnu.tar.gz
+          retention-days: 1
+
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      
+      - name: Setup Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          profile: minimal
+      
+      - name: Install Rust Components
+        run: |
+          rustup component add rustfmt clippy
+      
+      - name: Cache Dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-release-macos-${{ hashFiles('**/Cargo.lock') }}
+      
+      - name: Build Release
+        run: |
+          echo "🔨 Building for macOS (x86_64)"
+          cargo build --release
+          echo "✅ Build completed for macOS"
+      
+      - name: Verify Binary
+        run: |
+          echo "📦 Binary details for macOS:"
+          ls -la target/release/
+          echo ""
+          echo "📊 Binary size:"
+          ls -lh target/release/plex-media-organizer
+          echo ""
+          echo "✅ Binary verification passed for macOS"
+      
+      - name: Test Release Binary
+        env:
+          TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
+        run: |
+          # Quick test of release binary
+          ./target/release/plex-media-organizer --help
+          ./target/release/plex-media-organizer setup --help
+          echo "✅ Release binary test passed for macOS"
+      
+      - name: Create Archive
+        run: |
+          echo "📦 Creating archive for macOS"
+          tar -czf plex-media-organizer-v${{ github.ref_name }}-x86_64-apple-darwin.tar.gz -C target/release plex-media-organizer
+          echo "✅ Archive created: plex-media-organizer-v${{ github.ref_name }}-x86_64-apple-darwin.tar.gz"
+      
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: macos-binary
+          path: plex-media-organizer-v${{ github.ref_name }}-x86_64-apple-darwin.tar.gz
+          retention-days: 1
+
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      
+      - name: Setup Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          profile: minimal
+      
+      - name: Install Rust Components
+        run: |
+          rustup component add rustfmt clippy
+      
+      - name: Cache Dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-release-windows-${{ hashFiles('**/Cargo.lock') }}
+      
+      - name: Build Release
+        run: |
+          echo "🔨 Building for Windows (x86_64)"
+          cargo build --release
+          echo "✅ Build completed for Windows"
+      
+      - name: Verify Binary
+        run: |
+          echo "📦 Binary details for Windows:"
+          ls target/release/
+          echo ""
+          echo "📊 Binary size:"
+          ls -lh target/release/plex-media-organizer.exe
+          echo ""
+          echo "✅ Binary verification passed for Windows"
+      
+      - name: Test Release Binary
+        env:
+          TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
+        run: |
+          # Quick test of release binary
+          .\target\release\plex-media-organizer.exe --help
+          .\target\release\plex-media-organizer.exe setup --help
+          echo "✅ Release binary test passed for Windows"
+      
+      - name: Create Archive
+        run: |
+          echo "📦 Creating archive for Windows"
+          Compress-Archive -Path target/release/plex-media-organizer.exe -DestinationPath plex-media-organizer-v${{ github.ref_name }}-x86_64-pc-windows-msvc.zip
+          echo "✅ Archive created: plex-media-organizer-v${{ github.ref_name }}-x86_64-pc-windows-msvc.zip"
+      
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: windows-binary
+          path: plex-media-organizer-v${{ github.ref_name }}-x86_64-pc-windows-msvc.zip
+          retention-days: 1
+
+  create-release:
+    needs: [build-linux, build-macos, build-windows]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      
+      - name: Download All Artifacts
+        uses: actions/download-artifact@v3
+        with:
+          path: artifacts
+      
+      - name: List Artifacts
+        run: |
+          echo "📦 Downloaded artifacts:"
+          find artifacts -type f -name "*.tar.gz" -o -name "*.zip"
       
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            target/release/plex-media-organizer
-            target/release/plex-media-organizer.exe
-            PHASE_1_SUMMARY.md
+            artifacts/linux-binary/plex-media-organizer-v${{ github.ref_name }}-x86_64-unknown-linux-gnu.tar.gz
+            artifacts/macos-binary/plex-media-organizer-v${{ github.ref_name }}-x86_64-apple-darwin.tar.gz
+            artifacts/windows-binary/plex-media-organizer-v${{ github.ref_name }}-x86_64-pc-windows-msvc.zip
             README.md
+            CHANGELOG.md
           draft: false
           prerelease: false
           generate_release_notes: true
@@ -77,6 +235,9 @@ jobs:
       - name: Release Summary
         run: |
           echo "🎉 Release created successfully!"
-          echo "📦 Binary files uploaded"
+          echo "📦 Multi-platform binaries uploaded:"
+          echo "   - Linux (x86_64): plex-media-organizer-v${{ github.ref_name }}-x86_64-unknown-linux-gnu.tar.gz"
+          echo "   - macOS (x86_64): plex-media-organizer-v${{ github.ref_name }}-x86_64-apple-darwin.tar.gz"
+          echo "   - Windows (x86_64): plex-media-organizer-v${{ github.ref_name }}-x86_64-pc-windows-msvc.zip"
           echo "📚 Documentation included"
           echo "🚀 Ready for distribution"
