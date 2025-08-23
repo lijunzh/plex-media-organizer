@@ -1,6 +1,7 @@
 //! Directory scanning and file discovery
 
 use crate::config::AppConfig;
+#[allow(deprecated)] // Allow deprecated during migration phase
 use crate::parsers::MovieParser;
 use crate::types::{FailedFile, MediaFile, MediaType, ScanResult, ScanStatistics};
 use anyhow::Result;
@@ -13,6 +14,7 @@ use walkdir::WalkDir;
 
 /// Media file scanner with network drive optimizations
 #[derive(Debug)]
+#[allow(deprecated)] // Allow deprecated during migration phase
 pub struct Scanner {
     movie_parser: MovieParser,
     /// Application configuration

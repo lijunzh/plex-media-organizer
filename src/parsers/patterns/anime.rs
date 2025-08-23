@@ -175,6 +175,7 @@ impl AnimeDetector {
     }
 
     /// Legacy method: Detect anime movie patterns and extract enhanced metadata (from filename_parser.rs)
+    #[allow(deprecated)] // Allow deprecated during migration phase
     pub fn detect_anime_pattern(
         &self,
         title: &str,

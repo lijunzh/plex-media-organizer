@@ -1,5 +1,9 @@
 //! # Plex Media Organizer
 //!
+//! Note: During migration phase, we allow deprecated code for gradual transition
+#![allow(deprecated)]
+
+//!
 //! An intelligent media file organization library built in Rust that automatically parses and organizes
 //! your media collection according to Plex naming conventions.
 //!
@@ -208,8 +212,13 @@ pub mod cli;
 pub mod config;
 pub mod database;
 pub mod external;
+// Legacy parsers - use parsers::UnifiedMovieParser instead for new code
+#[deprecated(since = "0.2.0", note = "Use parsers::UnifiedMovieParser instead")]
+#[allow(deprecated)] // Allow deprecated during migration phase
 pub mod filename_parser;
 pub mod metadata_extractor;
+#[deprecated(since = "0.2.0", note = "Use parsers::UnifiedMovieParser instead")]
+#[allow(deprecated)] // Allow deprecated during migration phase
 pub mod movie_parser;
 pub mod organizer;
 pub mod parsers;
