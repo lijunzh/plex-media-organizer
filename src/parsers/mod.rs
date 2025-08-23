@@ -1,7 +1,20 @@
 //! Unified parsing logic for all media types
 
-// Re-export existing parsers for now
+pub mod extraction;
+pub mod patterns;
+pub mod types;
+
+// Re-export existing parsers for now (will be removed in Task 1.5)
 pub use crate::filename_parser::FilenameParser;
 pub use crate::movie_parser::MovieParser;
 
+// Re-export new parser types
+pub use extraction::{ExtractionResult, UnifiedTitleExtractor};
+pub use patterns::{PatternMatch, PatternMatcher, UnifiedPatternDetector};
+pub use types::{
+    AnimeInfo, FilenameComponents, LanguageInfo, ParserConfig, ParserResult, SeriesInfo,
+};
+
 // TODO: Gradually migrate to unified parser structure
+// Phase 1.4: Create unified movie parser
+// Phase 1.5: Remove old parser files
