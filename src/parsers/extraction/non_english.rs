@@ -149,7 +149,7 @@ impl NonEnglishProcessor {
     /// Extract non-English title from filename
     pub fn extract_non_english_title(&self, filename: &str) -> Option<String> {
         let parts: Vec<&str> = filename
-            .split(|c| c == '.' || c == '_' || c == '-' || c == ' ')
+            .split(['.', '_', '-', ' '])
             .filter(|part| !part.is_empty())
             .collect();
 
@@ -221,7 +221,7 @@ impl NonEnglishProcessor {
     /// Extract language-specific title
     pub fn extract_language_title(&self, filename: &str, language: &str) -> Option<String> {
         let parts: Vec<&str> = filename
-            .split(|c| c == '.' || c == '_' || c == '-' || c == ' ')
+            .split(['.', '_', '-', ' '])
             .filter(|part| !part.is_empty())
             .collect();
 
@@ -332,7 +332,7 @@ impl NonEnglishProcessor {
 
         // Clean up extra whitespace and separators
         cleaned = cleaned
-            .split(|c| c == '.' || c == '_' || c == '-' || c == ' ')
+            .split(['.', '_', '-', ' '])
             .filter(|part| !part.trim().is_empty())
             .collect::<Vec<_>>()
             .join(" ");

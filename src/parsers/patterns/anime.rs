@@ -75,28 +75,23 @@ impl AnimeDetector {
     /// Detect movie number in anime filenames
     pub fn detect_movie_number(&self, filename: &str) -> Option<u32> {
         for pattern in &self.movie_number_patterns {
-            if let Ok(regex) = Regex::new(pattern) {
-                if let Some(captures) = regex.captures(filename) {
-                    if let Some(number_str) = captures.get(1) {
-                        if let Ok(number) = number_str.as_str().parse::<u32>() {
-                            return Some(number);
-                        }
-                    }
-                }
+            if let Ok(regex) = Regex::new(pattern)
+                && let Some(captures) = regex.captures(filename)
+                && let Some(number_str) = captures.get(1)
+                && let Ok(number) = number_str.as_str().parse::<u32>()
+            {
+                return Some(number);
             }
         }
 
         // Also check for simple number patterns
         let simple_number_regex = Regex::new(r"\b(\d+)\b").unwrap();
-        if let Some(captures) = simple_number_regex.captures(filename) {
-            if let Some(number_str) = captures.get(1) {
-                if let Ok(number) = number_str.as_str().parse::<u32>() {
-                    // Only return if it's a reasonable movie number (1-20)
-                    if number >= 1 && number <= 20 {
-                        return Some(number);
-                    }
-                }
-            }
+        if let Some(captures) = simple_number_regex.captures(filename)
+            && let Some(number_str) = captures.get(1)
+            && let Ok(number) = number_str.as_str().parse::<u32>()
+            && (1..=20).contains(&number)
+        {
+            return Some(number);
         }
 
         None
@@ -142,7 +137,7 @@ impl AnimeDetector {
 
         // Clean up extra whitespace and separators
         title = title
-            .split(|c| c == '.' || c == '_' || c == '-')
+            .split(['.', '_', '-'])
             .filter(|part| !part.trim().is_empty())
             .collect::<Vec<_>>()
             .join(" ");

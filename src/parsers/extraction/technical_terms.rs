@@ -184,7 +184,7 @@ impl TechnicalTermsFilter {
     fn clean_title(&self, title: &str) -> String {
         // Split by common separators and filter out empty parts
         let parts: Vec<&str> = title
-            .split(|c| c == '.' || c == '_' || c == '-' || c == ' ')
+            .split(['.', '_', '-', ' '])
             .filter(|part| !part.trim().is_empty())
             .collect();
 
@@ -197,7 +197,7 @@ impl TechnicalTermsFilter {
         let term_lower = term.to_lowercase();
 
         // Don't treat common words as technical terms
-        let common_words = vec![
+        let common_words = [
             "movie", "film", "the", "and", "or", "of", "in", "on", "at", "to", "for",
         ];
         if common_words.contains(&term_lower.as_str()) {

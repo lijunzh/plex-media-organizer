@@ -35,6 +35,12 @@ pub struct UnifiedPatternDetector {
     language: LanguageDetector,
 }
 
+impl Default for UnifiedPatternDetector {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl UnifiedPatternDetector {
     pub fn new() -> Self {
         Self {

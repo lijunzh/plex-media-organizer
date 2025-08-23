@@ -10,6 +10,7 @@ pub struct LanguageDetector {
     language_patterns: Vec<String>,
     bilingual_patterns: Vec<String>,
     // Non-Latin script detection
+    #[allow(dead_code)]
     latin_regex: Regex,
     non_latin_regex: Regex,
 }
@@ -197,7 +198,7 @@ impl LanguageDetector {
     /// Extract language-specific title from multilingual content
     pub fn extract_language_title(&self, filename: &str, target_language: &str) -> Option<String> {
         let parts: Vec<&str> = filename
-            .split(|c| c == '.' || c == '_' || c == '-' || c == ' ')
+            .split(['.', '_', '-', ' '])
             .filter(|part| !part.is_empty())
             .collect();
 

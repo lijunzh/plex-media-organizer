@@ -25,6 +25,12 @@ pub struct UnifiedTitleExtractor {
     technical_filter: TechnicalTermsFilter,
 }
 
+impl Default for UnifiedTitleExtractor {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl UnifiedTitleExtractor {
     pub fn new() -> Self {
         Self {

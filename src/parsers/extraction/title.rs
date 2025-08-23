@@ -47,7 +47,7 @@ impl TitleExtractor {
 
         // Split by common separators
         let parts: Vec<&str> = filename
-            .split(|c| c == '.' || c == '_' || c == '-' || c == ' ')
+            .split(['.', '_', '-', ' '])
             .filter(|part| !part.is_empty())
             .collect();
 
@@ -100,10 +100,10 @@ impl TitleExtractor {
         for part in parts.iter().rev() {
             // Process in reverse order
             // Skip if it's a year
-            if let Ok(year) = part.parse::<u32>() {
-                if year >= 1900 && year <= 2030 {
-                    continue;
-                }
+            if let Ok(year) = part.parse::<u32>()
+                && (1900..=2030).contains(&year)
+            {
+                continue;
             }
 
             // Skip common file extensions and technical terms
@@ -131,7 +131,7 @@ impl TitleExtractor {
             "ma", "thd", "720p", "1080p", "2160p", "4k", "hdr", "uhd", "hd", "sd",
         ];
 
-        technical_terms.iter().any(|t| term == *t)
+        technical_terms.contains(&term)
     }
 
     /// Calculate confidence score for extracted title
@@ -154,7 +154,7 @@ impl TitleExtractor {
 
         if original_word_count > 0 {
             let usage_ratio = title_word_count as f32 / original_word_count as f32;
-            if usage_ratio >= 0.3 && usage_ratio <= 0.8 {
+            if (0.3..=0.8).contains(&usage_ratio) {
                 confidence += 0.3;
             } else if usage_ratio > 0.8 {
                 confidence += 0.1; // Might be too much, lower confidence
@@ -166,7 +166,7 @@ impl TitleExtractor {
             confidence -= 0.2;
         }
 
-        confidence.max(0.0).min(1.0)
+        confidence.clamp(0.0, 1.0)
     }
 }
 
