@@ -142,7 +142,7 @@ fn calculate_content_hash(&self, file_path: &Path) -> Result<String> {
 ## 🔗 Related Documentation
 
 - [Network Optimization Guide](../network-optimization.md)
-- [User Guide - Network Drive Optimization](../../docs/user-guide.md#network-drive-optimization)
+- [Features Guide - Network Drive Optimization](../../user/features.md#network-drive-optimization)
 - [Performance Testing Strategy](../planning/testing-strategy.md)
 - [Iteration 1 Retrospective](iteration-1-retrospective.md)
 

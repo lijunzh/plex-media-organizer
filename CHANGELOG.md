@@ -15,7 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Comprehensive backup and restore functionality
   - CLI `migrate` command for manual migration control
   - Dry-run mode for previewing changes
-  - Detailed migration documentation in `docs/user-guide/configuration-migration.md`
+  - Detailed migration documentation in `docs/user/configuration.md`
 - **Enhanced configuration management**:
   - Configuration version tracking with `version` field
   - Automatic backup creation before migration
@@ -38,7 +38,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Essential fallback terms for critical filtering (3L, YIFY, YTS, etc.)
   - Improved case-insensitive matching and title cleaning
   - Added missing technical terms (3L, TrueHD, 7.1, 5.1, 2.0, DoVi)
-  - Comprehensive documentation in `docs/user-guide/technical-terms.md`
+  - Comprehensive documentation in `docs/user/technical-terms.md`
   - CLI `terms` command structure (placeholder for future implementation)
 
 ### Changed

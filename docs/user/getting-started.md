@@ -156,7 +156,7 @@ plex-media-organizer setup --force
 
 ## Next Steps
 
-- Read the [CLI Commands Reference](user-guide/cli-commands.md) for detailed usage
+- Read the [CLI Commands Reference](cli-commands.md) for detailed usage
 - Check [Examples](examples/) for real-world scenarios
 - Review [Troubleshooting](troubleshooting.md) for common issues
 

@@ -6,13 +6,13 @@ Welcome to the Plex Media Organizer documentation. This guide helps you find the
 
 ### **For Users** (`user/`)
 - **[Getting Started](user/getting-started.md)** - Quick start guide for new users
-- **[User Guide](user/user-guide.md)** - Comprehensive usage documentation
+- **[Features Guide](user/features.md)** - Comprehensive usage documentation
 - **[Configuration](user/configuration.md)** - All configuration options and settings
 - **[Troubleshooting](user/troubleshooting.md)** - Common issues and solutions
 - **[Examples](user/examples/)** - Real-world usage examples
 
-### **For Users** (`user-guide/`)
-- **[CLI Commands Reference](user-guide/cli-commands.md)** - Complete CLI command documentation
+### **For Users** (`user/`)
+- **[CLI Commands Reference](user/cli-commands.md)** - Complete CLI command documentation
 
 ### **For Developers** (`developer/`)
 - **[Git Practices](developer/git-practices.md)** - Git commit best practices
@@ -78,7 +78,7 @@ The Plex Media Organizer now provides a **complete, production-ready CLI applica
 
 ### **New Users**
 1. Start with **[Getting Started](user/getting-started.md)**
-2. Read the **[CLI Commands Reference](user-guide/cli-commands.md)** for detailed usage
+2. Read the **[CLI Commands Reference](user/cli-commands.md)** for detailed usage
 3. Check **[Examples](user/examples/)** for real-world scenarios
 4. Use **[Troubleshooting](user/troubleshooting.md)** if you encounter issues
 

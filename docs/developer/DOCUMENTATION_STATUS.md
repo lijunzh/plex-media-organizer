@@ -8,8 +8,8 @@ This document tracks the status of documentation updates and identifies any rema
 
 ### **User Documentation**
 - ✅ **[Getting Started](user/getting-started.md)** - Updated to reflect current CLI workflow
-- ✅ **[User Guide](user/user-guide.md)** - Updated to remove outdated conservative approach references
-- ✅ **[CLI Commands Reference](user-guide/cli-commands.md)** - Comprehensive documentation for all 7 commands
+- ✅ **[Features Guide](user/features.md)** - Updated to remove outdated conservative approach references
+- ✅ **[CLI Commands Reference](user/cli-commands.md)** - Comprehensive documentation for all 7 commands
 
 ### **Developer Documentation**
 - ✅ **[Roadmap](developer/architecture/roadmap.md)** - Updated to reflect completed CLI workflow
