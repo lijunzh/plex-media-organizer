@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.1] - 2025-08-23
+
+### Added
+- **Apple Silicon Support**: Added native ARM64 builds for Apple M1/M2/M3 processors
+- **Dual macOS Architecture**: Now supports both Intel (x86_64) and Apple Silicon (aarch64) Macs
+- **Matrix Build Strategy**: macOS builds now use matrix strategy for multiple architectures
+
 ## [1.0.0] - 2025-08-23
 
 ### Added
