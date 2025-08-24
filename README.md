@@ -2,8 +2,8 @@
 
 [![CI](https://github.com/lijunzh/plex-media-organizer/workflows/CI/badge.svg)](https://github.com/lijunzh/plex-media-organizer/actions/workflows/ci.yml)
 [![Crates.io](https://img.shields.io/crates/v/plex-media-organizer)](https://crates.io/crates/plex-media-organizer)
-[![License](https://img.shields.io/crates/l/plex-media-organizer)](https://github.com/lijunzh/plex-media-organizer/blob/main/LICENSE)
-[![Downloads](https://img.shields.io/crates/d/plex-media-organizer)](https://crates.io/crates/plex-media-organizer)
+[![License](https://img.shields.io/github/license/lijunzh/plex-media-organizer)](https://github.com/lijunzh/plex-media-organizer/blob/main/LICENSE)
+[![GitHub Release Downloads](https://img.shields.io/github/downloads/lijunzh/plex-media-organizer/latest/total)](https://github.com/lijunzh/plex-media-organizer/releases)
 [![Rust Version](https://img.shields.io/badge/rust-1.70+-blue.svg)](https://www.rust-lang.org)
 [![Platforms](https://img.shields.io/badge/platforms-linux%20%7C%20macos%20%7C%20windows-lightgrey)](https://github.com/lijunzh/plex-media-organizer/releases)
 [![Release](https://img.shields.io/github/release/lijunzh/plex-media-organizer.svg)](https://github.com/lijunzh/plex-media-organizer/releases)
