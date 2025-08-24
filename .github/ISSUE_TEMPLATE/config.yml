@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 📚 Documentation
+    url: https://github.com/lijunzh/plex-media-organizer/tree/main/docs
+    about: Please check the documentation first for answers to common questions.
+  - name: 💬 Discussions
+    url: https://github.com/lijunzh/plex-media-organizer/discussions
+    about: Ask questions and share ideas in the Discussions section.
+  - name: 🐛 Known Issues
+    url: https://github.com/lijunzh/plex-media-organizer/issues?q=is%3Aissue+is%3Aopen+label%3Abug
+    about: Check if your issue has already been reported.
