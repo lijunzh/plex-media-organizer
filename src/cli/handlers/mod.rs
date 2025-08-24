@@ -10,3 +10,4 @@ pub mod test;
 // TODO: Add individual handler modules as they are implemented
 // pub mod rollback;
 // pub mod cleanup;
+pub mod migrate;

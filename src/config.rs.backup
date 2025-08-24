@@ -9,9 +9,6 @@ use std::path::PathBuf;
 /// Application configuration
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct AppConfig {
-    /// Configuration version for migration tracking
-    #[serde(default = "AppConfig::get_current_version")]
-    pub version: String,
     /// API configuration for external services
     pub apis: ApiConfig,
     /// Database configuration
@@ -253,43 +250,240 @@ impl Default for TechnicalTermsConfig {
     fn default() -> Self {
         Self {
             release_groups: vec![
-                "YIFY".to_string(),
+                // Common release groups
+                "CMCT".to_string(),
+                "WiKi".to_string(),
+                "FRDS".to_string(),
+                "HDS".to_string(),
+                "ADWeb".to_string(),
+                "TLF".to_string(),
+                "CHDWEB".to_string(),
+                "PTerWEB".to_string(),
+                "GREENOTEA".to_string(),
+                "ZmWeb".to_string(),
+                "HDVWEB".to_string(),
+                "NukeHD".to_string(),
+                "TJUPT".to_string(),
+                "CMCTV".to_string(),
+                "NTG".to_string(),
+                "HDWTV".to_string(),
+                "NowOur".to_string(),
+                "PandaQT".to_string(),
+                "HANDJOB".to_string(),
+                "npuer".to_string(),
+                "BYRHD".to_string(),
+                "c0kE".to_string(),
+                "TBMovies".to_string(),
+                "MNHD".to_string(),
                 "YTS".to_string(),
-                "RARBG".to_string(),
+                "MX".to_string(),
+                "HDWinG".to_string(),
+                "NYPAD".to_string(),
+                "ZigZag".to_string(),
+                "NTb".to_string(),
+                "REMUX".to_string(),
+                "iT".to_string(),
+                "mUHD".to_string(),
+                "IAMABLE".to_string(),
+                "KRaLiMaRKo".to_string(),
+                "HDChina".to_string(),
+                "CtrlHD".to_string(),
+                "SWTYBLZ".to_string(),
+                "ADE".to_string(),
+                "PHOBOS".to_string(),
+                "PTHOME".to_string(),
+                "SyncUP".to_string(),
+                "YIFY".to_string(),
+                "SPARKS".to_string(),
                 "3L".to_string(),
+                "HiDt".to_string(),
+                "Geek".to_string(),
+                "TayTO".to_string(),
+                "nikt0".to_string(),
+                "beAst".to_string(),
+                "FoRM".to_string(),
+                "CRiME".to_string(),
+                "HVAC".to_string(),
+                "MaoZhan".to_string(),
+                "VietHD".to_string(),
+                "JYK".to_string(),
+                "PiRaTeS".to_string(),
+                "GalaxyRG265".to_string(),
+                "PaODEQUEiJO".to_string(),
+                "Silence".to_string(),
+                "LoRD".to_string(),
+                "SA89".to_string(),
+                "FANDANGO".to_string(),
+                "DON".to_string(),
+                "D-Z0N3".to_string(),
+                "PTer".to_string(),
+                "ABM".to_string(),
+                "MZABI".to_string(),
+                "BYRPAD".to_string(),
+                "NCmt".to_string(),
+                "MTeam".to_string(),
+                "playWEB".to_string(),
+                "FLUX".to_string(),
+                "CMRG".to_string(),
+                "MZABARBiE".to_string(),
+                "SMURF".to_string(),
+                "AREY".to_string(),
+                "RABiDS".to_string(),
+                "ETHEL".to_string(),
+                "RightSiZE".to_string(),
+                "CiNEPHiLES".to_string(),
+                "Kitsune".to_string(),
+                "CHD".to_string(),
+                "LolHD".to_string(),
+                "DDP5".to_string(),
+                "WiKi".to_string(),
+                "SyncUP".to_string(),
+                "HDChina".to_string(),
+                "FRDS".to_string(),
+                "BYRHD".to_string(),
+                "playWEB".to_string(),
+                "IAMABLE".to_string(),
+                "EtHD".to_string(),
+                "FANDANGO".to_string(),
+                "LoRD".to_string(),
+                "MNHD".to_string(),
+                "PTer".to_string(),
+                "DON".to_string(),
+                "D-Z0N3".to_string(),
+                "BYRPAD".to_string(),
+                "iPad".to_string(),
             ],
             video_audio_terms: vec![
+                // Video/audio codecs and quality
+                "10bit".to_string(),
+                "10bits".to_string(),
+                "bit".to_string(),
+                "bits".to_string(),
+                "DDP".to_string(),
+                "DTS".to_string(),
+                "AC3".to_string(),
+                "AAC".to_string(),
+                "FLAC".to_string(),
+                "THD".to_string(),
+                "MA".to_string(),
+                "HD".to_string(),
                 "x264".to_string(),
                 "x265".to_string(),
                 "H264".to_string(),
                 "H265".to_string(),
                 "AVC".to_string(),
                 "HEVC".to_string(),
-                "10bit".to_string(),
-                "8bit".to_string(),
+                "Atmos".to_string(),
                 "TrueHD".to_string(),
                 "7.1".to_string(),
                 "5.1".to_string(),
                 "2.0".to_string(),
+                "DualAudio".to_string(),
+                "2Audio".to_string(),
+                "2Audios".to_string(),
+                "4Audios".to_string(),
+                "60fps".to_string(),
+                "HQ".to_string(),
+                "AAC(5".to_string(),
+                "1)".to_string(),
+                "Hi10P".to_string(),
+                "DD5".to_string(),
+                "TrueHD7".to_string(),
+                "H".to_string(),
+                "264".to_string(),
+                "265".to_string(),
+                "4Audio".to_string(),
+                "3Audio".to_string(),
+                "5Audio".to_string(),
+                "REPACK".to_string(),
+                "Remux".to_string(),
+                "VC-1".to_string(),
                 "DoVi".to_string(),
+                "HDR10".to_string(),
+                "EDR".to_string(),
+                "MULTi".to_string(),
+                "HDTS".to_string(),
+                "IMAX".to_string(),
+                "DSNP".to_string(),
+                "DTS-HD".to_string(),
+                "HDR".to_string(),
+                "120FPS".to_string(),
+                "4K".to_string(),
+                "WEB".to_string(),
+                "WEBRip".to_string(),
+                "UHD".to_string(),
+                "Blu-ray".to_string(),
+                "Bluray".to_string(),
+                "BluRay".to_string(),
+                "DD5".to_string(),
+                "DD+".to_string(),
+                "AC3".to_string(),
+                "AAC5".to_string(),
+                "AAC1".to_string(),
+                "10bit".to_string(),
+                "DV".to_string(),
+                "MP4".to_string(),
+                "MKV".to_string(),
             ],
             source_platform_terms: vec![
-                "BluRay".to_string(),
-                "WEB-DL".to_string(),
-                "HDTV".to_string(),
+                // Source/platform names
+                "NF".to_string(),
+                "AMZN".to_string(),
+                "HKG".to_string(),
+                "ESP".to_string(),
+                "GBR".to_string(),
+                "INT".to_string(),
+                "JPN".to_string(),
+                "CHN".to_string(),
+                "CCTV6HD".to_string(),
+                "CHC".to_string(),
+                "Star".to_string(),
+                "Movie-HD".to_string(),
+                "AKA".to_string(),
+                "Chinese".to_string(),
+                "iTunes".to_string(),
+                "AMZN".to_string(),
+                "NF".to_string(),
+                "Netflix".to_string(),
+                "HMAX".to_string(),
+                "NOW".to_string(),
+                "ATVP".to_string(),
+                "HULU".to_string(),
+                "DSNP".to_string(),
+            ],
+            file_format_terms: vec![
+                // File formats and containers
+                "HDTVRip".to_string(),
                 "DVDRip".to_string(),
-                "BRRip".to_string(),
+                "BDRip".to_string(),
                 "HDRip".to_string(),
                 "WEBRip".to_string(),
-                "REMUX".to_string(),
+                "HDTV".to_string(),
+                "MP3".to_string(),
             ],
-            file_format_terms: vec!["mkv".to_string(), "mp4".to_string(), "avi".to_string()],
             special_edition_terms: vec![
+                // Special editions and versions
                 "EXTENDED".to_string(),
                 "修复加长版".to_string(),
                 "导演剪辑版".to_string(),
+                "Extended".to_string(),
+                "RERIP".to_string(),
+                "Hybrid".to_string(),
+                "ES".to_string(),
             ],
-            custom_terms: vec![],
+            custom_terms: vec![
+                // Additional custom terms
+                "Blu".to_string(),
+                "ray".to_string(),
+                "VC".to_string(),
+                "YTS".to_string(),
+                "MX".to_string(),
+                "AM".to_string(),
+                "iNT".to_string(),
+                "HHWEB".to_string(),
+                "HDxT".to_string(),
+                "BYNDR".to_string(),
+            ],
         }
     }
 }
@@ -309,9 +503,11 @@ impl Default for ContentFilteringConfig {
     fn default() -> Self {
         Self {
             problematic_patterns: vec![
+                // Extras and bonus content
                 "production report".to_string(),
                 "making of".to_string(),
                 "behind the scenes".to_string(),
+                "highlight film concert".to_string(),
                 "documentary".to_string(),
                 "special feature".to_string(),
                 "bonus content".to_string(),
@@ -338,29 +534,17 @@ impl Default for ContentFilteringConfig {
             ],
             extras_extensions: vec!["ifo".to_string(), "bup".to_string(), "vob".to_string()],
             extras_patterns: vec![
-                "sample".to_string(),
-                "trailer".to_string(),
-                "pv".to_string(),
-                "menu".to_string(),
-                "bdmv".to_string(),
-                "interview".to_string(),
-                "commentary".to_string(),
-                "featurette".to_string(),
-                "deleted.scene".to_string(),
-                "bloopers".to_string(),
-                "outtakes".to_string(),
+                "one.more.time".to_string(),
+                "one.more.chance".to_string(),
+                "she.and.her.cat".to_string(),
+                "5.min".to_string(),
             ],
         }
     }
 }
 
 impl AppConfig {
-    /// Get the current configuration version
-    pub fn get_current_version() -> String {
-        env!("CARGO_PKG_VERSION").to_string()
-    }
-
-    /// Load configuration from file and environment variables with migration support
+    /// Load configuration from file and environment variables
     pub fn load() -> Result<Self> {
         let config_dir = Self::get_config_dir()?;
         let config_file = config_dir.join("config.toml");
@@ -373,8 +557,7 @@ impl AppConfig {
             config_builder.add_source(File::from_str(default_config, config::FileFormat::Toml));
 
         // Load user configuration file if it exists (overrides defaults)
-        let user_config_exists = config_file.exists();
-        if user_config_exists {
+        if config_file.exists() {
             config_builder = config_builder.add_source(File::from(config_file.as_path()));
         }
 
@@ -398,212 +581,7 @@ impl AppConfig {
             app_config.database.path = db_path;
         }
 
-        // Handle configuration migration if user config exists
-        if user_config_exists {
-            app_config = Self::migrate_configuration(app_config, &config_file)?;
-        }
-
         Ok(app_config)
-    }
-
-    /// Migrate configuration to current version while preserving user customizations
-    fn migrate_configuration(
-        mut app_config: AppConfig,
-        config_file: &PathBuf,
-    ) -> Result<AppConfig> {
-        let current_version = Self::get_current_version();
-
-        // If versions match, no migration needed
-        if app_config.version == current_version {
-            return Ok(app_config);
-        }
-
-        println!("🔄 Configuration migration detected:");
-        println!("   From version: {}", app_config.version);
-        println!("   To version: {}", current_version);
-
-        // Create backup of current configuration
-        let backup_path = config_file.with_extension("toml.backup");
-        if config_file.exists() {
-            fs::copy(config_file, &backup_path).context("Failed to create configuration backup")?;
-            println!("   📋 Backup created: {}", backup_path.display());
-        }
-
-        // Load current defaults for comparison
-        let default_config = Self::load_defaults_only()?;
-
-        // Merge new defaults with user customizations
-        app_config = Self::merge_with_defaults(app_config, default_config);
-
-        // Update version
-        app_config.version = current_version;
-
-        // Save migrated configuration
-        app_config.save()?;
-        println!("   ✅ Configuration migrated successfully");
-
-        Ok(app_config)
-    }
-
-    /// Load only the default configuration (no user overrides)
-    pub fn load_defaults_only() -> Result<Self> {
-        let mut config_builder = config::ConfigBuilder::<config::builder::DefaultState>::default();
-
-        // Load default configuration
-        let default_config = include_str!("../config/default.toml");
-        config_builder =
-            config_builder.add_source(File::from_str(default_config, config::FileFormat::Toml));
-
-        // Build and deserialize
-        let config = config_builder.build()?;
-        let app_config: AppConfig = config
-            .try_deserialize()
-            .context("Failed to deserialize default configuration")?;
-
-        Ok(app_config)
-    }
-
-    /// Merge user configuration with new defaults, preserving user customizations
-    pub fn merge_with_defaults(user_config: AppConfig, default_config: AppConfig) -> AppConfig {
-        let mut merged = user_config.clone();
-
-        // Merge technical terms - add new defaults while preserving user customizations
-        merged.organization.technical_terms = Self::merge_technical_terms(
-            &user_config.organization.technical_terms,
-            &default_config.organization.technical_terms,
-        );
-
-        // Merge title preservation - add new defaults while preserving user customizations
-        merged.organization.title_preservation = Self::merge_title_preservation(
-            &user_config.organization.title_preservation,
-            &default_config.organization.title_preservation,
-        );
-
-        // Merge language configuration
-        merged.organization.language = Self::merge_language_config(
-            &user_config.organization.language,
-            &default_config.organization.language,
-        );
-
-        // Merge content filtering
-        merged.organization.content_filtering = Self::merge_content_filtering(
-            &user_config.organization.content_filtering,
-            &default_config.organization.content_filtering,
-        );
-
-        merged
-    }
-
-    /// Merge technical terms, preserving user customizations and adding new defaults
-    fn merge_technical_terms(
-        user_terms: &TechnicalTermsConfig,
-        default_terms: &TechnicalTermsConfig,
-    ) -> TechnicalTermsConfig {
-        TechnicalTermsConfig {
-            release_groups: Self::merge_string_lists(
-                &user_terms.release_groups,
-                &default_terms.release_groups,
-            ),
-            video_audio_terms: Self::merge_string_lists(
-                &user_terms.video_audio_terms,
-                &default_terms.video_audio_terms,
-            ),
-            source_platform_terms: Self::merge_string_lists(
-                &user_terms.source_platform_terms,
-                &default_terms.source_platform_terms,
-            ),
-            file_format_terms: Self::merge_string_lists(
-                &user_terms.file_format_terms,
-                &default_terms.file_format_terms,
-            ),
-            special_edition_terms: Self::merge_string_lists(
-                &user_terms.special_edition_terms,
-                &default_terms.special_edition_terms,
-            ),
-            custom_terms: Self::merge_string_lists(
-                &user_terms.custom_terms,
-                &default_terms.custom_terms,
-            ),
-        }
-    }
-
-    /// Merge title preservation configuration
-    fn merge_title_preservation(
-        user_preservation: &TitlePreservationConfig,
-        default_preservation: &TitlePreservationConfig,
-    ) -> TitlePreservationConfig {
-        TitlePreservationConfig {
-            known_titles: Self::merge_string_lists(
-                &user_preservation.known_titles,
-                &default_preservation.known_titles,
-            ),
-            common_words: Self::merge_string_lists(
-                &user_preservation.common_words,
-                &default_preservation.common_words,
-            ),
-        }
-    }
-
-    /// Merge language configuration
-    fn merge_language_config(
-        user_language: &LanguageConfig,
-        default_language: &LanguageConfig,
-    ) -> LanguageConfig {
-        LanguageConfig {
-            language_codes: Self::merge_string_lists(
-                &user_language.language_codes,
-                &default_language.language_codes,
-            ),
-            technical_japanese_terms: Self::merge_string_lists(
-                &user_language.technical_japanese_terms,
-                &default_language.technical_japanese_terms,
-            ),
-        }
-    }
-
-    /// Merge content filtering configuration
-    fn merge_content_filtering(
-        user_filtering: &ContentFilteringConfig,
-        default_filtering: &ContentFilteringConfig,
-    ) -> ContentFilteringConfig {
-        ContentFilteringConfig {
-            problematic_patterns: Self::merge_string_lists(
-                &user_filtering.problematic_patterns,
-                &default_filtering.problematic_patterns,
-            ),
-            extras_extensions: Self::merge_string_lists(
-                &user_filtering.extras_extensions,
-                &default_filtering.extras_extensions,
-            ),
-            extras_patterns: Self::merge_string_lists(
-                &user_filtering.extras_patterns,
-                &default_filtering.extras_patterns,
-            ),
-        }
-    }
-
-    /// Merge two string lists, preserving user items and adding new defaults
-    fn merge_string_lists(user_list: &[String], default_list: &[String]) -> Vec<String> {
-        let mut merged = user_list.to_vec();
-
-        // Add new defaults that aren't already in user list
-        for default_item in default_list {
-            if !merged.contains(default_item) {
-                merged.push(default_item.clone());
-            }
-        }
-
-        merged
-    }
-
-    /// Check if configuration needs migration
-    pub fn needs_migration(&self) -> bool {
-        self.version != Self::get_current_version()
-    }
-
-    /// Get migration information
-    pub fn get_migration_info(&self) -> (String, String) {
-        (self.version.clone(), Self::get_current_version())
     }
 
     /// Save configuration to file
@@ -670,20 +648,47 @@ impl AppConfig {
         all_terms
     }
 
-    /// Get all content filtering patterns
+    /// Get all content filtering patterns as a single list
     pub fn get_all_content_filtering_patterns(&self) -> Vec<String> {
-        let mut patterns = Vec::new();
-        patterns.extend(
+        let mut all_patterns = Vec::new();
+
+        all_patterns.extend(
             self.organization
                 .content_filtering
                 .problematic_patterns
                 .clone(),
         );
-        patterns.extend(self.organization.content_filtering.extras_patterns.clone());
-        patterns
+        all_patterns.extend(self.organization.content_filtering.extras_patterns.clone());
+
+        all_patterns
     }
 
-    /// Get extras extensions
+    /// Get all language codes for detection
+    pub fn get_language_codes(&self) -> Vec<String> {
+        self.organization.language.language_codes.clone()
+    }
+
+    /// Get release groups for filtering
+    pub fn get_release_groups(&self) -> Vec<String> {
+        self.organization.technical_terms.release_groups.clone()
+    }
+
+    /// Get Japanese technical terms to filter out
+    pub fn get_technical_japanese_terms(&self) -> Vec<String> {
+        self.organization.language.technical_japanese_terms.clone()
+    }
+
+    /// Get known movie titles to preserve
+    pub fn get_known_titles(&self) -> Vec<String> {
+        self.organization.title_preservation.known_titles.clone()
+    }
+
+    /// Get common English words to preserve
+    pub fn get_common_words(&self) -> Vec<String> {
+        self.organization.title_preservation.common_words.clone()
+    }
+
+    /// Get extras file extensions
     pub fn get_extras_extensions(&self) -> Vec<String> {
         self.organization
             .content_filtering
@@ -691,28 +696,113 @@ impl AppConfig {
             .clone()
     }
 
-    /// Get language codes
-    pub fn get_language_codes(&self) -> Vec<String> {
-        self.organization.language.language_codes.clone()
+    /// Check if required API keys are configured
+    pub fn validate_api_keys(&self) -> Result<()> {
+        let mut missing_keys = Vec::new();
+
+        if self.apis.tmdb_api_key.is_none() {
+            missing_keys.push("TMDB API key");
+        }
+
+        if !missing_keys.is_empty() {
+            anyhow::bail!("Missing required API keys: {}", missing_keys.join(", "));
+        }
+
+        Ok(())
     }
 
-    /// Get common words
-    pub fn get_common_words(&self) -> Vec<String> {
-        self.organization.title_preservation.common_words.clone()
+    /// Create a new configuration with interactive setup
+    pub fn interactive_setup() -> Result<Self> {
+        println!("Welcome to Plex Media Organizer Setup!");
+        println!("This will help you configure the application.\n");
+
+        let mut config = AppConfig::default();
+
+        // Get TMDB API key
+        println!("To use this application, you need a TMDB API key.");
+        println!("Get one for free at: https://www.themoviedb.org/settings/api");
+        println!();
+
+        let tmdb_key = Self::prompt_input("Enter your TMDB API key: ")?;
+        if !tmdb_key.trim().is_empty() {
+            config.apis.tmdb_api_key = Some(tmdb_key.trim().to_string());
+        }
+
+        // Get database path
+        println!("\nDatabase Configuration:");
+        println!("The application stores movie data and API cache in a SQLite database.");
+        println!("Current default location: {}", config.database.path);
+
+        let db_path = Self::prompt_input(&format!(
+            "Database path (press Enter for default '{}'): ",
+            config.database.path
+        ))?;
+        if !db_path.trim().is_empty() {
+            config.database.path = db_path.trim().to_string();
+        }
+
+        // Validate database path
+        if let Some(parent) = std::path::Path::new(&config.database.path).parent()
+            && !parent.exists()
+        {
+            let create_dir = Self::prompt_input(&format!(
+                "Directory '{}' doesn't exist. Create it? (y/N): ",
+                parent.display()
+            ))?;
+            if create_dir.trim().to_lowercase() == "y" || create_dir.trim().to_lowercase() == "yes"
+            {
+                std::fs::create_dir_all(parent)?;
+                println!("✅ Directory created successfully!");
+            } else {
+                println!("⚠️  Please ensure the directory exists before running the application.");
+            }
+        }
+
+        // Save configuration
+        config.save()?;
+        println!("\nConfiguration saved successfully!");
+        println!("Database will be stored at: {}", config.database.path);
+
+        Ok(config)
     }
 
-    /// Get known titles
-    pub fn get_known_titles(&self) -> Vec<String> {
-        self.organization.title_preservation.known_titles.clone()
+    /// Prompt for user input
+    fn prompt_input(prompt: &str) -> Result<String> {
+        use std::io::{self, Write};
+
+        print!("{}", prompt);
+        io::stdout().flush()?;
+
+        let mut input = String::new();
+        io::stdin().read_line(&mut input)?;
+
+        Ok(input)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_config_defaults() {
+        let config = AppConfig::default();
+        assert!(config.apis.tmdb_api_key.is_none());
+        assert_eq!(
+            config.organization.quality.preferred_quality,
+            Some("1080p".to_string())
+        );
     }
 
-    /// Get technical Japanese terms
-    pub fn get_technical_japanese_terms(&self) -> Vec<String> {
-        self.organization.language.technical_japanese_terms.clone()
-    }
+    #[test]
+    fn test_config_serialization() {
+        let config = AppConfig::default();
+        let toml_string = toml::to_string(&config).unwrap();
+        let deserialized: AppConfig = toml::from_str(&toml_string).unwrap();
 
-    /// Get release groups
-    pub fn get_release_groups(&self) -> Vec<String> {
-        self.organization.technical_terms.release_groups.clone()
+        assert_eq!(
+            config.organization.quality.preferred_quality,
+            deserialized.organization.quality.preferred_quality
+        );
     }
 }
