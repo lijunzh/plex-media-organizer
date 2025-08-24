@@ -1,5 +1,15 @@
 # Plex Media Organizer
 
+[![CI](https://github.com/lijunzh/plex-media-organizer/workflows/CI/badge.svg)](https://github.com/lijunzh/plex-media-organizer/actions/workflows/ci.yml)
+[![Crates.io](https://img.shields.io/crates/v/plex-media-organizer)](https://crates.io/crates/plex-media-organizer)
+[![License](https://img.shields.io/crates/l/plex-media-organizer)](https://github.com/lijunzh/plex-media-organizer/blob/main/LICENSE)
+[![Downloads](https://img.shields.io/crates/d/plex-media-organizer)](https://crates.io/crates/plex-media-organizer)
+[![Rust Version](https://img.shields.io/badge/rust-1.70+-blue.svg)](https://www.rust-lang.org)
+[![Platforms](https://img.shields.io/badge/platforms-linux%20%7C%20macos%20%7C%20windows-lightgrey)](https://github.com/lijunzh/plex-media-organizer/releases)
+[![Release](https://img.shields.io/github/release/lijunzh/plex-media-organizer.svg)](https://github.com/lijunzh/plex-media-organizer/releases)
+[![Nightly](https://img.shields.io/github/actions/workflow/status/lijunzh/plex-media-organizer/nightly.yml?label=nightly%20build)](https://github.com/lijunzh/plex-media-organizer/actions/workflows/nightly.yml)
+[![Quality](https://img.shields.io/github/actions/workflow/status/lijunzh/plex-media-organizer/quality.yml?label=quality%20checks)](https://github.com/lijunzh/plex-media-organizer/actions/workflows/quality.yml)
+
 A powerful, intelligent media file organizer that follows Plex naming conventions. Built in Rust for performance and reliability.
 
 ## 🎬 Features
@@ -14,6 +24,16 @@ A powerful, intelligent media file organizer that follows Plex naming convention
 
 ### Installation
 
+#### Option 1: Install from Cargo (Recommended)
+```bash
+# Install the latest version
+cargo install plex-media-organizer
+
+# Update to the latest version
+cargo install --force plex-media-organizer
+```
+
+#### Option 2: Download Pre-built Binaries
 Download the latest release for your platform from [GitHub Releases](https://github.com/lijunzh/plex-media-organizer/releases):
 
 - **macOS (Intel/Apple Silicon)**: `plex-media-organizer-v1.0.0-x86_64-apple-darwin.tar.gz` / `plex-media-organizer-v1.0.0-aarch64-apple-darwin.tar.gz`
@@ -89,7 +109,7 @@ cargo test
 
 For development setup and contributing guidelines, see [Contributing Guide](CONTRIBUTING.md).
 
-## �� Performance
+## 📄 Performance
 
 - **Fast Parsing**: Optimized algorithms for quick filename analysis
 - **Parallel Processing**: Configurable parallel operations for large directories
