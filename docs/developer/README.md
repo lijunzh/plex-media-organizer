@@ -33,6 +33,7 @@ cargo watch -x test
 - **[Git Practices](git-practices.md)** - Commit standards and workflow
 - **[Documentation Standards](documentation-standards.md)** - Documentation guidelines
 - **[Documentation Status](DOCUMENTATION_STATUS.md)** - Documentation completion status
+- **[Release Process](release-process.md)** - Automated release and publication workflow
 
 ### Architecture & Design
 - **[Architecture](architecture/)** - System design and technical architecture

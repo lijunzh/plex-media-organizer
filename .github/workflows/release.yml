@@ -254,3 +254,155 @@ jobs:
           echo "   - Windows (x86_64): plex-media-organizer-v${{ github.ref_name }}-x86_64-pc-windows-msvc.zip"
           echo "📚 Documentation included"
           echo "🚀 Ready for distribution"
+
+  publish-crates-io:
+    needs: [create-release]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      
+      - name: Setup Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          profile: minimal
+      
+      - name: Cache Dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-publish-${{ hashFiles('**/Cargo.lock') }}
+      
+      - name: Verify Package
+        run: |
+          echo "🔍 Verifying package for crates.io..."
+          cargo check --release
+          cargo test --release
+          cargo package --allow-dirty
+          echo "✅ Package verification passed"
+      
+      - name: Publish to crates.io
+        run: |
+          echo "📦 Publishing to crates.io..."
+          cargo publish --token ${{ secrets.CARGO_REGISTRY_TOKEN }}
+          echo "✅ Published to crates.io successfully!"
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+      
+      - name: Crates.io Summary
+        run: |
+          echo "🎉 Crates.io publication successful!"
+          echo "📦 Package: plex-media-organizer"
+          echo "🏷️  Version: ${{ github.ref_name }}"
+          echo "🔗 URL: https://crates.io/crates/plex-media-organizer"
+
+  publish-homebrew:
+    needs: [create-release]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.0'
+          bundler-cache: true
+      
+      - name: Checkout Homebrew Tap
+        uses: actions/checkout@v4
+        with:
+          repository: lijunzh/homebrew-plex-media-organizer
+          path: homebrew-tap
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Calculate SHA256 Checksums
+        run: |
+          echo "🔍 Calculating SHA256 checksums for Homebrew formula..."
+          
+          # Download and calculate checksums
+          curl -L "https://github.com/lijunzh/plex-media-organizer/releases/download/${{ github.ref_name }}/plex-media-organizer-v${{ github.ref_name }}-aarch64-apple-darwin.tar.gz" -o aarch64.tar.gz
+          curl -L "https://github.com/lijunzh/plex-media-organizer/releases/download/${{ github.ref_name }}/plex-media-organizer-v${{ github.ref_name }}-x86_64-apple-darwin.tar.gz" -o x86_64.tar.gz
+          curl -L "https://github.com/lijunzh/plex-media-organizer/releases/download/${{ github.ref_name }}/plex-media-organizer-v${{ github.ref_name }}-x86_64-unknown-linux-gnu.tar.gz" -o linux.tar.gz
+          
+          AARCH64_SHA256=$(shasum -a 256 aarch64.tar.gz | cut -d' ' -f1)
+          X86_64_SHA256=$(shasum -a 256 x86_64.tar.gz | cut -d' ' -f1)
+          LINUX_SHA256=$(shasum -a 256 linux.tar.gz | cut -d' ' -f1)
+          
+          echo "AARCH64_SHA256=$AARCH64_SHA256" >> $GITHUB_ENV
+          echo "X86_64_SHA256=$X86_64_SHA256" >> $GITHUB_ENV
+          echo "LINUX_SHA256=$LINUX_SHA256" >> $GITHUB_ENV
+          
+          echo "✅ SHA256 checksums calculated:"
+          echo "   aarch64: $AARCH64_SHA256"
+          echo "   x86_64: $X86_64_SHA256"
+          echo "   linux: $LINUX_SHA256"
+      
+      - name: Update Homebrew Formula
+        run: |
+          echo "📝 Updating Homebrew formula..."
+          
+          # Extract version number (remove 'v' prefix)
+          VERSION=${GITHUB_REF_NAME#v}
+          
+          # Update the formula file
+          cat > homebrew-tap/Formula/plex-media-organizer.rb << EOF
+          class PlexMediaOrganizer < Formula
+            desc "Intelligent media file organizer following Plex naming conventions"
+            homepage "https://github.com/lijunzh/plex-media-organizer"
+            version "$VERSION"
+            license "MIT"
+
+            on_macos do
+              if Hardware::CPU.arm?
+                url "https://github.com/lijunzh/plex-media-organizer/releases/download/${{ github.ref_name }}/plex-media-organizer-v${{ github.ref_name }}-aarch64-apple-darwin.tar.gz"
+                sha256 "$AARCH64_SHA256"
+              else
+                url "https://github.com/lijunzh/plex-media-organizer/releases/download/${{ github.ref_name }}/plex-media-organizer-v${{ github.ref_name }}-x86_64-apple-darwin.tar.gz"
+                sha256 "$X86_64_SHA256"
+              end
+            end
+
+            on_linux do
+              url "https://github.com/lijunzh/plex-media-organizer/releases/download/${{ github.ref_name }}/plex-media-organizer-v${{ github.ref_name }}-x86_64-unknown-linux-gnu.tar.gz"
+              sha256 "$LINUX_SHA256"
+            end
+
+            def install
+              bin.install "plex-media-organizer"
+            end
+
+            test do
+              system "#{bin}/plex-media-organizer", "--version"
+            end
+          end
+          EOF
+          
+          echo "✅ Homebrew formula updated"
+      
+      - name: Commit and Push Homebrew Tap
+        run: |
+          echo "🚀 Committing and pushing Homebrew tap updates..."
+          
+          cd homebrew-tap
+          
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          
+          git add Formula/plex-media-organizer.rb
+          git commit -m "feat: update plex-media-organizer to ${{ github.ref_name }}"
+          git push
+          
+          echo "✅ Homebrew tap updated successfully!"
+      
+      - name: Homebrew Summary
+        run: |
+          echo "🎉 Homebrew publication successful!"
+          echo "📦 Formula: plex-media-organizer"
+          echo "🏷️  Version: ${{ github.ref_name }}"
+          echo "🔗 Tap: https://github.com/lijunzh/homebrew-plex-media-organizer"
+          echo "📥 Install: brew install lijunzh/plex-media-organizer/plex-media-organizer"
