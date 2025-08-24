@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Planned
+- TV Show support with episode detection
+- Music file organization
+- Web interface
+- Advanced CLI term management commands
+
+## [0.1.1] - 2025-08-23
+
 ### Added
 - **Configuration-based technical terms management**: Migrated from hard-coded technical terms to user-editable configuration
   - New `TechnicalTermsConfig` structure in `config.toml` for managing filtering terms
@@ -29,24 +37,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **3L release group filtering**: Fixed issue where "3L" was appearing in organized movie titles
 - **Technical terms case sensitivity**: Improved case-insensitive matching for better filtering accuracy
 
-## [1.0.1] - 2025-08-23
-
-### Added
-- **Multi-platform support**: Native builds for Linux (x86_64), macOS (x86_64 and aarch64), and Windows (x86_64)
-- **Apple Silicon support**: Native ARM64 builds for Apple M1/M2/M3 processors
-- **Enhanced GitHub Actions**: Automated multi-platform release workflow with native runners
-- **Improved release artifacts**: Platform-specific archives with proper naming conventions
-
-### Changed
-- **GitHub Actions workflow**: Refactored to use matrix strategy for multi-platform builds
-- **Build process**: Updated to use native runners for each platform (ubuntu-latest, macos-latest, windows-latest)
-- **Artifact management**: Updated to actions/upload-artifact@v4 and actions/download-artifact@v4
-
-### Fixed
-- **Windows build compatibility**: Fixed PowerShell command usage in GitHub Actions
-- **macOS matrix builds**: Corrected Rust toolchain target configuration for Apple Silicon
-
-## [1.0.0] - 2025-08-23
+## [0.1.0] - 2025-08-23
 
 ### Added
 - **Complete CLI workflow**: Full set of commands for media organization
@@ -64,6 +55,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Safety features**: Preview mode, dry-run operations, comprehensive error handling
 - **Performance optimizations**: Intelligent caching, database optimization, efficient parsing
 - **Comprehensive documentation**: User guides, developer docs, architecture documentation
+- **Multi-platform support**: Native builds for Linux (x86_64), macOS (x86_64 and aarch64), and Windows (x86_64)
+- **Apple Silicon support**: Native ARM64 builds for Apple M1/M2/M3 processors
+- **Enhanced GitHub Actions**: Automated multi-platform release workflow with native runners
 
 ### Changed
 - **Architecture**: Complete refactoring with modular parser components
@@ -71,18 +65,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Database**: SQLite with connection pooling and optimization
 - **Error handling**: Comprehensive error handling with user-friendly messages
 - **File organization**: Flat structure optimized for Plex with year-based option
+- **GitHub Actions workflow**: Refactored to use matrix strategy for multi-platform builds
+- **Build process**: Updated to use native runners for each platform
 
 ### Fixed
 - **Filename parsing**: Improved accuracy for complex patterns and edge cases
 - **Technical terms filtering**: Enhanced filtering of release groups, codecs, and quality indicators
 - **Title extraction**: Better handling of special characters and formatting
 - **Database operations**: Robust transaction handling and error recovery
+- **Windows build compatibility**: Fixed PowerShell command usage in GitHub Actions
+- **macOS matrix builds**: Corrected Rust toolchain target configuration for Apple Silicon
 
-## [0.1.0] - 2025-08-23
+## [Pre-0.1.0] - Development Phase
 
-### Added
-- Initial release with basic movie organization functionality
-- Filename parsing and metadata extraction
-- Basic CLI interface
-- Configuration management
-- Database storage for parsing results
+### Initial Development
+- Basic filename parsing functionality
+- Plex naming convention support
+- Multi-language title handling
+- Configuration system
+- Database schema design
+- CLI framework setup
+- Modular parser architecture
+- Technical terms filtering system
