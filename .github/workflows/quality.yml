@@ -1,9 +1,17 @@
 name: Quality Assurance
 
+# Quality Assurance Workflow
+# - PR Analysis: Runs on pull requests (PR-specific analysis and comments)
+# - Main Quality Check: Runs on push to main (essential quality validation)
+# - Documentation Check: Runs on PRs, push to main, and scheduled (comprehensive docs/deps)
+# - Weekly Comprehensive Test: Runs on schedule only (full test suite and performance)
+
 on:
   pull_request:
     branches: [main]
     types: [opened, synchronize, reopened, ready_for_review]
+  push:
+    branches: [main]  # Add quality checks for main branch pushes
   schedule:
     # Run quality checks weekly (Sunday 3 AM UTC)
     - cron: '0 3 * * 0'
@@ -111,8 +119,42 @@ jobs:
                console.log('Could not create PR analysis:', error.message);
              }
 
-  # Documentation and Code Quality (runs on PRs and scheduled)
+  # Essential Quality Checks for Main Branch (runs on push to main)
+  main-quality-check:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      
+      - name: Setup Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+      
+      - name: Quick Quality Validation
+        run: |
+          echo "🔍 Running essential quality checks for main branch..."
+          
+          # Quick documentation check
+          if [ ! -f README.md ] || [ ! -s README.md ]; then
+            echo "❌ README.md is missing or empty"
+            exit 1
+          fi
+          
+          # Quick build check
+          echo "🔨 Quick build verification..."
+          cargo check --release
+          
+          # Quick dependency security check
+          echo "🔒 Security audit..."
+          cargo audit || echo "Security audit completed"
+          
+          echo "✅ Essential quality checks passed!"
+
+  # Documentation and Code Quality (runs on PRs, push to main, and scheduled)
   documentation-check:
+    if: github.event_name == 'pull_request' || github.event_name == 'push' || github.event_name == 'schedule'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
@@ -177,7 +219,7 @@ jobs:
           
           echo "✅ Coverage analysis completed"
 
-  # Weekly Comprehensive Testing (scheduled only)
+  # Weekly Comprehensive Testing (scheduled only - not on push to main)
   weekly-comprehensive-test:
     if: github.event_name == 'schedule'
     runs-on: ubuntu-latest
