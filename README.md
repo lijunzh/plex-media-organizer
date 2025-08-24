@@ -133,6 +133,7 @@ For detailed command documentation, see [CLI Commands Reference](docs/user-guide
 - **Quality Detection**: Identifies resolution, source, and codec information
 - **Language Support**: Handles multi-language titles and metadata
 - **Confidence Scoring**: Provides confidence levels for parsing accuracy
+- **Technical Terms Filtering**: User-configurable filtering of release groups, codecs, and quality indicators
 
 ### Plex Integration
 - **Naming Conventions**: Follows Plex's recommended naming structure
@@ -187,7 +188,39 @@ confidence_threshold = 0.7
 network_mode = false
 max_parallel_operations = 16
 batch_size = 100
+
+# Technical terms filtering configuration
+[organization.technical_terms]
+# Release group names to filter out
+release_groups = ["YIFY", "YTS", "RARBG", "3L", "CMCT"]
+
+# Video/audio codec and quality terms
+video_audio_terms = ["x264", "x265", "DTS", "AC3", "TrueHD", "7.1"]
+
+# Source/platform names
+source_platform_terms = ["Netflix", "Amazon", "iTunes"]
+
+# File format and container terms
+file_format_terms = ["mkv", "mp4", "avi", "web", "dl", "rip"]
+
+# Special edition and version terms
+special_edition_terms = ["Extended", "Director's Cut", "Unrated"]
+
+# Additional custom terms
+custom_terms = ["YourCustomTerm1", "YourCustomTerm2"]
 ```
+
+### Technical Terms Management
+Technical terms (like release groups, codecs, quality indicators) are automatically filtered from movie titles. These terms are managed through the configuration file and can be customized without recompiling the application.
+
+**Benefits:**
+- ✅ **Single source of truth**: All terms in `config.toml`
+- ✅ **User-editable**: No need to recompile for changes
+- ✅ **Version controlled**: Changes tracked in git
+- ✅ **Immediate effect**: Restart app, changes apply
+- ✅ **Portable**: Config file moves with the app
+
+See [Technical Terms Management](docs/user-guide/technical-terms.md) for detailed documentation.
 
 ## 🛠️ Development
 
