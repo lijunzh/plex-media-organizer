@@ -28,7 +28,8 @@ A powerful, intelligent media file organizer that follows Plex naming convention
 
 Download the latest release for your platform from [GitHub Releases](https://github.com/lijunzh/plex-media-organizer/releases):
 
-- **macOS**: `plex-media-organizer-v1.0.0-x86_64-apple-darwin.tar.gz`
+- **macOS (Intel)**: `plex-media-organizer-v1.0.0-x86_64-apple-darwin.tar.gz`
+- **macOS (Apple Silicon)**: `plex-media-organizer-v1.0.0-aarch64-apple-darwin.tar.gz`
 - **Linux**: `plex-media-organizer-v1.0.0-x86_64-unknown-linux-gnu.tar.gz`
 - **Windows**: `plex-media-organizer-v1.0.0-x86_64-pc-windows-msvc.zip`
 

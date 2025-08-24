@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.0.0] - 2025-08-23
 
 ### Added
-- **Multi-platform Build Support**: GitHub Actions now builds for Linux, macOS, and Windows
+- **Multi-platform Build Support**: GitHub Actions now builds for Linux, macOS (Intel & Apple Silicon), and Windows
 - **Native Platform Builds**: Separate build jobs for each platform for better reliability
 - **Platform-specific Archives**: .tar.gz for Linux/macOS, .zip for Windows
 - **Updated Documentation**: Installation instructions for all platforms
