@@ -3,7 +3,6 @@
 [![License](https://img.shields.io/github/license/lijunzh/plex-media-organizer)](https://github.com/lijunzh/plex-media-organizer/blob/main/LICENSE)
 [![Rust Version](https://img.shields.io/badge/rust-1.70+-blue.svg)](https://www.rust-lang.org)
 [![Platforms](https://img.shields.io/badge/platforms-linux%20%7C%20macos%20%7C%20windows-lightgrey)](https://github.com/lijunzh/plex-media-organizer/releases)
-[![Release](https://img.shields.io/github/release/lijunzh/plex-media-organizer.svg)](https://github.com/lijunzh/plex-media-organizer/releases)
 [![Nightly](https://img.shields.io/github/actions/workflow/status/lijunzh/plex-media-organizer/nightly.yml?label=nightly%20build)](https://github.com/lijunzh/plex-media-organizer/actions/workflows/nightly.yml)
 [![Quality](https://img.shields.io/github/actions/workflow/status/lijunzh/plex-media-organizer/quality.yml?label=quality%20checks)](https://github.com/lijunzh/plex-media-organizer/actions/workflows/quality.yml)
 
