@@ -45,7 +45,7 @@ jobs:
       
       - name: Verify Binary
         run: |
-          echo " Binary details for Linux:"
+          echo "📦 Binary details for Linux:"
           ls -la target/release/
           echo ""
           echo "📊 Binary size:"
@@ -119,7 +119,7 @@ jobs:
       
       - name: Verify Binary
         run: |
-          echo " Binary details for macOS (${{ matrix.target }}):"
+          echo "📦 Binary details for macOS (${{ matrix.target }}):"
           ls -la target/${{ matrix.target }}/release/
           echo ""
           echo "📊 Binary size:"
@@ -182,7 +182,7 @@ jobs:
       
       - name: Verify Binary
         run: |
-          echo " Binary details for Windows:"
+          echo "📦 Binary details for Windows:"
           Get-ChildItem target/release/
           echo ""
           echo "📊 Binary size:"
@@ -226,7 +226,7 @@ jobs:
       
       - name: List Artifacts
         run: |
-          echo " Downloaded nightly artifacts:"
+          echo "📦 Downloaded nightly artifacts:"
           find artifacts -type f -name "*.tar.gz" -o -name "*.zip"
       
       - name: Generate Next Version Nightly
@@ -246,7 +246,7 @@ jobs:
           DATE=$(date +%Y%m%d)
           SHORT_SHA=$(git rev-parse --short HEAD)
           
-          # Create consistent version format for both GitHub and crates.io
+          # Create consistent version format for GitHub releases
           NIGHTLY_VERSION="${NEXT_VERSION}-nightly.${DATE}.${SHORT_SHA}"
           
           echo "current_version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
@@ -312,7 +312,7 @@ jobs:
                 - **Current Stable**: ${{ steps.nightly_version.outputs.current_version }}
                 - **Next Version**: ${{ steps.nightly_version.outputs.next_version }}
                 - **Nightly Version**: ${{ steps.nightly_version.outputs.nightly_version }}
-                - **Crates.io**: Available as pre-release version
+                - **Crates.io**: Not available (nightlies are GitHub-only)
                 
                 ### What's New
                 - Latest changes from main branch
@@ -332,13 +332,10 @@ jobs:
                 tar -xzf plex-media-organizer-nightly-*.tar.gz
                 ./plex-media-organizer --help
                 
-                # Option 2: Crates.io nightly (recommended)
-                cargo install plex-media-organizer --version "${{ steps.nightly_version.outputs.nightly_version }}"
+                # Option 2: Install from source (recommended)
+                cargo install --git https://github.com/lijunzh/plex-media-organizer
                 
-                # Option 3: Latest nightly (default)
-                cargo install plex-media-organizer
-                
-                # Option 4: Windows
+                # Option 3: Windows
                 # Extract the zip file and run plex-media-organizer.exe
                 \`\`\`
                 
@@ -346,6 +343,7 @@ jobs:
                 - This is a **nightly build** and may contain experimental features
                 - Use at your own risk in production environments
                 - For stable releases, use: \`cargo install plex-media-organizer --version "${{ steps.nightly_version.outputs.current_version }}"\`
+                - Nightlies are only available via GitHub releases (not crates.io)
                 
                 **Build Date**: ${{ github.event.head_commit.timestamp || 'N/A' }}
                 **Commit**: ${{ github.sha }}
@@ -383,7 +381,7 @@ jobs:
             - **Current Stable**: ${{ steps.nightly_version.outputs.current_version }}
             - **Next Version**: ${{ steps.nightly_version.outputs.next_version }}
             - **Nightly Version**: ${{ steps.nightly_version.outputs.nightly_version }}
-            - **Crates.io**: Available as pre-release version
+            - **Crates.io**: Not available (nightlies are GitHub-only)
             
             ### What's New
             - Latest changes from main branch
@@ -403,13 +401,10 @@ jobs:
             tar -xzf plex-media-organizer-nightly-*.tar.gz
             ./plex-media-organizer --help
             
-            # Option 2: Crates.io nightly (recommended)
-            cargo install plex-media-organizer --version "${{ steps.nightly_version.outputs.nightly_version }}"
+            # Option 2: Install from source (recommended)
+            cargo install --git https://github.com/lijunzh/plex-media-organizer
             
-            # Option 3: Latest nightly (default)
-            cargo install plex-media-organizer
-            
-            # Option 4: Windows
+            # Option 3: Windows
             # Extract the zip file and run plex-media-organizer.exe
             ```
             
@@ -417,6 +412,7 @@ jobs:
             - This is a **nightly build** and may contain experimental features
             - Use at your own risk in production environments
             - For stable releases, use: `cargo install plex-media-organizer --version "${{ steps.nightly_version.outputs.current_version }}"`
+            - Nightlies are only available via GitHub releases (not crates.io)
             
             **Build Date**: ${{ github.event.head_commit.timestamp || 'N/A' }}
             **Commit**: ${{ github.sha }}
@@ -475,7 +471,7 @@ jobs:
             echo "   - macOS (x86_64): plex-media-organizer-nightly-x86_64-apple-darwin.tar.gz"
             echo "   - macOS (Apple Silicon): plex-media-organizer-nightly-aarch64-apple-darwin.tar.gz"
             echo "   - Windows (x86_64): plex-media-organizer-nightly-x86_64-pc-windows-msvc.zip"
-            echo "��️  Updated Tag: ${{ steps.nightly_version.outputs.nightly_version }}"
+            echo "🏷️  Updated Tag: ${{ steps.nightly_version.outputs.nightly_version }}"
             echo "🔄 Kept single nightly release (updated existing)"
           else
             echo "🌙 Created new nightly release successfully!"
@@ -488,99 +484,6 @@ jobs:
             echo "🆕 Created first nightly release"
           fi
           echo "🚀 Nightly build ready for testing"
+          echo "📝 Note: Nightlies are GitHub-only (not published to crates.io)"
 
-  publish-nightly-crates:
-    needs: [update-nightly-release]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-      
-      - name: Setup Rust
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          profile: minimal
-      
-      - name: Cache Dependencies
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            target
-          key: ${{ runner.os }}-cargo-nightly-publish-${{ hashFiles('**/Cargo.lock') }}
-      
-      - name: Generate Next Version Nightly
-        id: nightly_version
-        run: |
-          # Get current version from Cargo.toml
-          CURRENT_VERSION=$(grep '^version = ' Cargo.toml | cut -d'"' -f2)
-          
-          # Calculate next version (increment patch version)
-          MAJOR=$(echo $CURRENT_VERSION | cut -d'.' -f1)
-          MINOR=$(echo $CURRENT_VERSION | cut -d'.' -f2)
-          PATCH=$(echo $CURRENT_VERSION | cut -d'.' -f3)
-          NEXT_PATCH=$((PATCH + 1))
-          NEXT_VERSION="${MAJOR}.${MINOR}.${NEXT_PATCH}"
-          
-          # Generate nightly version based on current date and commit hash
-          DATE=$(date +%Y%m%d)
-          SHORT_SHA=$(git rev-parse --short HEAD)
-          
-          # Create consistent version format for crates.io
-          NIGHTLY_VERSION="${NEXT_VERSION}-nightly.${DATE}.${SHORT_SHA}"
-          
-          echo "current_version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
-          echo "next_version=$NEXT_VERSION" >> $GITHUB_OUTPUT
-          echo "nightly_version=$NIGHTLY_VERSION" >> $GITHUB_OUTPUT
-          
-          echo "Generated nightly version for crates.io:"
-          echo "  Current stable version: $CURRENT_VERSION"
-          echo "  Next version: $NEXT_VERSION"
-          echo "  Nightly version: $NIGHTLY_VERSION"
-          echo "  Date: $DATE"
-          echo "  Commit: $SHORT_SHA"
-      
-      - name: Update Cargo.toml Version
-        run: |
-          # Update Cargo.toml with nightly version
-          NIGHTLY_VERSION="${{ steps.nightly_version.outputs.nightly_version }}"
-          sed -i "s/^version = \".*\"/version = \"$NIGHTLY_VERSION\"/" Cargo.toml
-          echo "Updated Cargo.toml version to: $NIGHTLY_VERSION"
-          cat Cargo.toml | grep '^version = '
-      
-      - name: Verify Package
-        run: |
-          echo "🔍 Verifying nightly package for crates.io..."
-          cargo check --release
-          cargo test --release
-          cargo package --allow-dirty
-          echo "✅ Nightly package verification passed"
-      
-      - name: Publish Nightly to Crates.io
-        run: |
-          echo " Publishing nightly to crates.io..."
-          echo "Version: ${{ steps.nightly_version.outputs.nightly_version }}"
-          cargo publish --token ${{ secrets.CARGO_REGISTRY_TOKEN }} --allow-dirty
-          echo "✅ Published nightly to crates.io successfully!"
-        env:
-          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
-      
-      - name: Restore Original Version
-        run: |
-          # Restore original version in Cargo.toml
-          ORIGINAL_VERSION="${{ steps.nightly_version.outputs.current_version }}"
-          sed -i "s/^version = \".*\"/version = \"$ORIGINAL_VERSION\"/" Cargo.toml
-          echo "Restored Cargo.toml version to: $ORIGINAL_VERSION"
-          cat Cargo.toml | grep '^version = '
-      
-      - name: Nightly Crates.io Summary
-        run: |
-          echo "🎉 Nightly crates.io publication successful!"
-          echo "📦 Package: plex-media-organizer"
-          echo "��️  Nightly Version: ${{ steps.nightly_version.outputs.nightly_version }}"
-          echo "🔗 URL: https://crates.io/crates/plex-media-organizer"
-          echo "📥 Install: cargo install plex-media-organizer --version \"${{ steps.nightly_version.outputs.nightly_version }}\""
-          echo "📥 Latest: cargo install plex-media-organizer"
-          echo "⚠️  Note: This is a nightly build - use with caution!"
+
