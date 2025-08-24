@@ -9,7 +9,7 @@ repository = "https://github.com/lijunzh/plex-media-organizer"
 
 [dependencies]
 # Core dependencies
-tokio = { version = "1.0", features = ["full"] }
+tokio = { version = "1.0", features = ["rt-multi-thread", "macros", "time", "fs", "net", "io-util"] }
 anyhow = "1.0"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
@@ -66,3 +66,8 @@ path = "src/main.rs"
 [lib]
 name = "plex_media_organizer"
 path = "src/lib.rs"
+
+[profile.release]
+codegen-units = 1
+lto = true
+strip = true
