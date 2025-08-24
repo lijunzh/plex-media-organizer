@@ -95,6 +95,7 @@ jobs:
         with:
           toolchain: stable
           profile: minimal
+          target: ${{ matrix.target }}
       
       - name: Install Rust Components
         run: |
