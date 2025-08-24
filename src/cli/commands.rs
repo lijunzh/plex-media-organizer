@@ -4,6 +4,7 @@ use clap::{Args, Parser, Subcommand};
 
 use crate::cli::handlers::cleanup::{CleanupArgs, handle_cleanup};
 use crate::cli::handlers::config::{ConfigArgs, handle_config};
+use crate::cli::handlers::migrate::{MigrateArgs, handle_migrate};
 use crate::cli::handlers::organize::{OrganizeArgs, handle_organize};
 use crate::cli::handlers::rollback::{RollbackArgs, handle_rollback};
 use crate::cli::handlers::scan::{ScanArgs, handle_scan};
@@ -39,6 +40,8 @@ pub enum Commands {
     Cleanup(CleanupArgs),
     /// Manage technical terms for title filtering
     Terms(TermsArgs),
+    /// Migrate configuration to latest defaults
+    Migrate(MigrateArgs),
 }
 
 /// Arguments for the terms command
@@ -88,6 +91,7 @@ impl Cli {
                 println!("Terms management command not yet implemented.");
                 Ok(())
             }
+            Commands::Migrate(args) => handle_migrate(args).await,
         }
     }
 }

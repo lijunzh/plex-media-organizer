@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Configuration migration system**: Intelligent automatic migration of user configurations
+  - Version tracking in configuration files
+  - Automatic migration on app startup
+  - Smart merging of new defaults with user customizations
+  - Comprehensive backup and restore functionality
+  - CLI `migrate` command for manual migration control
+  - Dry-run mode for previewing changes
+  - Detailed migration documentation in `docs/user-guide/configuration-migration.md`
+- **Enhanced configuration management**:
+  - Configuration version tracking with `version` field
+  - Automatic backup creation before migration
+  - Intelligent merging algorithm preserving user customizations
+  - Platform-specific configuration directory handling
+  - Comprehensive error handling and rollback capabilities
+
 ### Planned
 - TV Show support with episode detection
 - Music file organization

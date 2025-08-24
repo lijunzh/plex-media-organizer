@@ -118,6 +118,7 @@
 //! use plex_media_organizer::{AppConfig, ApiConfig, DatabaseConfig, OrganizationConfig, QualityConfig, OriginalTitleConfig, MatchingConfig, TitlePreservationConfig, LanguageConfig, TechnicalTermsConfig, ContentFilteringConfig};
 //!
 //! let config = AppConfig {
+//!     version: "0.1.1".to_string(),
 //!     apis: ApiConfig {
 //!         tmdb_api_key: Some("your_key".to_string()),
 //!     },
