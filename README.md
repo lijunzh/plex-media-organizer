@@ -3,6 +3,7 @@
 [![Crates.io](https://img.shields.io/crates/v/plex-media-organizer)](https://crates.io/crates/plex-media-organizer)
 [![License](https://img.shields.io/github/license/lijunzh/plex-media-organizer)](https://github.com/lijunzh/plex-media-organizer/blob/main/LICENSE)
 [![Platforms](https://img.shields.io/badge/platforms-linux%20%7C%20macos%20%7C%20windows-lightgrey)](https://github.com/lijunzh/plex-media-organizer/releases)
+[![Nightly](https://img.shields.io/github/actions/workflow/status/lijunzh/plex-media-organizer/nightly.yml?label=nightly%20build)](https://github.com/lijunzh/plex-media-organizer/actions/workflows/nightly.yml)
 
 A powerful, intelligent media file organizer that follows Plex naming conventions. Built in Rust for performance and reliability.
 
