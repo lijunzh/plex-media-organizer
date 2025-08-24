@@ -7,7 +7,7 @@ description = "Intelligent media file organizer following Plex naming convention
 license = "MIT"
 repository = "https://github.com/lijunzh/plex-media-organizer"
 readme = "README.md"
-keywords = ["plex", "media", "organizer", "movies", "file-management", "cli"]
+keywords = ["plex", "media", "organizer", "movies", "cli"]
 categories = ["command-line-utilities", "multimedia", "filesystem"]
 
 [dependencies]
