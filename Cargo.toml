@@ -2,7 +2,7 @@
 name = "plex-media-organizer"
 version = "0.1.1"
 edition = "2024"
-authors = ["Your Name <your.email@example.com>"]
+authors = ["Lijun Zhu <gatechzhu@gmail.com>"]
 description = "Intelligent media file organizer following Plex naming conventions"
 license = "MIT"
 repository = "https://github.com/lijunzh/plex-media-organizer"
