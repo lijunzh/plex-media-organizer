@@ -45,9 +45,9 @@ impl Default for TechnicalTermsFilter {
                 "series".to_string(),
                 "ova".to_string(),
                 "oav".to_string(),
-                "movie".to_string(),
                 "special".to_string(),
                 "anime".to_string(),
+                "dovi".to_string(),
             ],
             release_groups: vec![
                 "YIFY".to_string(),
@@ -64,6 +64,7 @@ impl Default for TechnicalTermsFilter {
                 "INTERNAL".to_string(),
                 "EXTENDED".to_string(),
                 "DIRFIX".to_string(),
+                "3L".to_string(),
             ],
             codecs: vec![
                 "x264".to_string(),
@@ -108,6 +109,10 @@ impl Default for TechnicalTermsFilter {
                 "DTS-HD".to_string(),
                 "MA".to_string(),
                 "THD".to_string(),
+                "TrueHD".to_string(),
+                "7.1".to_string(),
+                "5.1".to_string(),
+                "2.0".to_string(),
             ],
         }
     }
@@ -170,8 +175,8 @@ impl TechnicalTermsFilter {
         let title_upper = title.to_uppercase();
 
         if title_upper.contains(&term_upper) {
-            // Use word boundaries to avoid false positives
-            let pattern = format!(r"\b{}\b", regex::escape(term));
+            // Use word boundaries to avoid false positives, case insensitive
+            let pattern = format!(r"(?i)\b{}\b", regex::escape(term));
             if let Ok(regex) = Regex::new(&pattern) {
                 return regex.replace_all(title, "").to_string();
             }
@@ -315,5 +320,13 @@ mod tests {
         let result = filter.filter("Movie...1080p...BluRay...mkv");
 
         assert_eq!(result, "Movie");
+    }
+
+    #[test]
+    fn test_filter_3l_release_group() {
+        let filter = TechnicalTermsFilter::new();
+        let result = filter.filter("The.Batman.2022.2160p.Remux.HEVC.DoVi.TrueHD.7.1-3L.mkv");
+
+        assert_eq!(result, "The Batman 2022");
     }
 }
