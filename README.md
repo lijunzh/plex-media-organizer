@@ -31,7 +31,16 @@ cargo install plex-media-organizer
 cargo install --force plex-media-organizer
 ```
 
-#### Option 2: Download Pre-built Binaries
+#### Option 2: Install from Homebrew (macOS/Linux)
+```bash
+# Install the latest version
+brew install lijunzh/plex-media-organizer/plex-media-organizer
+
+# Update to the latest version
+brew upgrade plex-media-organizer
+```
+
+#### Option 3: Download Pre-built Binaries
 Download the latest release for your platform from [GitHub Releases](https://github.com/lijunzh/plex-media-organizer/releases):
 
 - **macOS (Intel/Apple Silicon)**: `plex-media-organizer-v1.0.0-x86_64-apple-darwin.tar.gz` / `plex-media-organizer-v1.0.0-aarch64-apple-darwin.tar.gz`
