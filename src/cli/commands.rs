@@ -1,6 +1,6 @@
 //! CLI command definitions
 
-use clap::{Parser, Subcommand};
+use clap::{Args, Parser, Subcommand};
 
 use crate::cli::handlers::cleanup::{CleanupArgs, handle_cleanup};
 use crate::cli::handlers::config::{ConfigArgs, handle_config};
@@ -23,26 +23,50 @@ pub struct Cli {
 
 #[derive(Debug, Subcommand)]
 pub enum Commands {
-    /// Scan a directory for media files
-    Scan(ScanArgs),
-
-    /// Set up configuration interactively
-    Setup(SetupArgs),
-
-    /// Show current configuration
-    Config(ConfigArgs),
-
-    /// Test parsing and organization
+    /// Test filename parsing
     Test(TestArgs),
-
+    /// Scan directories for media files
+    Scan(ScanArgs),
+    /// Setup initial configuration
+    Setup(SetupArgs),
+    /// Show or edit configuration
+    Config(ConfigArgs),
     /// Organize media files
     Organize(OrganizeArgs),
-
-    /// Rollback previous organization operation
+    /// Rollback previous organization operations
     Rollback(RollbackArgs),
-
-    /// Clean up old operations and optimize database
+    /// Clean up old operation history
     Cleanup(CleanupArgs),
+    /// Manage technical terms for title filtering
+    Terms(TermsArgs),
+}
+
+/// Arguments for the terms command
+#[derive(Debug, Clone, Args)]
+pub struct TermsArgs {
+    /// List all technical terms
+    #[arg(long)]
+    pub list: bool,
+
+    /// Add a new technical term
+    #[arg(long)]
+    pub add: Option<String>,
+
+    /// Remove a technical term
+    #[arg(long)]
+    pub remove: Option<String>,
+
+    /// Show terms by category
+    #[arg(long)]
+    pub categories: bool,
+
+    /// Export terms to a file
+    #[arg(long)]
+    pub export: Option<String>,
+
+    /// Import terms from a file
+    #[arg(long)]
+    pub import: Option<String>,
 }
 
 impl Cli {
@@ -58,6 +82,12 @@ impl Cli {
             Commands::Organize(args) => handle_organize(args).await,
             Commands::Rollback(args) => handle_rollback(args).await,
             Commands::Cleanup(args) => handle_cleanup(args).await,
+            Commands::Terms(_args) => {
+                // This case is not yet implemented in handlers,
+                // so we'll just print a placeholder message.
+                println!("Terms management command not yet implemented.");
+                Ok(())
+            }
         }
     }
 }

@@ -1,172 +1,284 @@
 //! Technical terms filtering for title extraction
 
+use crate::config::TechnicalTermsConfig;
 use regex::Regex;
+use std::collections::HashSet;
 
-/// Technical terms filter
-#[derive(Clone, Debug)]
+/// Filter for removing technical terms from movie titles
+#[derive(Debug, Clone)]
 pub struct TechnicalTermsFilter {
-    technical_terms: Vec<String>,
-    release_groups: Vec<String>,
-    codecs: Vec<String>,
-    qualities: Vec<String>,
-    sources: Vec<String>,
-    audio_formats: Vec<String>,
+    technical_terms: HashSet<String>,
+    release_groups: HashSet<String>,
+    codecs: HashSet<String>,
+    qualities: HashSet<String>,
+    sources: HashSet<String>,
+    audio_formats: HashSet<String>,
 }
 
 impl Default for TechnicalTermsFilter {
     fn default() -> Self {
-        Self {
-            technical_terms: vec![
-                "mkv".to_string(),
-                "mp4".to_string(),
-                "avi".to_string(),
-                "web".to_string(),
-                "dl".to_string(),
-                "rip".to_string(),
-                "bluray".to_string(),
-                "hdtv".to_string(),
-                "dvdrip".to_string(),
-                "brrip".to_string(),
-                "hdrip".to_string(),
-                "webrip".to_string(),
-                "remux".to_string(),
-                "atvp".to_string(),
-                "it".to_string(),
-                "netflix".to_string(),
-                "amazon".to_string(),
-                "part".to_string(),
-                "cd".to_string(),
-                "disc".to_string(),
-                "volume".to_string(),
-                "vol".to_string(),
-                "collection".to_string(),
-                "trilogy".to_string(),
-                "saga".to_string(),
-                "series".to_string(),
-                "ova".to_string(),
-                "oav".to_string(),
-                "special".to_string(),
-                "anime".to_string(),
-                "dovi".to_string(),
-            ],
-            release_groups: vec![
-                "YIFY".to_string(),
-                "YTS".to_string(),
-                "RARBG".to_string(),
-                "ETRG".to_string(),
-                "FUM".to_string(),
-                "DIMENSION".to_string(),
-                "SPARKS".to_string(),
-                "FGT".to_string(),
-                "HALCYON".to_string(),
-                "REPACK".to_string(),
-                "PROPER".to_string(),
-                "INTERNAL".to_string(),
-                "EXTENDED".to_string(),
-                "DIRFIX".to_string(),
-                "3L".to_string(),
-            ],
-            codecs: vec![
-                "x264".to_string(),
-                "x265".to_string(),
-                "H264".to_string(),
-                "H265".to_string(),
-                "AVC".to_string(),
-                "HEVC".to_string(),
-                "10bit".to_string(),
-                "8bit".to_string(),
-            ],
-            qualities: vec![
-                "720p".to_string(),
-                "1080p".to_string(),
-                "2160p".to_string(),
-                "4K".to_string(),
-                "HDR".to_string(),
-                "UHD".to_string(),
-                "HD".to_string(),
-                "SD".to_string(),
-            ],
-            sources: vec![
-                "BluRay".to_string(),
-                "WEB-DL".to_string(),
-                "HDTV".to_string(),
-                "DVDRip".to_string(),
-                "BRRip".to_string(),
-                "HDRip".to_string(),
-                "WEBRip".to_string(),
-                "REMUX".to_string(),
-                "ATVP".to_string(),
-                "iT".to_string(),
-                "Netflix".to_string(),
-                "Amazon".to_string(),
-            ],
-            audio_formats: vec![
-                "DTS".to_string(),
-                "AC3".to_string(),
-                "AAC".to_string(),
-                "FLAC".to_string(),
-                "DD5.1".to_string(),
-                "DTS-HD".to_string(),
-                "MA".to_string(),
-                "THD".to_string(),
-                "TrueHD".to_string(),
-                "7.1".to_string(),
-                "5.1".to_string(),
-                "2.0".to_string(),
-            ],
-        }
+        Self::with_config(TechnicalTermsConfig::default())
     }
 }
 
 impl TechnicalTermsFilter {
+    /// Create a new filter with default terms (fallback)
     pub fn new() -> Self {
         Self::default()
     }
 
-    pub fn with_terms(technical_terms: Vec<String>) -> Self {
-        let mut filter = Self::default();
-        filter.technical_terms.extend(technical_terms);
+    /// Create a filter with custom terms
+    pub fn with_terms(terms: Vec<String>) -> Self {
+        let mut filter = Self::new();
+        for term in terms {
+            filter.technical_terms.insert(term);
+        }
         filter
     }
 
-    /// Filter technical terms from title
+    /// Create a filter from configuration
+    pub fn with_config(config: TechnicalTermsConfig) -> Self {
+        let mut technical_terms = HashSet::new();
+        let mut release_groups = HashSet::new();
+        let mut codecs = HashSet::new();
+        let mut qualities = HashSet::new();
+        let mut sources = HashSet::new();
+        let mut audio_formats = HashSet::new();
+
+        // Add release groups from config
+        for term in config.release_groups {
+            release_groups.insert(term);
+        }
+
+        // Categorize video/audio terms from config
+        for term in config.video_audio_terms {
+            if Self::is_audio_format(&term) {
+                audio_formats.insert(term);
+            } else if Self::is_codec(&term) {
+                codecs.insert(term);
+            } else {
+                technical_terms.insert(term);
+            }
+        }
+
+        // Add source/platform terms from config
+        for term in config.source_platform_terms {
+            sources.insert(term);
+        }
+
+        // Add file format terms from config
+        for term in config.file_format_terms {
+            technical_terms.insert(term);
+        }
+
+        // Add special edition terms from config
+        for term in config.special_edition_terms {
+            technical_terms.insert(term);
+        }
+
+        // Add custom terms from config
+        for term in config.custom_terms {
+            technical_terms.insert(term);
+        }
+
+        // Add essential fallback terms (minimal set that should never change)
+        Self::add_essential_fallback_terms(
+            &mut technical_terms,
+            &mut release_groups,
+            &mut codecs,
+            &mut qualities,
+            &mut sources,
+            &mut audio_formats,
+        );
+
+        Self {
+            technical_terms,
+            release_groups,
+            codecs,
+            qualities,
+            sources,
+            audio_formats,
+        }
+    }
+
+    /// Add essential fallback terms that should always be available
+    /// These are minimal and should rarely change
+    fn add_essential_fallback_terms(
+        technical_terms: &mut HashSet<String>,
+        release_groups: &mut HashSet<String>,
+        codecs: &mut HashSet<String>,
+        qualities: &mut HashSet<String>,
+        sources: &mut HashSet<String>,
+        audio_formats: &mut HashSet<String>,
+    ) {
+        // Essential technical terms (minimal fallback)
+        let essential_technical = vec![
+            "mkv",
+            "mp4",
+            "avi",
+            "web",
+            "dl",
+            "rip",
+            "part",
+            "cd",
+            "disc",
+            "volume",
+            "vol",
+            "collection",
+            "trilogy",
+            "saga",
+            "series",
+            "ova",
+            "oav",
+            "special",
+            "anime",
+        ];
+
+        // Essential release groups (critical ones that must be filtered)
+        let essential_release_groups = vec![
+            "YIFY", "YTS", "RARBG", "3L", // Critical ones that must be filtered
+        ];
+
+        // Essential codecs
+        let essential_codecs = vec![
+            "x264", "x265", "H264", "H265", "AVC", "HEVC", "10bit", "8bit",
+        ];
+
+        // Essential qualities
+        let essential_qualities = vec!["720p", "1080p", "2160p", "4K", "HDR", "UHD", "HD", "SD"];
+
+        // Essential sources
+        let essential_sources = vec![
+            "BluRay", "WEB-DL", "HDTV", "DVDRip", "BRRip", "HDRip", "WEBRip", "REMUX",
+        ];
+
+        // Essential audio formats
+        let essential_audio = vec![
+            "DTS", "AC3", "AAC", "FLAC", "DD5.1", "DTS-HD", "MA", "THD", "TrueHD", "7.1", "5.1",
+            "2.0",
+        ];
+
+        for term in essential_technical {
+            technical_terms.insert(term.to_string());
+        }
+        for term in essential_release_groups {
+            release_groups.insert(term.to_string());
+        }
+        for term in essential_codecs {
+            codecs.insert(term.to_string());
+        }
+        for term in essential_qualities {
+            qualities.insert(term.to_string());
+        }
+        for term in essential_sources {
+            sources.insert(term.to_string());
+        }
+        for term in essential_audio {
+            audio_formats.insert(term.to_string());
+        }
+    }
+
+    /// Check if a term is an audio format
+    fn is_audio_format(term: &str) -> bool {
+        let audio_patterns = [
+            "DTS", "AC3", "AAC", "FLAC", "DD", "THD", "TrueHD", "MA", "Atmos", "5.1", "7.1", "2.0",
+            "Audio", "Audios",
+        ];
+        audio_patterns
+            .iter()
+            .any(|&pattern| term.to_uppercase().contains(pattern))
+    }
+
+    /// Check if a term is a codec
+    fn is_codec(term: &str) -> bool {
+        let codec_patterns = [
+            "x264", "x265", "H264", "H265", "AVC", "HEVC", "bit", "bits", "VC-1", "DoVi", "HDR10",
+            "EDR",
+        ];
+        codec_patterns
+            .iter()
+            .any(|&pattern| term.to_uppercase().contains(pattern))
+    }
+
+    /// Filter technical terms from a title
     pub fn filter(&self, title: &str) -> String {
-        let mut filtered = title.to_string();
+        let mut result = title.to_string();
 
-        // Filter technical terms
+        // Filter all term categories
         for term in &self.technical_terms {
-            filtered = self.remove_term(&filtered, term);
+            result = self.remove_term(&result, term);
+        }
+        for term in &self.release_groups {
+            result = self.remove_term(&result, term);
+        }
+        for term in &self.codecs {
+            result = self.remove_term(&result, term);
+        }
+        for term in &self.qualities {
+            result = self.remove_term(&result, term);
+        }
+        for term in &self.sources {
+            result = self.remove_term(&result, term);
+        }
+        for term in &self.audio_formats {
+            result = self.remove_term(&result, term);
         }
 
-        // Filter release groups
-        for group in &self.release_groups {
-            filtered = self.remove_term(&filtered, group);
+        // Clean up extra whitespace and punctuation
+        self.clean_title(&result)
+    }
+
+    /// Check if a term is considered technical
+    pub fn is_technical_term(&self, term: &str) -> bool {
+        let term_upper = term.to_uppercase();
+        self.technical_terms
+            .iter()
+            .any(|t| t.to_uppercase() == term_upper)
+            || self
+                .release_groups
+                .iter()
+                .any(|t| t.to_uppercase() == term_upper)
+            || self.codecs.iter().any(|t| t.to_uppercase() == term_upper)
+            || self
+                .qualities
+                .iter()
+                .any(|t| t.to_uppercase() == term_upper)
+            || self.sources.iter().any(|t| t.to_uppercase() == term_upper)
+            || self
+                .audio_formats
+                .iter()
+                .any(|t| t.to_uppercase() == term_upper)
+    }
+
+    /// Get all technical terms
+    pub fn get_all_terms(&self) -> Vec<String> {
+        let mut all_terms = Vec::new();
+        all_terms.extend(self.technical_terms.iter().cloned());
+        all_terms.extend(self.release_groups.iter().cloned());
+        all_terms.extend(self.codecs.iter().cloned());
+        all_terms.extend(self.qualities.iter().cloned());
+        all_terms.extend(self.sources.iter().cloned());
+        all_terms.extend(self.audio_formats.iter().cloned());
+        all_terms
+    }
+
+    /// Add custom technical terms
+    pub fn add_terms(&mut self, terms: Vec<String>) {
+        for term in terms {
+            self.technical_terms.insert(term);
         }
+    }
 
-        // Filter codecs
-        for codec in &self.codecs {
-            filtered = self.remove_term(&filtered, codec);
+    /// Remove technical terms from list
+    pub fn remove_terms(&mut self, terms: Vec<String>) {
+        for term in terms {
+            self.technical_terms.remove(&term);
+            self.release_groups.remove(&term);
+            self.codecs.remove(&term);
+            self.qualities.remove(&term);
+            self.sources.remove(&term);
+            self.audio_formats.remove(&term);
         }
-
-        // Filter qualities
-        for quality in &self.qualities {
-            filtered = self.remove_term(&filtered, quality);
-        }
-
-        // Filter sources
-        for source in &self.sources {
-            filtered = self.remove_term(&filtered, source);
-        }
-
-        // Filter audio formats
-        for audio in &self.audio_formats {
-            filtered = self.remove_term(&filtered, audio);
-        }
-
-        // Clean up extra whitespace and separators
-        filtered = self.clean_title(&filtered);
-
-        filtered
     }
 
     /// Remove a specific term from title
@@ -181,80 +293,46 @@ impl TechnicalTermsFilter {
                 return regex.replace_all(title, "").to_string();
             }
         }
-
         title.to_string()
     }
 
-    /// Clean up title by removing extra whitespace and separators
+    /// Clean up title by removing extra whitespace and punctuation
     fn clean_title(&self, title: &str) -> String {
+        let mut result = title.to_string();
+
+        // Replace multiple dots with single dot
+        while result.contains("..") {
+            result = result.replace("..", ".");
+        }
+
+        // Replace multiple dashes with single dash
+        while result.contains("--") {
+            result = result.replace("--", "-");
+        }
+
+        // Replace multiple underscores with single underscore
+        while result.contains("__") {
+            result = result.replace("__", "_");
+        }
+
+        // Replace multiple spaces with single space
+        while result.contains("  ") {
+            result = result.replace("  ", " ");
+        }
+
+        // Remove leading/trailing dots, dashes, underscores, and spaces
+        result = result
+            .trim_matches(|c| c == '.' || c == '-' || c == '_' || c == ' ')
+            .to_string();
+
         // Split by common separators and filter out empty parts
-        let parts: Vec<&str> = title
+        let parts: Vec<&str> = result
             .split(['.', '_', '-', ' '])
             .filter(|part| !part.trim().is_empty())
             .collect();
 
         // Join parts with spaces
         parts.join(" ")
-    }
-
-    /// Check if a term is a technical term
-    pub fn is_technical_term(&self, term: &str) -> bool {
-        let term_lower = term.to_lowercase();
-
-        // Don't treat common words as technical terms
-        let common_words = [
-            "movie", "film", "the", "and", "or", "of", "in", "on", "at", "to", "for",
-        ];
-        if common_words.contains(&term_lower.as_str()) {
-            return false;
-        }
-
-        self.technical_terms
-            .iter()
-            .any(|t| t.to_lowercase() == term_lower)
-            || self
-                .release_groups
-                .iter()
-                .any(|t| t.to_lowercase() == term_lower)
-            || self.codecs.iter().any(|t| t.to_lowercase() == term_lower)
-            || self
-                .qualities
-                .iter()
-                .any(|t| t.to_lowercase() == term_lower)
-            || self.sources.iter().any(|t| t.to_lowercase() == term_lower)
-            || self
-                .audio_formats
-                .iter()
-                .any(|t| t.to_lowercase() == term_lower)
-    }
-
-    /// Get all technical terms
-    pub fn get_all_terms(&self) -> Vec<String> {
-        let mut all_terms = Vec::new();
-        all_terms.extend(self.technical_terms.clone());
-        all_terms.extend(self.release_groups.clone());
-        all_terms.extend(self.codecs.clone());
-        all_terms.extend(self.qualities.clone());
-        all_terms.extend(self.sources.clone());
-        all_terms.extend(self.audio_formats.clone());
-        all_terms
-    }
-
-    /// Add custom technical terms
-    pub fn add_terms(&mut self, terms: Vec<String>) {
-        self.technical_terms.extend(terms);
-    }
-
-    /// Remove technical terms from list
-    pub fn remove_terms(&mut self, terms: Vec<String>) {
-        for term in terms {
-            self.technical_terms.retain(|t| t != &term);
-            self.release_groups.retain(|t| t != &term);
-            self.codecs.retain(|t| t != &term);
-            self.qualities.retain(|t| t != &term);
-            self.sources.retain(|t| t != &term);
-            self.audio_formats.retain(|t| t != &term);
-        }
     }
 }
 

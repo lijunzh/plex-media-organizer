@@ -4,6 +4,7 @@ mod non_english;
 mod technical_terms;
 pub mod title;
 
+use crate::config::TechnicalTermsConfig;
 pub use non_english::NonEnglishProcessor;
 pub use technical_terms::TechnicalTermsFilter;
 pub use title::TitleExtractor;
@@ -37,6 +38,14 @@ impl UnifiedTitleExtractor {
             title_extractor: TitleExtractor::new(),
             non_english_processor: NonEnglishProcessor::new(),
             technical_filter: TechnicalTermsFilter::new(),
+        }
+    }
+
+    pub fn with_config(config: TechnicalTermsConfig) -> Self {
+        Self {
+            title_extractor: TitleExtractor::new(),
+            non_english_processor: NonEnglishProcessor::new(),
+            technical_filter: TechnicalTermsFilter::with_config(config),
         }
     }
 
