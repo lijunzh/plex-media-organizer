@@ -1,0 +1,445 @@
+name: Nightly Build
+
+on:
+  schedule:
+    # Run every day at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch: # Allow manual triggering
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      
+      - name: Setup Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          profile: minimal
+      
+      - name: Install Rust Components
+        run: |
+          rustup component add rustfmt clippy
+      
+      - name: Cache Dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-nightly-linux-${{ hashFiles('**/Cargo.lock') }}
+      
+      - name: Install System Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libsqlite3-dev
+      
+      - name: Build Release
+        run: |
+          echo "🔨 Building nightly for Linux (x86_64)"
+          cargo build --release
+          echo "✅ Nightly build completed for Linux"
+      
+      - name: Verify Binary
+        run: |
+          echo "📦 Binary details for Linux:"
+          ls -la target/release/
+          echo ""
+          echo "📊 Binary size:"
+          ls -lh target/release/plex-media-organizer
+          echo ""
+          echo "✅ Binary verification passed for Linux"
+      
+      - name: Test Release Binary
+        env:
+          TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
+        run: |
+          # Quick test of release binary
+          ./target/release/plex-media-organizer --help
+          ./target/release/plex-media-organizer setup --help
+          echo "✅ Nightly binary test passed for Linux"
+      
+      - name: Create Archive
+        run: |
+          echo "📦 Creating nightly archive for Linux"
+          tar -czf plex-media-organizer-nightly-x86_64-unknown-linux-gnu.tar.gz -C target/release plex-media-organizer
+          echo "✅ Nightly archive created: plex-media-organizer-nightly-x86_64-unknown-linux-gnu.tar.gz"
+      
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-nightly-binary
+          path: plex-media-organizer-nightly-x86_64-unknown-linux-gnu.tar.gz
+          retention-days: 30
+
+  build-macos:
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        target: [x86_64-apple-darwin, aarch64-apple-darwin]
+        include:
+          - target: x86_64-apple-darwin
+            binary_name: plex-media-organizer
+            archive_name: plex-media-organizer-nightly-x86_64-apple-darwin.tar.gz
+          - target: aarch64-apple-darwin
+            binary_name: plex-media-organizer
+            archive_name: plex-media-organizer-nightly-aarch64-apple-darwin.tar.gz
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      
+      - name: Setup Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          profile: minimal
+          target: ${{ matrix.target }}
+      
+      - name: Install Rust Components
+        run: |
+          rustup component add rustfmt clippy
+      
+      - name: Cache Dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-nightly-macos-${{ matrix.target }}-${{ hashFiles('**/Cargo.lock') }}
+      
+      - name: Build Release
+        run: |
+          echo "🔨 Building nightly for macOS (${{ matrix.target }})"
+          cargo build --release --target ${{ matrix.target }}
+          echo "✅ Nightly build completed for macOS (${{ matrix.target }})"
+      
+      - name: Verify Binary
+        run: |
+          echo "📦 Binary details for macOS (${{ matrix.target }}):"
+          ls -la target/${{ matrix.target }}/release/
+          echo ""
+          echo "📊 Binary size:"
+          ls -lh target/${{ matrix.target }}/release/${{ matrix.binary_name }}
+          echo ""
+          echo "✅ Binary verification passed for macOS (${{ matrix.target }})"
+      
+      - name: Test Release Binary
+        env:
+          TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
+        run: |
+          # Quick test of release binary
+          ./target/${{ matrix.target }}/release/${{ matrix.binary_name }} --help
+          ./target/${{ matrix.target }}/release/${{ matrix.binary_name }} setup --help
+          echo "✅ Nightly binary test passed for macOS (${{ matrix.target }})"
+      
+      - name: Create Archive
+        run: |
+          echo "📦 Creating nightly archive for macOS (${{ matrix.target }})"
+          tar -czf ${{ matrix.archive_name }} -C target/${{ matrix.target }}/release ${{ matrix.binary_name }}
+          echo "✅ Nightly archive created: ${{ matrix.archive_name }}"
+      
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-${{ matrix.target }}-nightly-binary
+          path: ${{ matrix.archive_name }}
+          retention-days: 30
+
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      
+      - name: Setup Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          profile: minimal
+      
+      - name: Install Rust Components
+        run: |
+          rustup component add rustfmt clippy
+      
+      - name: Cache Dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-nightly-windows-${{ hashFiles('**/Cargo.lock') }}
+      
+      - name: Build Release
+        run: |
+          echo "🔨 Building nightly for Windows (x86_64)"
+          cargo build --release
+          echo "✅ Nightly build completed for Windows"
+      
+      - name: Verify Binary
+        run: |
+          echo "📦 Binary details for Windows:"
+          Get-ChildItem target/release/
+          echo ""
+          echo "📊 Binary size:"
+          Get-ChildItem target/release/plex-media-organizer.exe | Select-Object Name, Length, @{Name="Size(MB)";Expression={[math]::Round($_.Length/1MB,2)}}
+          echo ""
+          echo "✅ Binary verification passed for Windows"
+      
+      - name: Test Release Binary
+        env:
+          TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
+        run: |
+          # Quick test of release binary
+          .\target\release\plex-media-organizer.exe --help
+          .\target\release\plex-media-organizer.exe setup --help
+          echo "✅ Nightly binary test passed for Windows"
+      
+      - name: Create Archive
+        run: |
+          echo "📦 Creating nightly archive for Windows"
+          Compress-Archive -Path target/release/plex-media-organizer.exe -DestinationPath plex-media-organizer-nightly-x86_64-pc-windows-msvc.zip
+          echo "✅ Nightly archive created: plex-media-organizer-nightly-x86_64-pc-windows-msvc.zip"
+      
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-nightly-binary
+          path: plex-media-organizer-nightly-x86_64-pc-windows-msvc.zip
+          retention-days: 30
+
+  update-nightly-release:
+    needs: [build-linux, build-macos, build-windows]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      
+      - name: Download All Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+      
+      - name: List Artifacts
+        run: |
+          echo "📦 Downloaded nightly artifacts:"
+          find artifacts -type f -name "*.tar.gz" -o -name "*.zip"
+      
+      - name: Generate Nightly Version
+        id: nightly_version
+        run: |
+          # Generate nightly version based on current date and commit hash
+          DATE=$(date +%Y%m%d)
+          SHORT_SHA=$(git rev-parse --short HEAD)
+          NIGHTLY_VERSION="nightly-$DATE-$SHORT_SHA"
+          echo "version=$NIGHTLY_VERSION" >> $GITHUB_OUTPUT
+          echo "Generated nightly version: $NIGHTLY_VERSION"
+          echo "Build date: $(date)"
+          echo "Commit: $SHORT_SHA"
+          echo "Full commit: $(git rev-parse HEAD)"
+      
+      - name: Check for Existing Nightly Release
+        id: check_release
+        uses: actions/github-script@v7
+        with:
+          script: |
+            try {
+              const { data: releases } = await github.rest.repos.listReleases({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+              });
+              
+              const nightlyRelease = releases.find(release => 
+                release.tag_name.startsWith('nightly-') && 
+                release.prerelease === true
+              );
+              
+              if (nightlyRelease) {
+                console.log('Found existing nightly release:', nightlyRelease.tag_name);
+                core.setOutput('release_id', nightlyRelease.id);
+                core.setOutput('release_tag', nightlyRelease.tag_name);
+                core.setOutput('exists', 'true');
+              } else {
+                console.log('No existing nightly release found');
+                core.setOutput('exists', 'false');
+              }
+            } catch (error) {
+              console.log('Error checking for existing release:', error.message);
+              core.setOutput('exists', 'false');
+            }
+      
+      - name: Update Existing Nightly Release
+        if: steps.check_release.outputs.exists == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            try {
+              // Update the existing release
+              await github.rest.repos.updateRelease({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                release_id: ${{ steps.check_release.outputs.release_id }},
+                tag_name: '${{ steps.nightly_version.outputs.version }}',
+                name: 'Nightly Build - ${{ steps.nightly_version.outputs.version }}',
+                body: `## Nightly Build - ${{ steps.nightly_version.outputs.version }}
+                
+                This is an automated nightly build from the latest commit.
+                
+                ### What's New
+                - Latest changes from main branch
+                - Optimized binary size with LTO and strip
+                - Multi-platform support
+                
+                ### Downloads
+                - **Linux (x86_64)**: \`plex-media-organizer-nightly-x86_64-unknown-linux-gnu.tar.gz\`
+                - **macOS (x86_64)**: \`plex-media-organizer-nightly-x86_64-apple-darwin.tar.gz\`
+                - **macOS (Apple Silicon)**: \`plex-media-organizer-nightly-aarch64-apple-darwin.tar.gz\`
+                - **Windows (x86_64)**: \`plex-media-organizer-nightly-x86_64-pc-windows-msvc.zip\`
+                
+                ### Installation
+                \`\`\`bash
+                # Linux/macOS
+                tar -xzf plex-media-organizer-nightly-*.tar.gz
+                ./plex-media-organizer --help
+                
+                # Windows
+                # Extract the zip file and run plex-media-organizer.exe
+                \`\`\`
+                
+                ### ⚠️ Important Notes
+                - This is a **nightly build** and may contain experimental features
+                - Use at your own risk in production environments
+                - For stable releases, use the latest tagged version
+                
+                **Build Date**: ${{ github.event.head_commit.timestamp || 'N/A' }}
+                **Commit**: ${{ github.sha }}
+                **Previous**: ${{ steps.check_release.outputs.release_tag }}`,
+                prerelease: true
+              });
+              
+              // Update the tag
+              await github.rest.git.updateRef({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: 'tags/${{ steps.nightly_version.outputs.version }}',
+                sha: '${{ github.sha }}',
+                force: true
+              });
+              
+              console.log('✅ Updated existing nightly release');
+            } catch (error) {
+              console.log('Error updating release:', error.message);
+              core.setFailed(error.message);
+            }
+      
+      - name: Create New Nightly Release
+        if: steps.check_release.outputs.exists == 'false'
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.nightly_version.outputs.version }}
+          name: "Nightly Build - ${{ steps.nightly_version.outputs.version }}"
+          body: |
+            ## Nightly Build - ${{ steps.nightly_version.outputs.version }}
+            
+            This is an automated nightly build from the latest commit.
+            
+            ### What's New
+            - Latest changes from main branch
+            - Optimized binary size with LTO and strip
+            - Multi-platform support
+            
+            ### Downloads
+            - **Linux (x86_64)**: `plex-media-organizer-nightly-x86_64-unknown-linux-gnu.tar.gz`
+            - **macOS (x86_64)**: `plex-media-organizer-nightly-x86_64-apple-darwin.tar.gz`
+            - **macOS (Apple Silicon)**: `plex-media-organizer-nightly-aarch64-apple-darwin.tar.gz`
+            - **Windows (x86_64)**: `plex-media-organizer-nightly-x86_64-pc-windows-msvc.zip`
+            
+            ### Installation
+            ```bash
+            # Linux/macOS
+            tar -xzf plex-media-organizer-nightly-*.tar.gz
+            ./plex-media-organizer --help
+            
+            # Windows
+            # Extract the zip file and run plex-media-organizer.exe
+            ```
+            
+            ### ⚠️ Important Notes
+            - This is a **nightly build** and may contain experimental features
+            - Use at your own risk in production environments
+            - For stable releases, use the latest tagged version
+            
+            **Build Date**: ${{ github.event.head_commit.timestamp || 'N/A' }}
+            **Commit**: ${{ github.sha }}
+          files: |
+            artifacts/linux-nightly-binary/plex-media-organizer-nightly-x86_64-unknown-linux-gnu.tar.gz
+            artifacts/macos-x86_64-apple-darwin-nightly-binary/plex-media-organizer-nightly-x86_64-apple-darwin.tar.gz
+            artifacts/macos-aarch64-apple-darwin-nightly-binary/plex-media-organizer-nightly-aarch64-apple-darwin.tar.gz
+            artifacts/windows-nightly-binary/plex-media-organizer-nightly-x86_64-pc-windows-msvc.zip
+          draft: false
+          prerelease: true
+          generate_release_notes: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Upload Assets to Existing Release
+        if: steps.check_release.outputs.exists == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            try {
+              // Upload new assets to the existing release
+              const assets = [
+                'artifacts/linux-nightly-binary/plex-media-organizer-nightly-x86_64-unknown-linux-gnu.tar.gz',
+                'artifacts/macos-x86_64-apple-darwin-nightly-binary/plex-media-organizer-nightly-x86_64-apple-darwin.tar.gz',
+                'artifacts/macos-aarch64-apple-darwin-nightly-binary/plex-media-organizer-nightly-aarch64-apple-darwin.tar.gz',
+                'artifacts/windows-nightly-binary/plex-media-organizer-nightly-x86_64-pc-windows-msvc.zip'
+              ];
+              
+              for (const assetPath of assets) {
+                if (fs.existsSync(assetPath)) {
+                  const assetName = path.basename(assetPath);
+                  console.log(`Uploading ${assetName}...`);
+                  
+                  await github.rest.repos.uploadReleaseAsset({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    release_id: ${{ steps.check_release.outputs.release_id }},
+                    name: assetName,
+                    data: fs.readFileSync(assetPath)
+                  });
+                  
+                  console.log(`✅ Uploaded ${assetName}`);
+                }
+              }
+            } catch (error) {
+              console.log('Error uploading assets:', error.message);
+              core.setFailed(error.message);
+            }
+      
+      - name: Nightly Release Summary
+        run: |
+          if [ "${{ steps.check_release.outputs.exists }}" = "true" ]; then
+            echo "🌙 Updated existing nightly release successfully!"
+            echo "📦 Multi-platform nightly binaries uploaded:"
+            echo "   - Linux (x86_64): plex-media-organizer-nightly-x86_64-unknown-linux-gnu.tar.gz"
+            echo "   - macOS (x86_64): plex-media-organizer-nightly-x86_64-apple-darwin.tar.gz"
+            echo "   - macOS (Apple Silicon): plex-media-organizer-nightly-aarch64-apple-darwin.tar.gz"
+            echo "   - Windows (x86_64): plex-media-organizer-nightly-x86_64-pc-windows-msvc.zip"
+            echo "🏷️  Updated Tag: ${{ steps.nightly_version.outputs.version }}"
+            echo "🔄 Kept single nightly release (updated existing)"
+          else
+            echo "🌙 Created new nightly release successfully!"
+            echo "📦 Multi-platform nightly binaries uploaded:"
+            echo "   - Linux (x86_64): plex-media-organizer-nightly-x86_64-unknown-linux-gnu.tar.gz"
+            echo "   - macOS (x86_64): plex-media-organizer-nightly-x86_64-apple-darwin.tar.gz"
+            echo "   - macOS (Apple Silicon): plex-media-organizer-nightly-aarch64-apple-darwin.tar.gz"
+            echo "   - Windows (x86_64): plex-media-organizer-nightly-x86_64-pc-windows-msvc.zip"
+            echo "🏷️  New Tag: ${{ steps.nightly_version.outputs.version }}"
+            echo "🆕 Created first nightly release"
+          fi
+          echo "🚀 Nightly build ready for testing"
