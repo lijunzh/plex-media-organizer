@@ -6,6 +6,9 @@ authors = ["Your Name <your.email@example.com>"]
 description = "Intelligent media file organizer following Plex naming conventions"
 license = "MIT"
 repository = "https://github.com/lijunzh/plex-media-organizer"
+readme = "README.md"
+keywords = ["plex", "media", "organizer", "movies", "file-management", "cli"]
+categories = ["command-line-utilities", "multimedia", "filesystem"]
 
 [dependencies]
 # Core dependencies

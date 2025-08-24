@@ -111,7 +111,7 @@ pub struct QualityConfig {
 pub struct OriginalTitleConfig {
     /// Use original titles for organization instead of English
     pub prefer_original_titles: bool,
-    /// Include English title in brackets: 英雄 [Hero] (2002)
+    /// Include English title in brackets: 英雄 \[Hero\] (2002)
     pub include_english_subtitle: bool,
     /// Fallback to English if original title causes file system issues
     pub fallback_to_english_on_error: bool,
