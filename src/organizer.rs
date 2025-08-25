@@ -479,10 +479,10 @@ impl Organizer {
     /// Perform actual file organization
     fn perform_file_organization(&self, original_path: &Path, new_path: &Path) -> Result<()> {
         // Create parent directory if it doesn't exist
-        if let Some(parent) = new_path.parent()
-            && !parent.exists()
-        {
-            fs::create_dir_all(parent).context("Failed to create directory")?;
+        if let Some(parent) = new_path.parent() {
+            if !parent.exists() {
+                fs::create_dir_all(parent).context("Failed to create directory")?;
+            }
         }
 
         // Move the main media file

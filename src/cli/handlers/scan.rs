@@ -226,15 +226,15 @@ async fn scan_for_media_files(directory: &PathBuf, verbose: bool) -> Result<Vec<
         .into_iter()
         .filter_map(|e| e.ok())
     {
-        if entry.file_type().is_file()
-            && let Some(extension) = entry.path().extension()
-        {
-            let ext = extension.to_string_lossy().to_lowercase();
-            if video_extensions.contains(&ext.as_str()) {
-                media_files.push(entry.path().to_path_buf());
+        if entry.file_type().is_file() {
+            if let Some(extension) = entry.path().extension() {
+                let ext = extension.to_string_lossy().to_lowercase();
+                if video_extensions.contains(&ext.as_str()) {
+                    media_files.push(entry.path().to_path_buf());
 
-                if let Some(ref pb) = progress_bar {
-                    pb.set_message(format!("Found {} media files...", media_files.len()));
+                    if let Some(ref pb) = progress_bar {
+                        pb.set_message(format!("Found {} media files...", media_files.len()));
+                    }
                 }
             }
         }
