@@ -211,23 +211,33 @@
 
 pub mod cli;
 pub mod config;
+pub mod core;
 pub mod database;
 pub mod external;
-pub mod metadata_extractor;
-pub mod organizer;
+pub mod media;
 pub mod parsers;
-pub mod scanner;
 pub mod types;
 
 pub use cli::*;
 pub use config::*;
+pub use core::*;
 pub use database::*;
 pub use external::*;
+pub use parsers::*;
+pub use types::*;
+
+// Re-export legacy modules for backward compatibility
+pub mod metadata_extractor;
+pub mod organizer;
+pub mod scanner;
+
 pub use metadata_extractor::*;
 pub use organizer::*;
-pub use parsers::*;
 pub use scanner::*;
-pub use types::*;
+
+// Re-export specific media types to avoid conflicts
+pub use media::extractor::MetadataExtractor;
+pub use media::types::{AudioTrack as MediaAudioTrack, SubtitleTrack as MediaSubtitleTrack, Resolution as MediaResolution, MediaMetadata as MediaFileMetadata};
 
 /// Main result type for the library
 pub type Result<T> = anyhow::Result<T>;

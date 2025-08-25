@@ -300,11 +300,10 @@ async fn rollback_single_file(
     };
 
     // Create parent directory if it doesn't exist
-    if let Some(parent) = organized_file.original_path.parent()
-        && !parent.exists()
-        && !preview
-    {
-        std::fs::create_dir_all(parent)?;
+    if let Some(parent) = organized_file.original_path.parent() {
+        if !parent.exists() && !preview {
+            std::fs::create_dir_all(parent)?;
+        }
     }
 
     // Perform the rollback operation

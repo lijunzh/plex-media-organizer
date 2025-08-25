@@ -267,11 +267,11 @@ impl UnifiedMovieParser {
         let mut result = self.parse(filename)?;
 
         // Enhance with TMDB data if available
-        if let Some(tmdb_client) = &self.tmdb_client
-            && let Ok(Some(tmdb_match)) = tmdb_client
+        if let Some(tmdb_client) = &self.tmdb_client {
+            if let Ok(Some(tmdb_match)) = tmdb_client
                 .find_best_match(&result.data.title, result.data.year)
                 .await
-        {
+            {
             // Boost confidence based on TMDB match quality
             let enhanced_confidence =
                 (result.data.confidence + tmdb_match.confidence_score).min(1.0);
@@ -279,6 +279,7 @@ impl UnifiedMovieParser {
 
             // Update parsing method to indicate TMDB enhancement
             result.parsing_method = "unified+tmdb".to_string();
+            }
         }
 
         Ok(result)

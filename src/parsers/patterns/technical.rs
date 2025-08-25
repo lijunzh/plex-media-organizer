@@ -103,10 +103,10 @@ impl TechnicalPatterns {
         for pattern in &self.audio_patterns {
             // Use word boundaries to avoid false positives
             let pattern_regex = format!(r"\b{}\b", regex::escape(pattern));
-            if let Ok(regex) = Regex::new(&pattern_regex)
-                && regex.is_match(filename)
-            {
-                return Some(pattern.clone());
+            if let Ok(regex) = Regex::new(&pattern_regex) {
+                if regex.is_match(filename) {
+                    return Some(pattern.clone());
+                }
             }
         }
         None
@@ -127,11 +127,12 @@ impl TechnicalPatterns {
         // Look for 4-digit years (19xx or 20xx)
         let year_regex = Regex::new(r"\b(19|20)\d{2}\b").unwrap();
 
-        if let Some(captures) = year_regex.captures(filename)
-            && let Some(year_str) = captures.get(0)
-            && let Ok(year) = year_str.as_str().parse::<u32>()
-        {
-            return Some(year);
+        if let Some(captures) = year_regex.captures(filename) {
+            if let Some(year_str) = captures.get(0) {
+                if let Ok(year) = year_str.as_str().parse::<u32>() {
+                    return Some(year);
+                }
+            }
         }
         None
     }
@@ -218,10 +219,10 @@ impl PatternDetector {
         for part in parts.iter().rev() {
             // Process in reverse order to get correct title order
             // Skip if it's a year
-            if let Ok(year) = part.parse::<u32>()
-                && (1900..=2030).contains(&year)
-            {
-                continue;
+            if let Ok(year) = part.parse::<u32>() {
+                if (1900..=2030).contains(&year) {
+                    continue;
+                }
             }
 
             // Skip technical terms (but be more conservative)
