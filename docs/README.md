@@ -10,37 +10,27 @@ Welcome to the Plex Media Organizer documentation. This guide helps you find the
 - **[Configuration](user/configuration.md)** - All configuration options and settings
 - **[Troubleshooting](user/troubleshooting.md)** - Common issues and solutions
 - **[Examples](user/examples/)** - Real-world usage examples
-
-### **For Users** (`user/`)
 - **[CLI Commands Reference](user/cli-commands.md)** - Complete CLI command documentation
 
 ### **For Developers** (`developer/`)
+- **[Architecture](developer/architecture/)** - Technical architecture and design
+  - **[Current Architecture](developer/architecture/architecture.md)** - System design and implementation
+  - **[Development Roadmap](developer/architecture/roadmap.md)** - Future development plans
 - **[Git Practices](developer/git-practices.md)** - Git commit best practices
 - **[Documentation Standards](developer/documentation-standards.md)** - Documentation guidelines
-- **[Architecture](developer/architecture/)** - Technical architecture and design
-  - **[Current Architecture](developer/architecture/architecture.md)** - Existing system design
-  - **[Module Structure](developer/architecture/module-structure.md)** - Target architecture
-  - **[Roadmap](developer/architecture/roadmap.md)** - Development phases and planning
-  - **[Decisions](developer/architecture/decisions/)** - Architecture decision records
-- **[Planning](developer/planning/)** - Development planning documents
-- **[Retrospectives](developer/retrospectives/)** - Project retrospectives
 
 ### **Technical Analysis** (`analysis/`)
-- **[Current Limitations](analysis/current-limitations.md)** - Known limitations and trade-offs
-- **[TMDB Matching](analysis/tmdb-matching.md)** - TMDB integration analysis
-- **[Edge Cases](analysis/edge-cases.md)** - Edge case analysis and handling
-- **[Current Issues](analysis/current-issues.md)** - Current issues analysis
-- **[Status](analysis/status.md)** - Project status and metrics
+- **[Current Status](analysis/status.md)** - Project status and metrics
+- **[Known Limitations](analysis/current-limitations.md)** - Current limitations and trade-offs
 
-## 🎯 **Current Status: Complete CLI Workflow**
+## 🎯 **Current Status: English Movie Organization**
 
-The Plex Media Organizer now provides a **complete, production-ready CLI application** with comprehensive media organization capabilities:
+The Plex Media Organizer provides a **production-ready CLI application** focused on **English movie organization** with TMDB integration:
 
 ### **✅ Completed Features**
 - **7 Core CLI Commands**: Complete workflow from setup to cleanup
-- **Database-Backed Operations**: SQLite database with rollback capabilities
-- **TMDB Integration**: Enhanced metadata using The Movie Database API
-- **Multi-language Support**: English, Chinese, Japanese, Arabic, Russian
+- **TMDB-First Strategy**: Enhanced metadata using The Movie Database API
+- **English Movie Focus**: Optimized for `/Volume/media/movie/English` directory structure
 - **Safety Features**: Preview mode, rollback, comprehensive error handling
 - **Performance Optimization**: Caching, parallel processing, network optimization
 
@@ -54,25 +44,26 @@ The Plex Media Organizer now provides a **complete, production-ready CLI applica
 7. **`cleanup`** - Database maintenance
 
 ### **📊 Technical Achievements**
-- **96+ Unit Tests**: Comprehensive test coverage
-- **Database Integration**: SQLite with operation history
+- **Comprehensive Test Suite**: Real-world validation with high success rates
+- **Database Integration**: SQLite with operation history and rollback
 - **Modular Architecture**: Clean separation of concerns
-- **Performance Optimized**: Fast parsing and organization
 - **Production Ready**: Conservative defaults and safety features
 
-## 🚀 **Next Steps**
+## 🚀 **Future Roadmap**
 
-### **Immediate Priority: TV Show Support**
+### **Phase 2: TV Series Support**
 - Episode detection and season organization
 - TVDB API integration
 - Extend existing CLI commands for TV shows
-- Mixed content handling (movies + TV shows)
 
-### **Future Iterations**
-- **Web Interface**: Browser-based management
-- **Advanced Features**: Scheduled operations, batch processing
-- **Music Support**: Music file organization and metadata
-- **Production Optimization**: Performance and monitoring
+### **Phase 3: Music Support**
+- Music file organization and metadata
+- MusicBrainz API integration
+
+### **Phase 4: Multi-Language & Multi-API**
+- Non-English content support (anime, international films)
+- Multiple external database integration
+- Advanced language detection
 
 ## 🎯 **Quick Navigation**
 
@@ -91,7 +82,6 @@ The Plex Media Organizer now provides a **complete, production-ready CLI applica
 1. Follow **[Git Practices](developer/git-practices.md)** for proper commits
 2. Review **[Architecture](developer/architecture/)** for technical understanding
 3. Check **[Documentation Standards](developer/documentation-standards.md)** for guidelines
-4. Review **[Planning](developer/planning/)** and **[Retrospectives](developer/retrospectives/)** for context
 
 ## 📋 **Quick Start Example**
 
@@ -99,17 +89,17 @@ The Plex Media Organizer now provides a **complete, production-ready CLI applica
 # 1. Setup (first time only)
 plex-media-organizer setup
 
-# 2. Scan directory
-plex-media-organizer scan /path/to/movies
+# 2. Scan English movie directory
+plex-media-organizer scan /Volume/media/movie/English
 
 # 3. Test parsing
-plex-media-organizer test /path/to/movies --use-cache
+plex-media-organizer test /Volume/media/movie/English --use-cache
 
 # 4. Preview organization
-plex-media-organizer organize /path/to/movies --preview
+plex-media-organizer organize /Volume/media/movie/English --preview
 
 # 5. Organize files
-plex-media-organizer organize /path/to/movies
+plex-media-organizer organize /Volume/media/movie/English
 
 # 6. Cleanup old operations
 plex-media-organizer cleanup --keep-count 10
