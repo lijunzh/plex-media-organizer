@@ -2,6 +2,7 @@
 
 use crate::{
     config::AppConfig,
+    core::{Processor, Organizer},
     database::DatabaseManager,
     external::tmdb::UnifiedTmdbClient,
     output::{print_section_header, print_subsection_header},
@@ -265,29 +266,30 @@ pub async fn handle_organize(args: OrganizeArgs) -> Result<()> {
         create_backup(&args.directory).await?;
     }
 
-    // Scan for all files
-    let all_files = scan_for_media_files(&args.directory, args.verbose).await?;
-    println!("✓ Found {} total files", all_files.len());
+    // Create processor with appropriate settings
+    let mut processor = if args.network_mode {
+        Processor::for_network_drive(parser.clone())
+    } else {
+        Processor::with_concurrency(parser.clone(), args.max_parallel)
+    };
 
-    if all_files.is_empty() {
+    // Set network mode if requested
+    processor.set_network_mode(args.network_mode);
+
+    // Process directory using the new core module
+    let scan_result = processor.process_directory(&args.directory).await?;
+    
+    println!("✓ Found {} total files", scan_result.files.len());
+
+    if scan_result.files.is_empty() {
         println!("⚠️  No files found in directory");
         return Ok(());
     }
 
-    // Create organize config
-    let organize_config = OrganizeConfig {
-        parser,
-        output_directory: output_directory.clone(),
-        config: config.clone(),
-        min_confidence: args.min_confidence,
-        preview: args.preview,
-        verbose: args.verbose,
-        use_cache: args.use_cache,
-        organize_by_year: args.organize_by_year,
-    };
-
-    // Organize files
-    let result = organize_files(&organize_config, &all_files).await?;
+    // Create organizer
+    let organizer = Organizer::new(args.preview, None);
+    // Organize files using the new core module
+    let result = organizer.organize_scan_result(&scan_result).await?;
 
     // Display results
     display_organization_results(&result, &args).await?;
@@ -302,9 +304,34 @@ pub async fn handle_organize(args: OrganizeArgs) -> Result<()> {
             // Create operation history manager
             let operation_manager = crate::database::operations::OperationHistoryManager::new(conn);
 
+            // Convert core organizer result to CLI handler result for database storage
+            let cli_result = OrganizationResult {
+                total_files: result.statistics.total_files as usize,
+                organized_files: result.organized_files.iter().map(|f| OrganizedFile {
+                    original_path: f.original_path.clone(),
+                    new_path: f.new_path.clone(),
+                    media_file: f.media_file.clone(),
+                    operation_type: OperationType::Move, // Default to Move for now
+                }).collect(),
+                skipped_files: Vec::new(), // Core organizer doesn't track skipped files
+                failed_files: result.failed_files.iter().map(|f| FailedFile {
+                    path: f.media_file.file_path.clone(),
+                    error: f.error.clone(),
+                }).collect(),
+                organization_stats: OrganizationStats {
+                    successful_organizations: result.statistics.organized_files as usize,
+                    skipped_files: 0,
+                    failed_files: result.statistics.failed_files as usize,
+                    total_size_moved: 0, // Would need to calculate this
+                    average_confidence: 0.0, // Would need to calculate this
+                    operation_duration: std::time::Duration::from_secs_f64(result.statistics.duration_seconds),
+                },
+                operation_duration: std::time::Duration::from_secs_f64(result.statistics.duration_seconds),
+            };
+
             // Store the operation
             let operation_id = operation_manager.store_operation(
-                &result,
+                &cli_result,
                 &args.directory,
                 Some(&output_directory),
             )?;
@@ -322,24 +349,16 @@ pub async fn handle_organize(args: OrganizeArgs) -> Result<()> {
         println!("This is a PREVIEW of what would happen:");
         println!(
             "• {} files would be organized",
-            result.organization_stats.successful_organizations
-        );
-        println!(
-            "• {} files would be skipped",
-            result.organization_stats.skipped_files
+            result.statistics.organized_files
         );
         println!(
             "• {} files would fail",
-            result.organization_stats.failed_files
+            result.statistics.failed_files
         );
         println!(
             "• Operation type: {}",
-            if result.organization_stats.successful_organizations > 0 {
-                match result.organized_files[0].operation_type {
-                    OperationType::Move => "MOVE files to organized structure",
-                    OperationType::Rename => "RENAME files in place",
-                    OperationType::Copy => "COPY files (not recommended for large media files)",
-                }
+            if result.statistics.organized_files > 0 {
+                "MOVE files to organized structure"
             } else {
                 "No operations"
             }
@@ -542,7 +561,7 @@ async fn process_single_file(
         file_path: file_path.clone(),
         file_name: filename.to_string(),
         file_size: metadata.len(),
-        media_type: MediaType::Movie, // For now, assume all are movies
+        media_type: MediaType::Video, // For now, assume all are videos
         content_hash: format!("{:x}", md5::compute(filename.as_bytes())),
         last_modified: DateTime::from(
             metadata
@@ -797,42 +816,26 @@ async fn create_backup(directory: &Path) -> Result<()> {
 }
 
 async fn display_organization_results(
-    result: &OrganizationResult,
+    result: &crate::core::OrganizationResult,
     args: &OrganizeArgs,
 ) -> Result<()> {
     print_subsection_header("Organization Results");
 
     println!("📊 Overall Statistics:");
-    println!("  Total files processed: {}", result.total_files);
+    println!("  Total files processed: {}", result.statistics.total_files);
     println!(
         "  Successfully organized: {}",
-        result.organization_stats.successful_organizations
+        result.statistics.organized_files
     );
-    println!(
-        "  Skipped files: {}",
-        result.organization_stats.skipped_files
-    );
-    println!("  Failed files: {}", result.organization_stats.failed_files);
+    println!("  Failed files: {}", result.statistics.failed_files);
     println!(
         "  Success rate: {:.1}%",
-        (result.organization_stats.successful_organizations as f64 / result.total_files as f64)
-            * 100.0
+        result.statistics.success_rate * 100.0
     );
 
-    if result.organization_stats.successful_organizations > 0 {
-        println!(
-            "  Total size moved: {} MB",
-            result.organization_stats.total_size_moved / 1024 / 1024
-        );
-        println!(
-            "  Average confidence: {:.2}",
-            result.organization_stats.average_confidence
-        );
-    }
-
     println!(
-        "  Operation duration: {:?}",
-        result.organization_stats.operation_duration
+        "  Operation duration: {:.2}s",
+        result.statistics.duration_seconds
     );
 
     // Show organized files - always show in preview mode, or when verbose
@@ -846,11 +849,7 @@ async fn display_organization_results(
         };
 
         for organized_file in result.organized_files.iter().take(display_count) {
-            let operation_str = match organized_file.operation_type {
-                OperationType::Move => "MOVE",
-                OperationType::Rename => "RENAME",
-                OperationType::Copy => "COPY",
-            };
+            let operation_str = if organized_file.dry_run { "PREVIEW" } else { "MOVE" };
 
             // Show full paths in preview mode for better verification
             if args.preview {
@@ -886,45 +885,7 @@ async fn display_organization_results(
         }
     }
 
-    // Show skipped files - always show in preview mode, or when verbose
-    if (args.preview || args.verbose) && !result.skipped_files.is_empty() {
-        print_subsection_header("Skipped Files");
 
-        let display_count = if args.preview {
-            result.skipped_files.len() // Show all skipped files in preview mode
-        } else {
-            std::cmp::min(5, result.skipped_files.len()) // Show sample when not preview
-        };
-
-        for skipped_file in result.skipped_files.iter().take(display_count) {
-            let reason_str = match &skipped_file.reason {
-                SkipReason::LowConfidence(conf) => format!("Low confidence ({:.2})", conf),
-                SkipReason::NoMetadata => "No metadata".to_string(),
-                SkipReason::AlreadyOrganized => "Already organized".to_string(),
-                SkipReason::ExtrasContent => "Extras content".to_string(),
-                SkipReason::UnsupportedFormat => "Unsupported format".to_string(),
-                SkipReason::UserSkipped => "User skipped".to_string(),
-            };
-
-            // Show full paths in preview mode for better debugging
-            if args.preview {
-                println!("  ⚠️  {} ({})", skipped_file.path.display(), reason_str);
-            } else {
-                println!(
-                    "  ⚠️  {} ({})",
-                    skipped_file.path.file_name().unwrap().to_string_lossy(),
-                    reason_str
-                );
-            }
-        }
-
-        if !args.preview && result.skipped_files.len() > display_count {
-            println!(
-                "  ... and {} more files",
-                result.skipped_files.len() - display_count
-            );
-        }
-    }
 
     // Show failed files
     if !result.failed_files.is_empty() {
@@ -934,7 +895,7 @@ async fn display_organization_results(
         for failed_file in result.failed_files.iter().take(sample_count) {
             println!(
                 "  ❌ {}: {}",
-                failed_file.path.file_name().unwrap().to_string_lossy(),
+                failed_file.media_file.file_name,
                 failed_file.error
             );
         }

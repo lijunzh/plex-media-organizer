@@ -211,22 +211,20 @@
 
 pub mod cli;
 pub mod config;
+pub mod core;
 pub mod database;
 pub mod external;
-pub mod metadata_extractor;
-pub mod organizer;
+pub mod media;
 pub mod parsers;
-pub mod scanner;
 pub mod types;
 
 pub use cli::*;
 pub use config::*;
+pub use core::*;
 pub use database::*;
 pub use external::*;
-pub use metadata_extractor::*;
-pub use organizer::*;
+pub use media::{extractor, types as media_types};
 pub use parsers::*;
-pub use scanner::*;
 pub use types::*;
 
 /// Main result type for the library

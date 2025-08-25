@@ -183,10 +183,10 @@ impl UnifiedTmdbClient {
 
         // Strategy 3: Try with cleaned title (remove common suffixes/prefixes)
         let cleaned_title = self.clean_title_for_search(title);
-        if cleaned_title != title
-            && let Some(result) = self.find_best_match(&cleaned_title, year).await?
-        {
-            return Ok(Some(result));
+        if cleaned_title != title {
+            if let Some(result) = self.find_best_match(&cleaned_title, year).await? {
+                return Ok(Some(result));
+            }
         }
 
         // Strategy 4: Try with alternative title variations
@@ -261,10 +261,10 @@ impl UnifiedTmdbClient {
         }
 
         // Handle sequel numbers (e.g., "Matrix 2" -> "Matrix")
-        if let Some(last_space) = title.rfind(' ')
-            && let Ok(_number) = title[last_space + 1..].parse::<u32>()
-        {
-            variations.push(title[..last_space].trim().to_string());
+        if let Some(last_space) = title.rfind(' ') {
+            if let Ok(_number) = title[last_space + 1..].parse::<u32>() {
+                variations.push(title[..last_space].trim().to_string());
+            }
         }
 
         variations
@@ -274,7 +274,7 @@ impl UnifiedTmdbClient {
     pub fn tmdb_to_movie_info(
         &self,
         tmdb_movie: &crate::types::TmdbMovie,
-    ) -> crate::types::MovieInfo {
+    ) -> crate::media::MovieInfo {
         let year = tmdb_movie.release_date.as_ref().and_then(|date| {
             if date.len() >= 4 {
                 date[..4].parse::<u32>().ok()
@@ -290,7 +290,7 @@ impl UnifiedTmdbClient {
             .as_ref()
             .map(|c| c.name.clone());
 
-        crate::types::MovieInfo {
+        crate::media::MovieInfo {
             title: tmdb_movie.title.clone(),
             original_title: tmdb_movie.original_title.clone(),
             original_language: tmdb_movie.original_language.clone(),

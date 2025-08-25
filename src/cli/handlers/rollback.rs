@@ -150,7 +150,7 @@ fn load_operation_from_database(
                         .to_string_lossy()
                         .to_string(),
                     file_size: file_record.file_size,
-                    media_type: crate::types::MediaType::Movie,
+                    media_type: crate::types::MediaType::Video,
                     content_hash: format!(
                         "{:x}",
                         md5::compute(file_record.original_path.to_string_lossy().as_bytes())
@@ -300,11 +300,10 @@ async fn rollback_single_file(
     };
 
     // Create parent directory if it doesn't exist
-    if let Some(parent) = organized_file.original_path.parent()
-        && !parent.exists()
-        && !preview
-    {
-        std::fs::create_dir_all(parent)?;
+    if let Some(parent) = organized_file.original_path.parent() {
+        if !parent.exists() && !preview {
+            std::fs::create_dir_all(parent)?;
+        }
     }
 
     // Perform the rollback operation

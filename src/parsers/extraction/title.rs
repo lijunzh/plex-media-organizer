@@ -100,10 +100,10 @@ impl TitleExtractor {
         for part in parts.iter().rev() {
             // Process in reverse order
             // Skip if it's a year
-            if let Ok(year) = part.parse::<u32>()
-                && (1900..=2030).contains(&year)
-            {
-                continue;
+            if let Ok(year) = part.parse::<u32>() {
+                if (1900..=2030).contains(&year) {
+                    continue;
+                }
             }
 
             // Skip common file extensions and technical terms
@@ -397,17 +397,17 @@ impl TitleExtractor {
             return false; // Keep this word
         }
         // Check if it's a year
-        if let Some(y) = year
-            && token.parse::<u32>().ok() == Some(*y)
-        {
-            return true;
+        if let Some(y) = year {
+            if token.parse::<u32>().ok() == Some(*y) {
+                return true;
+            }
         }
 
         // Check if it's quality, source, audio, codec, or group
-        if let Some(q) = quality
-            && token.to_lowercase().contains(&q.to_lowercase())
-        {
-            return true;
+        if let Some(q) = quality {
+            if token.to_lowercase().contains(&q.to_lowercase()) {
+                return true;
+            }
         }
 
         if let Some(s) = source {
@@ -427,22 +427,22 @@ impl TitleExtractor {
             }
         }
 
-        if let Some(a) = audio
-            && token.to_lowercase().contains(&a.to_lowercase())
-        {
-            return true;
+        if let Some(a) = audio {
+            if token.to_lowercase().contains(&a.to_lowercase()) {
+                return true;
+            }
         }
 
-        if let Some(c) = codec
-            && token.to_lowercase().contains(&c.to_lowercase())
-        {
-            return true;
+        if let Some(c) = codec {
+            if token.to_lowercase().contains(&c.to_lowercase()) {
+                return true;
+            }
         }
 
-        if let Some(g) = group
-            && token == g
-        {
-            return true;
+        if let Some(g) = group {
+            if token == g {
+                return true;
+            }
         }
 
         // Use provided language codes
