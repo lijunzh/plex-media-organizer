@@ -17,6 +17,23 @@ pub struct FilenameComponents {
     pub confidence: f32,
 }
 
+impl Default for FilenameComponents {
+    fn default() -> Self {
+        Self {
+            title: String::new(),
+            original_title: None,
+            year: None,
+            quality: None,
+            source: None,
+            language: None,
+            audio: None,
+            codec: None,
+            group: None,
+            confidence: 0.0,
+        }
+    }
+}
+
 /// Anime movie information extracted from filename
 #[derive(Debug, Clone)]
 pub struct AnimeInfo {

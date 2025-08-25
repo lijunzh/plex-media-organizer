@@ -2,7 +2,8 @@
 
 use crate::config::AppConfig;
 use crate::parsers::UnifiedMovieParser;
-use crate::types::{FailedFile, MediaFile, MediaType, ScanResult, ScanStatistics};
+use crate::types::{FailedFile, MediaFile, MediaType, ScanResult, ScanStatistics, ParsingResult};
+// use crate::parsers::types::ParserResult; // Unused import
 use anyhow::Result;
 use chrono::Utc;
 use futures::stream::{self, StreamExt};
@@ -151,10 +152,10 @@ impl Scanner {
                 for line in mount_info.lines() {
                     if line.contains("smb") || line.contains("cifs") {
                         // Check if this mount point matches our path
-                        if let Some(mount_point) = line.split_whitespace().next()
-                            && path_str.starts_with(mount_point)
-                        {
-                            return true;
+                        if let Some(mount_point) = line.split_whitespace().next() {
+                            if path_str.starts_with(mount_point) {
+                                return true;
+                            }
                         }
                     }
                 }
@@ -362,9 +363,8 @@ impl Scanner {
         let mut skipped_extras = 0;
 
         for file_path in files {
-            if let Some(extension) = file_path.extension()
-                && self.is_media_extension(extension)
-            {
+            if let Some(extension) = file_path.extension() {
+                if self.is_media_extension(extension) {
                 // Skip extras content (menus, interviews, trailers, etc.)
                 if self.is_extras_content(file_path) {
                     skipped_extras += 1;
@@ -379,6 +379,7 @@ impl Scanner {
                     self.create_media_file(file_path)?
                 };
                 media_files.push(media_file);
+                }
             }
 
             processed += 1;
@@ -438,11 +439,12 @@ impl Scanner {
         let extras_extensions = crate::config::AppConfig::load()
             .map(|config| config.get_extras_extensions())
             .unwrap_or_else(|_| vec!["ifo".to_string(), "bup".to_string(), "vob".to_string()]);
-        if let Some(ext) = file_path.extension()
-            && let Some(ext_str) = ext.to_str()
-            && extras_extensions.contains(&ext_str.to_lowercase())
-        {
-            return true;
+        if let Some(ext) = file_path.extension() {
+            if let Some(ext_str) = ext.to_str() {
+                if extras_extensions.contains(&ext_str.to_lowercase()) {
+                    return true;
+                }
+            }
         }
 
         // Secondary check: Skip files with obvious extras patterns in filename
@@ -604,7 +606,20 @@ impl Scanner {
                     let progress_bar = progress_bar.clone();
                     async move {
                         let result = match movie_parser.parse_movie(&media_file.file_path).await {
-                            Ok(parsing_result) => Ok(parsing_result),
+                            Ok(parser_result) => {
+                                // Convert ParserResult<FilenameComponents> to ParsingResult
+                                let parsing_result = ParsingResult {
+                                    media_file: media_file.clone(),
+                                    parsed_metadata: crate::types::MediaMetadata::default(), // TODO: Convert from FilenameComponents
+                                    confidence_score: parser_result.confidence,
+                                    parsing_strategy: crate::types::ParsingStrategy::FilenameOnly,
+                                    external_sources: Vec::new(),
+                                    user_corrections: Vec::new(),
+                                    created_at: chrono::Utc::now(),
+                                    updated_at: chrono::Utc::now(),
+                                };
+                                Ok(parsing_result)
+                            }
                             Err(error) => {
                                 let failed_file = FailedFile {
                                     media_file: media_file.clone(),
@@ -669,7 +684,20 @@ impl Scanner {
                 let progress_bar = progress_bar.clone();
                 async move {
                     let result = match movie_parser.parse_movie(&media_file.file_path).await {
-                        Ok(parsing_result) => Ok(parsing_result),
+                        Ok(parser_result) => {
+                            // Convert ParserResult<FilenameComponents> to ParsingResult
+                            let parsing_result = ParsingResult {
+                                media_file: media_file.clone(),
+                                parsed_metadata: crate::types::MediaMetadata::default(), // TODO: Convert from FilenameComponents
+                                confidence_score: parser_result.confidence,
+                                parsing_strategy: crate::types::ParsingStrategy::FilenameOnly,
+                                external_sources: Vec::new(),
+                                user_corrections: Vec::new(),
+                                created_at: chrono::Utc::now(),
+                                updated_at: chrono::Utc::now(),
+                            };
+                            Ok(parsing_result)
+                        }
                         Err(error) => {
                             let failed_file = FailedFile {
                                 media_file: media_file.clone(),

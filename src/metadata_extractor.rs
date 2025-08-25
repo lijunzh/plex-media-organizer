@@ -21,17 +21,17 @@ impl MetadataExtractor {
         }
 
         // 2. Extract from media file headers (if no external file or incomplete)
-        if (metadata.title.is_empty() || metadata.year.is_none())
-            && let Some(header_meta) = Self::extract_from_media_headers(file_path)?
-        {
-            metadata = Self::merge_movie_info(metadata, header_meta);
+        if metadata.title.is_empty() || metadata.year.is_none() {
+            if let Some(header_meta) = Self::extract_from_media_headers(file_path)? {
+                metadata = Self::merge_movie_info(metadata, header_meta);
+            }
         }
 
         // 3. Fallback to filename parsing (lowest priority)
-        if metadata.title.is_empty()
-            && let Some(filename_meta) = Self::extract_from_filename(file_path)?
-        {
-            metadata = Self::merge_movie_info(metadata, filename_meta);
+        if metadata.title.is_empty() {
+            if let Some(filename_meta) = Self::extract_from_filename(file_path)? {
+                metadata = Self::merge_movie_info(metadata, filename_meta);
+            }
         }
 
         Ok(metadata)
@@ -46,10 +46,10 @@ impl MetadataExtractor {
 
         for ext in &reliable_extensions {
             let metadata_path = base_path.with_extension(ext);
-            if metadata_path.exists()
-                && let Some(meta) = Self::parse_metadata_file(&metadata_path)?
-            {
-                return Ok(Some(meta));
+            if metadata_path.exists() {
+                if let Some(meta) = Self::parse_metadata_file(&metadata_path)? {
+                    return Ok(Some(meta));
+                }
             }
         }
 
@@ -81,10 +81,10 @@ impl MetadataExtractor {
         }
 
         // Extract year
-        if let Some(year_str) = Self::extract_xml_tag(&content, "year")
-            && let Ok(year) = year_str.parse::<u32>()
-        {
-            movie_info.year = Some(year);
+        if let Some(year_str) = Self::extract_xml_tag(&content, "year") {
+            if let Ok(year) = year_str.parse::<u32>() {
+                movie_info.year = Some(year);
+            }
         }
 
         // Extract original title
@@ -219,10 +219,10 @@ impl MetadataExtractor {
             if let Some(title) = captures.get(1) {
                 movie_info.title = title.as_str().trim().to_string();
             }
-            if let Some(year_str) = captures.get(2)
-                && let Ok(year) = year_str.as_str().parse::<u32>()
-            {
-                movie_info.year = Some(year);
+            if let Some(year_str) = captures.get(2) {
+                if let Ok(year) = year_str.as_str().parse::<u32>() {
+                    movie_info.year = Some(year);
+                }
             }
         }
 

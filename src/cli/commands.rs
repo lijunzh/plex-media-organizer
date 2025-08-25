@@ -9,7 +9,7 @@ use crate::cli::handlers::organize::{OrganizeArgs, handle_organize};
 use crate::cli::handlers::rollback::{RollbackArgs, handle_rollback};
 use crate::cli::handlers::scan::{ScanArgs, handle_scan};
 use crate::cli::handlers::setup::{SetupArgs, handle_setup};
-use crate::cli::handlers::test::{TestArgs, handle_test};
+// use crate::cli::handlers::test::{TestArgs, handle_test}; // Temporarily disabled
 
 /// Plex Media Organizer - Intelligent media file organization
 #[derive(Parser)]
@@ -25,7 +25,7 @@ pub struct Cli {
 #[derive(Debug, Subcommand)]
 pub enum Commands {
     /// Test filename parsing
-    Test(TestArgs),
+    // Test(TestArgs), // Temporarily disabled
     /// Scan directories for media files
     Scan(ScanArgs),
     /// Setup initial configuration
@@ -81,7 +81,7 @@ impl Cli {
             Commands::Scan(args) => handle_scan(args).await,
             Commands::Setup(args) => handle_setup(args).await,
             Commands::Config(args) => handle_config(args).await,
-            Commands::Test(args) => handle_test(args).await,
+            // Commands::Test(args) => handle_test(args).await, // Temporarily disabled
             Commands::Organize(args) => handle_organize(args).await,
             Commands::Rollback(args) => handle_rollback(args).await,
             Commands::Cleanup(args) => handle_cleanup(args).await,

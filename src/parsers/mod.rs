@@ -3,7 +3,7 @@
 pub mod extraction;
 pub mod patterns;
 pub mod types;
-pub mod unified;
+pub mod movie;
 
 // Re-export new parser types
 pub use extraction::{ExtractionResult, UnifiedTitleExtractor};
@@ -19,8 +19,9 @@ pub use patterns::series::SeriesDetector;
 // Re-export legacy title extraction methods for backward compatibility
 pub use extraction::title::TitleExtractor;
 
-// Re-export unified movie parser
-pub use unified::UnifiedMovieParser;
+// Re-export movie parser
+pub use movie::MovieParser;
+pub use movie::UnifiedMovieParser; // Backward compatibility
 
 // TODO: Gradually migrate to unified parser structure
 // Phase 1.4: Create unified movie parser - COMPLETED

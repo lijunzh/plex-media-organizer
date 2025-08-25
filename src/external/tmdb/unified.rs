@@ -183,10 +183,10 @@ impl UnifiedTmdbClient {
 
         // Strategy 3: Try with cleaned title (remove common suffixes/prefixes)
         let cleaned_title = self.clean_title_for_search(title);
-        if cleaned_title != title
-            && let Some(result) = self.find_best_match(&cleaned_title, year).await?
-        {
-            return Ok(Some(result));
+        if cleaned_title != title {
+            if let Some(result) = self.find_best_match(&cleaned_title, year).await? {
+                return Ok(Some(result));
+            }
         }
 
         // Strategy 4: Try with alternative title variations
@@ -261,10 +261,10 @@ impl UnifiedTmdbClient {
         }
 
         // Handle sequel numbers (e.g., "Matrix 2" -> "Matrix")
-        if let Some(last_space) = title.rfind(' ')
-            && let Ok(_number) = title[last_space + 1..].parse::<u32>()
-        {
-            variations.push(title[..last_space].trim().to_string());
+        if let Some(last_space) = title.rfind(' ') {
+            if let Ok(_number) = title[last_space + 1..].parse::<u32>() {
+                variations.push(title[..last_space].trim().to_string());
+            }
         }
 
         variations
