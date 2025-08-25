@@ -1,157 +1,170 @@
-# Current Limitations and Trade-offs
+# Current Limitations
 
 ## Overview
 
-The Plex Media Organizer uses a **conservative approach** to ensure accuracy over completeness. This means some movies may be skipped rather than risk incorrect organization.
+This document outlines the current limitations of the Plex Media Organizer, focusing on the English movie organization functionality. Understanding these limitations helps set appropriate expectations and guides future development priorities.
 
-## Current Approach
+## 🎬 **English Movie Focus Limitations**
 
-### 1. TMDB-First Strategy
-- **Trust TMDB's data completely** - we use TMDB's English title and original title as authoritative
-- **High confidence threshold (0.7)** - requires strong evidence before organizing
-- **Skip unmatched movies** - rather than use potentially incorrect fallback data
+### **Media Type Scope**
+- **Movies Only**: Currently supports English movies exclusively
+- **No TV Shows**: Episode detection and season organization not implemented
+- **No Music**: Music file organization and metadata not supported
+- **No Mixed Content**: Cannot handle directories with multiple media types
 
-### 2. Title Extraction Limitations
-- **Basic technical term filtering** - some technical terms may remain in extracted titles
-- **No machine learning** - relies on hard-coded patterns
-- **Limited multilingual support** - primarily optimized for Chinese, Japanese, and English
+### **Language Support**
+- **English Movies Only**: Optimized for English-language movie content
+- **No International Films**: Limited support for non-English movies
+- **No Anime**: Japanese anime and other international content not supported
+- **No Multi-Language**: Cannot handle movies with multiple language titles
 
-## Why Movies Get Skipped
+## 🔧 **Technical Limitations**
 
-### 1. "No TMDB match found"
-**Cause**: TMDB cannot find a movie with the extracted title and year.
+### **API Dependencies**
+- **TMDB Only**: Single external API dependency for movie metadata
+- **No Fallback APIs**: Limited to TMDB for movie information
+- **API Rate Limits**: Subject to TMDB's free tier rate limits
+- **Internet Required**: Cannot function without internet access
 
-**Common reasons**:
-- Technical terms in filename not properly filtered (e.g., "Fight Back to School DualAudio iNT TLF")
-- Movie doesn't exist in TMDB database
-- Movie has very different title in TMDB vs. filename
-- Year mismatch between filename and TMDB data
+### **File System Limitations**
+- **Local Files Only**: Cannot organize cloud-stored or network files
+- **Single Directory**: Processes one directory at a time
+- **No Recursive Organization**: Cannot organize nested directory structures
+- **File Permissions**: Requires appropriate file system permissions
 
-**Example**:
-```
-Filename: Fight.Back.to.School.3.1993.BDRip.X264.DualAudio.iNT-TLF.mkv
-Extracted title: "Fight Back to School DualAudio iNT TLF"
-Issue: Technical terms "DualAudio", "iNT", "TLF" not filtered out
-Result: TMDB can't find a movie with this exact title
-```
+### **Performance Constraints**
+- **Sequential Processing**: Files processed one at a time (not fully parallel)
+- **Memory Usage**: Large directories may consume significant memory
+- **Database Size**: SQLite database grows with operation history
+- **Cache Expiration**: TMDB cache expires after 24 hours
 
-### 2. "Low confidence (X < 0.7)"
-**Cause**: TMDB found a match but confidence score is below threshold.
+## 🛡️ **Safety Limitations**
 
-**Common reasons**:
-- Partial title match (e.g., "Lost in the Stars" vs "消失的她")
-- Year mismatch
-- Different title variations
+### **Rollback Limitations**
+- **Operation-Based**: Rollback only available for complete operations
+- **No Partial Rollback**: Cannot rollback individual file changes
+- **Database Dependency**: Rollback requires intact database
+- **Time-Based**: Old operations may be cleaned up automatically
 
-**Example**:
-```
-Filename: 消失的她.Lost.in.the.Stars.2022.1080p.WEB-DL.mkv
-TMDB match: "Lost in the Stars" (2023)
-Confidence: 0.69 (below 0.7 threshold)
-Issue: Year mismatch (2022 vs 2023) and partial title match
-```
+### **Error Recovery**
+- **Stop on Error**: Processing stops on first critical error
+- **No Automatic Retry**: Failed operations require manual intervention
+- **Limited Error Context**: Some error messages may be generic
+- **No Recovery Mode**: Cannot resume interrupted operations
 
-## Trade-offs
+## 📊 **Accuracy Limitations**
 
-### Conservative Approach (Current)
-**Pros**:
-- ✅ **High accuracy** - very low risk of incorrect organization
-- ✅ **Clean results** - organized movies are correctly identified
-- ✅ **TMDB authoritative** - uses official movie database
-- ✅ **Safe for automation** - won't create incorrect directory structures
+### **Parsing Accuracy**
+- **Filename Dependent**: Accuracy depends on filename quality
+- **TMDB Coverage**: Limited to movies available in TMDB database
+- **Confidence Thresholds**: Low-confidence matches may be skipped
+- **No Learning**: System doesn't learn from user corrections
 
-**Cons**:
-- ❌ **Lower coverage** - some movies will be skipped
-- ❌ **Manual intervention needed** - skipped movies require manual review
-- ❌ **Technical term sensitivity** - filenames with unusual patterns may fail
+### **Title Matching**
+- **Exact Match Preferred**: Fuzzy matching has limitations
+- **Year Sensitivity**: Incorrect years may cause matching failures
+- **Title Variations**: Some title variations may not be recognized
+- **No Context Awareness**: Cannot use surrounding files for context
 
-### Alternative: Aggressive Approach (Not Recommended)
-**Pros**:
-- ✅ **Higher coverage** - more movies would be organized
-- ✅ **Less manual work** - fewer skipped movies
+## 🎯 **User Experience Limitations**
 
-**Cons**:
-- ❌ **Risk of errors** - could create incorrect directory structures
-- ❌ **Plex indexing issues** - wrong titles could affect search and metadata
-- ❌ **Data integrity** - organized files might not match actual movie content
+### **CLI Interface**
+- **Command Line Only**: No graphical user interface
+- **No Interactive Mode**: All operations require command-line input
+- **Limited Progress**: Basic progress reporting only
+- **No Real-Time Updates**: Cannot see changes as they happen
 
-## Recommendations
+### **Configuration**
+- **Manual Setup**: Requires manual API key configuration
+- **Limited Customization**: Few configurable options
+- **No Profiles**: Cannot save different configuration profiles
+- **No Templates**: Cannot customize naming templates
 
-### For Users
+## 📈 **Scalability Limitations**
 
-1. **Accept the trade-off**: It's better to skip a movie than organize it incorrectly
-2. **Review skipped movies**: Check the skipped list for movies you want to organize manually
-3. **Use preview mode**: Always run with `--preview` first to see what will be organized
-4. **Safety requirement**: Lower confidence thresholds (below 0.7) **require** `--preview` mode for safety
-5. **Adjust confidence threshold**: Use `--min-confidence 0.5` for more permissive matching (but review results carefully)
+### **Large Libraries**
+- **Memory Constraints**: Very large directories may cause memory issues
+- **Processing Time**: Large libraries take significant time to process
+- **Database Performance**: Large operation histories may slow queries
+- **No Batching**: Cannot process multiple directories simultaneously
 
-### For Filename Issues
+### **Concurrent Usage**
+- **Single User**: Designed for single-user operation
+- **No Multi-Processing**: Cannot run multiple instances simultaneously
+- **File Locking**: May conflict with other file operations
+- **No Distributed Processing**: Cannot distribute across multiple machines
 
-1. **Clean filenames**: Remove technical terms manually before organizing
-2. **Use standard naming**: Follow common movie naming conventions
-3. **Check TMDB**: Verify the movie exists in TMDB with the expected title
+## 🔮 **Future Limitations (Planned Features)**
 
-### For Developers
+### **Phase 2: TV Series Support**
+- **Episode Detection**: Will add TV show episode pattern recognition
+- **TVDB Integration**: Will add TVDB API for TV show metadata
+- **Season Organization**: Will support season-based directory structures
+- **Mixed Content**: Will handle movies and TV shows in same directory
 
-1. **Iteration 2**: Build a technical terms database for better filtering
-2. **Machine learning**: Implement pattern learning for new technical terms
-3. **Alternative search strategies**: Try multiple search approaches when TMDB fails
-4. **User feedback**: Allow users to correct and improve title extraction
+### **Phase 3: Music Support**
+- **Music Detection**: Will add music file format recognition
+- **MusicBrainz Integration**: Will add MusicBrainz API for music metadata
+- **Artist/Album Organization**: Will support music-specific directory structures
+- **Track Naming**: Will apply music-specific naming conventions
 
-## Configuration Options
+### **Phase 4: Multi-Language & Multi-API**
+- **Language Detection**: Will add automatic language detection
+- **Multiple APIs**: Will support multiple external databases
+- **Anime Support**: Will add specialized anime content handling
+- **International Films**: Will enhance non-English movie support
 
-### Confidence Threshold
-```bash
-# Conservative (default) - high accuracy, lower coverage
---min-confidence 0.7
+## 🎯 **Workarounds and Solutions**
 
-# Moderate - balanced approach (requires --preview)
---min-confidence 0.6 --preview
+### **For Current Limitations**
 
-# Permissive - higher coverage, review carefully (requires --preview)
---min-confidence 0.5 --preview
-```
+#### **Large Libraries**
+- Process directories in smaller batches
+- Use cleanup command to manage database size
+- Monitor memory usage during processing
 
-**Safety Note**: Thresholds below 0.7 require `--preview` mode to prevent accidental incorrect organization.
+#### **API Rate Limits**
+- Use caching to minimize API calls
+- Process during off-peak hours
+- Consider TMDB paid tier for higher limits
 
-### Skip Unmatched Movies
-```bash
-# Skip movies with no TMDB match (default)
---skip-unmatched true
+#### **Accuracy Issues**
+- Review and manually correct low-confidence matches
+- Use test command to preview results before organizing
+- Provide feedback for future improvements
 
-# Use fallback data (not recommended)
---skip-unmatched false
-```
+#### **File System Issues**
+- Ensure proper file permissions
+- Use dry-run mode to preview changes
+- Keep backups before organizing
 
-## Future Improvements (Iteration 2)
+### **For Future Features**
+- **TV Shows**: Use dedicated TV show organization tools until Phase 2
+- **Music**: Use music-specific organization tools until Phase 3
+- **International Content**: Use language-specific tools until Phase 4
+- **Large Scale**: Consider dedicated media management solutions
 
-1. **Technical Terms Database**
-   - JSON/TOML configuration file
-   - User-extensible patterns
-   - Categorized by type (codec, quality, release group, etc.)
+## 📝 **Documentation of Limitations**
 
-2. **Improved Title Extraction**
-   - Machine learning for pattern recognition
-   - Fuzzy matching for similar terms
-   - Multiple extraction strategies
+### **Why Document Limitations?**
+- **Set Expectations**: Help users understand what the tool can and cannot do
+- **Guide Development**: Prioritize features based on user needs
+- **Prevent Misuse**: Avoid users attempting unsupported operations
+- **Plan Workarounds**: Help users find alternative solutions
 
-3. **Enhanced TMDB Integration**
-   - Alternative search strategies
-   - Year range matching
-   - Partial title matching with confidence scoring
+### **Limitation Categories**
+1. **Current Limitations**: What the tool cannot do now
+2. **Technical Limitations**: Constraints due to technology choices
+3. **Design Limitations**: Intentional scope limitations
+4. **Future Limitations**: Features planned for future phases
 
-4. **User Feedback System**
-   - Allow users to correct extraction errors
-   - Learn from user corrections
-   - Community-driven pattern updates
+## 🎯 **Conclusion**
 
-## Conclusion
+The Plex Media Organizer is designed as a focused, reliable tool for English movie organization. While it has specific limitations, these are intentional design choices that prioritize:
 
-The current conservative approach prioritizes **accuracy over completeness**. While some movies will be skipped, this ensures that organized movies are correctly identified and properly structured for Plex.
+- **Safety and Reliability**: Comprehensive error handling and rollback capabilities
+- **Accuracy**: High-quality parsing for English movies
+- **Simplicity**: Clear, focused functionality
+- **Extensibility**: Architecture ready for future expansion
 
-For users who need higher coverage, consider:
-1. Manually cleaning problematic filenames
-2. Using a lower confidence threshold (with careful review)
-3. Waiting for Iteration 2 improvements
-
-**Remember**: It's always better to skip a movie than to organize it incorrectly!
+Understanding these limitations helps users make informed decisions about when and how to use the tool, and guides the development team in prioritizing future improvements.
