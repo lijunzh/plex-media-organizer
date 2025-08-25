@@ -119,53 +119,88 @@ This document outlines an iterative, incremental implementation plan for the Ple
 
 ---
 
-## 🎬 **Iteration 3: TV Show Support (Weeks 5-6)** 🎯 **NEXT**
+## 🎬 **Iteration 3: Enhanced Movie Parsing (Weeks 5-6)** 🎯 **NEXT**
+
+### **Goal**: Improve movie parsing to handle international content in `/Volume/media/movie` with TMDB-first approach
+
+#### **3.1 TMDB-First Parsing Strategy** 🎯 **PRIORITY**
+- [ ] **Always prioritize TMDB matches** - Skip files without confident TMDB matches
+- [ ] **Enhanced confidence scoring** - Improve match confidence algorithms
+- [ ] **Better fallback handling** - Only use filename parsing when TMDB fails completely
+- [ ] **International title support** - Handle non-English movie titles effectively
+- [ ] **Multi-language search** - Search TMDB in multiple languages for better matches
+
+#### **3.2 International Movie Support**
+- [ ] **Chinese movies** - Handle Chinese titles, alternative titles, and bilingual names
+- [ ] **Japanese movies** - Support Japanese titles and anime patterns
+- [ ] **Korean movies** - Korean title parsing and TMDB matching
+- [ ] **European movies** - French, German, Spanish, Italian title handling
+- [ ] **Middle Eastern movies** - Arabic, Persian, Turkish title support
+- [ ] **Russian movies** - Cyrillic title parsing and matching
+
+#### **3.3 Enhanced TMDB Integration**
+- [ ] **Alternative title search** - Search TMDB alternative titles in multiple languages
+- [ ] **Original title matching** - Match against original titles when available
+- [ ] **Regional title handling** - Handle different titles for different regions
+- [ ] **Improved fuzzy matching** - Better algorithms for partial matches
+- [ ] **Confidence thresholds** - Configurable confidence levels for acceptance
+
+#### **3.4 Parser Improvements**
+- [ ] **Better title extraction** - Improved algorithms for extracting clean titles from filenames
+- [ ] **Year detection** - More robust year extraction and validation
+- [ ] **Quality detection** - Enhanced quality and format detection
+- [ ] **Special character handling** - Better handling of special characters in titles
+- [ ] **Encoding support** - Proper UTF-8 and other encoding handling
+
+---
+
+## 📺 **Iteration 4: TV Show Support (Weeks 7-8)**
 
 ### **Goal**: Add TV show parsing and organization capabilities
 
-#### **3.1 TV Show Parser**
+#### **4.1 TV Show Parser**
 - [ ] Episode number detection (S01E01, 1x01, etc.)
 - [ ] Season detection and organization
 - [ ] Series title extraction
 - [ ] Multi-episode file handling
 - [ ] Special episode detection (specials, extras)
 
-#### **3.2 TV Show Organization**
+#### **4.2 TV Show Organization**
 - [ ] Season-based directory structure
 - [ ] Episode naming conventions
 - [ ] Special episode handling
 - [ ] Series metadata integration
 
-#### **3.3 TVDB Integration**
+#### **4.3 TVDB Integration**
 - [ ] TVDB API client implementation
 - [ ] Series metadata lookup
 - [ ] Episode information retrieval
 - [ ] Fallback to filename parsing
 
-#### **3.4 CLI Extensions**
+#### **4.4 CLI Extensions**
 - [ ] Extend existing commands for TV shows
 - [ ] TV show-specific options
 - [ ] Mixed content handling (movies + TV shows)
 
 ---
 
-## 🌐 **Iteration 4: Web Interface (Weeks 7-8)**
+## 🌐 **Iteration 5: Web Interface (Weeks 9-10)**
 
 ### **Goal**: Browser-based management interface
 
-#### **4.1 Web Server**
+#### **5.1 Web Server**
 - [ ] Actix-web server implementation
 - [ ] REST API endpoints
 - [ ] WebSocket support for real-time updates
 - [ ] Static file serving
 
-#### **4.2 Web Dashboard**
+#### **5.2 Web Dashboard**
 - [ ] React/Vue frontend
 - [ ] File browser interface
 - [ ] Progress monitoring
 - [ ] Configuration management UI
 
-#### **4.3 Real-time Features**
+#### **5.3 Real-time Features**
 - [ ] Live progress updates
 - [ ] Real-time file scanning
 - [ ] WebSocket notifications
@@ -173,23 +208,23 @@ This document outlines an iterative, incremental implementation plan for the Ple
 
 ---
 
-## ⚡ **Iteration 5: Advanced Features (Weeks 9-10)**
+## ⚡ **Iteration 6: Advanced Features (Weeks 11-12)**
 
 ### **Goal**: Enhanced functionality and automation
 
-#### **5.1 Scheduled Operations**
+#### **6.1 Scheduled Operations**
 - [ ] Cron-like scheduling
 - [ ] Watch directories for new files
 - [ ] Automated organization
 - [ ] Email notifications
 
-#### **5.2 Batch Processing**
+#### **6.2 Batch Processing**
 - [ ] Multiple directory processing
 - [ ] Batch operation management
 - [ ] Progress tracking
 - [ ] Error recovery
 
-#### **5.3 Cloud Integration**
+#### **6.3 Cloud Integration**
 - [ ] Google Drive support
 - [ ] Dropbox integration
 - [ ] S3/Backblaze support
@@ -197,23 +232,23 @@ This document outlines an iterative, incremental implementation plan for the Ple
 
 ---
 
-## 🎵 **Iteration 6: Music Support (Weeks 11-12)**
+## 🎵 **Iteration 7: Music Support (Weeks 13-14)**
 
 ### **Goal**: Music file organization and metadata
 
-#### **6.1 Music Parser**
+#### **7.1 Music Parser**
 - [ ] Artist/album/track detection
 - [ ] Music metadata extraction
 - [ ] Various music formats support
 - [ ] Compilation handling
 
-#### **6.2 Music Organization**
+#### **7.2 Music Organization**
 - [ ] Artist/album directory structure
 - [ ] Track naming conventions
 - [ ] Metadata preservation
 - [ ] Music-specific options
 
-#### **6.3 Music Metadata APIs**
+#### **7.3 Music Metadata APIs**
 - [ ] MusicBrainz integration
 - [ ] Last.fm API support
 - [ ] Local metadata extraction
@@ -221,23 +256,23 @@ This document outlines an iterative, incremental implementation plan for the Ple
 
 ---
 
-## 🚀 **Iteration 7: Production Ready (Weeks 13-14)**
+## 🚀 **Iteration 8: Production Ready (Weeks 15-16)**
 
 ### **Goal**: Production deployment and optimization
 
-#### **7.1 Performance Optimization**
+#### **8.1 Performance Optimization**
 - [ ] Large library optimization
 - [ ] Memory usage optimization
 - [ ] Database query optimization
 - [ ] Caching improvements
 
-#### **7.2 Monitoring and Analytics**
+#### **8.2 Monitoring and Analytics**
 - [ ] Operation analytics
 - [ ] Performance metrics
 - [ ] Error tracking
 - [ ] Usage statistics
 
-#### **7.3 Documentation and Deployment**
+#### **8.3 Documentation and Deployment**
 - [ ] Complete user documentation
 - [ ] Deployment guides
 - [ ] Docker containerization
@@ -302,11 +337,11 @@ This document outlines an iterative, incremental implementation plan for the Ple
 - **Multi-language Support**: English, Chinese, Japanese, Arabic, Russian
 - **Performance Optimization**: Caching, parallel processing, network optimization
 
-### **🎯 Next Priority: TV Show Support**
-- **Episode Detection**: Parse episode numbers and seasons
-- **Series Organization**: Season-based directory structures
-- **TVDB Integration**: Enhanced TV show metadata
-- **CLI Extensions**: Extend existing commands for TV shows
+### **🎯 Next Priority: Enhanced Movie Parsing**
+- **TMDB-First Strategy**: Always prioritize confident TMDB matches
+- **International Support**: Handle movies from `/Volume/media/movie` in multiple languages
+- **Enhanced Parsing**: Improved title extraction and matching algorithms
+- **Better Fallbacks**: Only use filename parsing when TMDB fails completely
 
 ### **📋 Success Factors**
 - **Start Simple**: Don't over-engineer new features
@@ -329,7 +364,7 @@ This iterative approach has successfully delivered a complete, production-ready 
 - ✅ **Robust Testing** with 96+ unit tests
 - ✅ **Performance Optimizations** for large libraries
 
-The foundation is solid and ready for the next iteration: **TV Show Support**. This will extend the existing architecture to handle TV show parsing, episode detection, and season-based organization.
+The foundation is solid and ready for the next iteration: **Enhanced Movie Parsing**. This will improve the existing movie parsing to handle international content in `/Volume/media/movie` with a TMDB-first approach that prioritizes confident matches over filename parsing.
 
 Remember: **Perfect is the enemy of done**. Get something working, test it with real data, learn from the experience, and improve. This approach will continue to deliver value while building toward a comprehensive media organization solution.
 
