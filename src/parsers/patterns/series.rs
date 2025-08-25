@@ -97,23 +97,27 @@ impl SeriesDetector {
         ];
 
         for pattern in patterns {
-            if let Ok(regex) = Regex::new(pattern)
-                && let Some(captures) = regex.captures(filename)
-                && let Some(number_str) = captures.get(1)
-                && let Ok(number) = number_str.as_str().parse::<u32>()
-            {
-                return Some(number);
+            if let Ok(regex) = Regex::new(pattern) {
+                if let Some(captures) = regex.captures(filename) {
+                    if let Some(number_str) = captures.get(1) {
+                        if let Ok(number) = number_str.as_str().parse::<u32>() {
+                            return Some(number);
+                        }
+                    }
+                }
             }
         }
 
         // Also check for simple number patterns that might be series numbers
         let simple_number_regex = Regex::new(r"\b(\d+)\b").unwrap();
-        if let Some(captures) = simple_number_regex.captures(filename)
-            && let Some(number_str) = captures.get(1)
-            && let Ok(number) = number_str.as_str().parse::<u32>()
-            && (1..=10).contains(&number)
-        {
-            return Some(number);
+        if let Some(captures) = simple_number_regex.captures(filename) {
+            if let Some(number_str) = captures.get(1) {
+                if let Ok(number) = number_str.as_str().parse::<u32>() {
+                    if (1..=10).contains(&number) {
+                        return Some(number);
+                    }
+                }
+            }
         }
 
         None
@@ -238,22 +242,24 @@ impl SeriesDetector {
             if let Some(captures) = regex::Regex::new(pattern)
                 .ok()
                 .and_then(|re| re.captures(title))
-                && let Some(series_name) = captures.get(1)
-                && let Some(series_num_str) = captures.get(*capture_group)
             {
-                // Try to parse the series number
-                if let Ok(series_num) = series_num_str.as_str().parse::<u32>() {
-                    let series_name_trimmed = series_name.as_str().trim();
-                    // Validate that the series name doesn't end with a number (to avoid "Iron Man 2 3" -> "Iron Man 2", 3)
-                    if !series_name_trimmed.ends_with(|c: char| c.is_ascii_digit()) {
-                        return Some((series_name_trimmed.to_string(), series_num));
-                    }
-                }
-                // Handle Roman numerals
-                if *capture_group == 2 && pattern.contains("I{1,3}|IV|V|VI{1,3}|IX|X") {
-                    let roman_num = series_num_str.as_str();
-                    if let Some(num) = self.roman_to_arabic(roman_num) {
-                        return Some((series_name.as_str().trim().to_string(), num));
+                if let Some(series_name) = captures.get(1) {
+                    if let Some(series_num_str) = captures.get(*capture_group) {
+                        // Try to parse the series number
+                        if let Ok(series_num) = series_num_str.as_str().parse::<u32>() {
+                            let series_name_trimmed = series_name.as_str().trim();
+                            // Validate that the series name doesn't end with a number (to avoid "Iron Man 2 3" -> "Iron Man 2", 3)
+                            if !series_name_trimmed.ends_with(|c: char| c.is_ascii_digit()) {
+                                return Some((series_name_trimmed.to_string(), series_num));
+                            }
+                        }
+                        // Handle Roman numerals
+                        if *capture_group == 2 && pattern.contains("I{1,3}|IV|V|VI{1,3}|IX|X") {
+                            let roman_num = series_num_str.as_str();
+                            if let Some(num) = self.roman_to_arabic(roman_num) {
+                                return Some((series_name.as_str().trim().to_string(), num));
+                            }
+                        }
                     }
                 }
             }

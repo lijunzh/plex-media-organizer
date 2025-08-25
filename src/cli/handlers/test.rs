@@ -236,75 +236,76 @@ async fn test_directory(
         .into_iter()
         .filter_map(|e| e.ok())
     {
-        if entry.file_type().is_file()
-            && let Some(extension) = entry.path().extension()
-            && video_extensions.contains(&extension.to_string_lossy().to_lowercase().as_str())
-        {
-            total_files += 1;
-            let filename = entry.path().file_name().unwrap().to_string_lossy();
-
-            if verbose {
-                println!("\n--- File {}: {} ---", total_files, filename);
-            }
-
-            let start = std::time::Instant::now();
-            let result = if use_cache {
-                parser.parse_async(&filename).await
-            } else {
-                parser.parse(&filename)
-            };
-            let duration = start.elapsed();
-
-            match result {
-                Ok(parser_result) => {
-                    successful_parses += 1;
-
-                    let cache_status =
-                        if use_cache && parser_result.parsing_method == "unified_cached" {
-                            cache_hits += 1;
-                            "CACHE HIT"
-                        } else if use_cache {
-                            cache_misses += 1;
-                            "CACHE MISS"
-                        } else {
-                            "N/A"
-                        };
-
-                    results.push((
-                        filename.to_string(),
-                        parser_result.data.title.clone(),
-                        parser_result.data.year,
-                        parser_result.data.quality.clone(),
-                        parser_result.data.source.clone(),
-                        format!("{:.2}", parser_result.data.confidence),
-                        format!("{:?}", duration),
-                        cache_status.to_string(),
-                    ));
+        if entry.file_type().is_file() {
+            if let Some(extension) = entry.path().extension() {
+                if video_extensions.contains(&extension.to_string_lossy().to_lowercase().as_str()) {
+                    total_files += 1;
+                    let filename = entry.path().file_name().unwrap().to_string_lossy();
 
                     if verbose {
-                        println!("  Title: {}", parser_result.data.title);
-                        println!("  Year: {:?}", parser_result.data.year);
-                        println!("  Quality: {:?}", parser_result.data.quality);
-                        println!("  Source: {:?}", parser_result.data.source);
-                        println!("  Confidence: {:.2}", parser_result.data.confidence);
-                        println!("  Duration: {:?}", duration);
-                        println!("  Cache: {}", cache_status);
+                        println!("\n--- File {}: {} ---", total_files, filename);
                     }
-                }
-                Err(e) => {
-                    results.push((
-                        filename.to_string(),
-                        "ERROR".to_string(),
-                        None,
-                        None,
-                        None,
-                        "0.00".to_string(),
-                        format!("{:?}", duration),
-                        "ERROR".to_string(),
-                    ));
 
-                    if verbose {
-                        println!("  Error: {}", e);
+                    let start = std::time::Instant::now();
+                    let result = if use_cache {
+                        parser.parse_async(&filename).await
+                    } else {
+                        parser.parse(&filename)
+                    };
+                    let duration = start.elapsed();
+
+                    match result {
+                        Ok(parser_result) => {
+                            successful_parses += 1;
+
+                            let cache_status =
+                                if use_cache && parser_result.parsing_method == "unified_cached" {
+                                    cache_hits += 1;
+                                    "CACHE HIT"
+                                } else if use_cache {
+                                    cache_misses += 1;
+                                    "CACHE MISS"
+                                } else {
+                                    "N/A"
+                                };
+
+                            results.push((
+                                filename.to_string(),
+                                parser_result.data.title.clone(),
+                                parser_result.data.year,
+                                parser_result.data.quality.clone(),
+                                parser_result.data.source.clone(),
+                                format!("{:.2}", parser_result.data.confidence),
+                                format!("{:?}", duration),
+                                cache_status.to_string(),
+                            ));
+
+                            if verbose {
+                                println!("  Title: {}", parser_result.data.title);
+                                println!("  Year: {:?}", parser_result.data.year);
+                                println!("  Quality: {:?}", parser_result.data.quality);
+                                println!("  Source: {:?}", parser_result.data.source);
+                                println!("  Confidence: {:.2}", parser_result.data.confidence);
+                                println!("  Duration: {:?}", duration);
+                                println!("  Cache: {}", cache_status);
+                            }
+                        }
+                        Err(e) => {
+                            results.push((
+                                filename.to_string(),
+                                "ERROR".to_string(),
+                                None,
+                                None,
+                                None,
+                                "0.00".to_string(),
+                                format!("{:?}", duration),
+                                "ERROR".to_string(),
+                            ));
+
+                            if verbose {
+                                println!("  Error: {}", e);
+                            }
+                        }
                     }
                 }
             }

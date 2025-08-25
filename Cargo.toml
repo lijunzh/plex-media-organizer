@@ -1,7 +1,7 @@
 [package]
 name = "plex-media-organizer"
 version = "0.1.1"
-edition = "2024"
+edition = "2021"
 authors = ["Lijun Zhu <gatechzhu@gmail.com>"]
 description = "Intelligent media file organizer following Plex naming conventions"
 license = "MIT"

@@ -151,10 +151,10 @@ impl Scanner {
                 for line in mount_info.lines() {
                     if line.contains("smb") || line.contains("cifs") {
                         // Check if this mount point matches our path
-                        if let Some(mount_point) = line.split_whitespace().next()
-                            && path_str.starts_with(mount_point)
-                        {
-                            return true;
+                        if let Some(mount_point) = line.split_whitespace().next() {
+                                                        if path_str.starts_with(mount_point) {
+                                return true;
+                            }
                         }
                     }
                 }
@@ -362,23 +362,23 @@ impl Scanner {
         let mut skipped_extras = 0;
 
         for file_path in files {
-            if let Some(extension) = file_path.extension()
-                && self.is_media_extension(extension)
-            {
-                // Skip extras content (menus, interviews, trailers, etc.)
-                if self.is_extras_content(file_path) {
-                    skipped_extras += 1;
-                    processed += 1;
-                    continue;
-                }
+            if let Some(extension) = file_path.extension() {
+                if self.is_media_extension(extension) {
+                    // Skip extras content (menus, interviews, trailers, etc.)
+                    if self.is_extras_content(file_path) {
+                        skipped_extras += 1;
+                        processed += 1;
+                        continue;
+                    }
 
-                // For network drives, minimize file system calls
-                let media_file = if self.network_mode {
-                    self.create_media_file_network_optimized(file_path)?
-                } else {
-                    self.create_media_file(file_path)?
-                };
-                media_files.push(media_file);
+                    // For network drives, minimize file system calls
+                    let media_file = if self.network_mode {
+                        self.create_media_file_network_optimized(file_path)?
+                    } else {
+                        self.create_media_file(file_path)?
+                    };
+                    media_files.push(media_file);
+                }
             }
 
             processed += 1;
@@ -438,11 +438,12 @@ impl Scanner {
         let extras_extensions = crate::config::AppConfig::load()
             .map(|config| config.get_extras_extensions())
             .unwrap_or_else(|_| vec!["ifo".to_string(), "bup".to_string(), "vob".to_string()]);
-        if let Some(ext) = file_path.extension()
-            && let Some(ext_str) = ext.to_str()
-            && extras_extensions.contains(&ext_str.to_lowercase())
-        {
-            return true;
+        if let Some(ext) = file_path.extension() {
+            if let Some(ext_str) = ext.to_str() {
+                if extras_extensions.contains(&ext_str.to_lowercase()) {
+                    return true;
+                }
+            }
         }
 
         // Secondary check: Skip files with obvious extras patterns in filename
