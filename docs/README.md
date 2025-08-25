@@ -8,6 +8,7 @@ Welcome to the Plex Media Organizer documentation. This guide helps you find the
 - **[Getting Started](user/getting-started.md)** - Quick start guide for new users
 - **[Features Guide](user/features.md)** - Comprehensive usage documentation
 - **[Configuration](user/configuration.md)** - All configuration options and settings
+- **[Parsing Strategy](user/parsing-strategy.md)** - How filename parsing works
 - **[Troubleshooting](user/troubleshooting.md)** - Common issues and solutions
 - **[Examples](user/examples/)** - Real-world usage examples
 
@@ -20,6 +21,7 @@ Welcome to the Plex Media Organizer documentation. This guide helps you find the
 - **[Architecture](developer/architecture/)** - Technical architecture and design
   - **[Current Architecture](developer/architecture/architecture.md)** - Existing system design
   - **[Module Structure](developer/architecture/module-structure.md)** - Target architecture
+  - **[Filename Parsing Strategy](architecture/filename-parsing-strategy.md)** - New TMDB-first parsing approach
   - **[Roadmap](developer/architecture/roadmap.md)** - Development phases and planning
   - **[Decisions](developer/architecture/decisions/)** - Architecture decision records
 - **[Planning](developer/planning/)** - Development planning documents
