@@ -236,10 +236,9 @@ async fn test_directory(
         .into_iter()
         .filter_map(|e| e.ok())
     {
-        if entry.file_type().is_file()
-            && let Some(extension) = entry.path().extension()
-            && video_extensions.contains(&extension.to_string_lossy().to_lowercase().as_str())
-        {
+        if entry.file_type().is_file() {
+            if let Some(extension) = entry.path().extension() {
+                if video_extensions.contains(&extension.to_string_lossy().to_lowercase().as_str()) {
             total_files += 1;
             let filename = entry.path().file_name().unwrap().to_string_lossy();
 
@@ -309,6 +308,8 @@ async fn test_directory(
                 }
             }
         }
+    }
+    }
     }
 
     // Print summary

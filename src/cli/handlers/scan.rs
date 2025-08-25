@@ -6,12 +6,12 @@ use std::path::PathBuf;
 
 use crate::{
     config::AppConfig,
+    core::Processor,
     database::DatabaseManager,
     output::{print_section_header, print_subsection_header},
     parsers::UnifiedMovieParser,
-    types::{MediaFile, MediaMetadata, MediaType},
+    types::MediaFile,
 };
-use indicatif::{ProgressBar, ProgressStyle};
 use serde::{Deserialize, Serialize};
 
 #[derive(Args, Debug)]
@@ -137,8 +137,22 @@ pub async fn handle_scan(args: ScanArgs) -> Result<()> {
     println!("📦 Batch size: {}", args.batch_size);
     println!("🎯 Confidence threshold: {:.2}", args.min_confidence);
 
-    // Scan for media files
-    let media_files = scan_for_media_files(&args.directory, args.verbose).await?;
+    // Create processor with appropriate settings
+    let mut processor = if args.network_mode {
+        Processor::for_network_drive(parser)
+    } else {
+        Processor::with_concurrency(parser, args.max_parallel)
+    };
+
+    // Set network mode if requested
+    processor.set_network_mode(args.network_mode);
+
+    // Process directory using the new core module
+    let scan_result = processor.process_directory(&args.directory).await?;
+    
+    let media_files = scan_result.files;
+    let parsed_files = scan_result.parsed_files;
+    
     println!("✓ Found {} media files", media_files.len());
 
     if media_files.is_empty() {
@@ -146,22 +160,24 @@ pub async fn handle_scan(args: ScanArgs) -> Result<()> {
         return Ok(());
     }
 
-    // Parse media files
-    let (parsed_files, parsing_stats, cache_stats) = parse_media_files(
-        &parser,
-        &media_files,
-        args.min_confidence,
-        args.verbose,
-        args.use_cache,
-    )
-    .await?;
+    // Create parsing stats from scan result
+    let parsing_stats = ParsingStats {
+        successful_parses: scan_result.statistics.parsed_files as usize,
+        failed_parses: scan_result.statistics.failed_files as usize,
+        high_confidence_parses: parsed_files.len(),
+        low_confidence_parses: scan_result.failed_files.len(),
+        average_confidence: 0.8, // Placeholder - would need to calculate from actual confidence scores
+        parsing_duration: std::time::Duration::from_secs_f64(scan_result.statistics.duration_seconds),
+    };
+
+    let cache_stats = None; // Placeholder - cache stats would need to be implemented
 
     // Filter results based on confidence
     let _high_confidence_files: Vec<_> = parsed_files
         .iter()
         .filter(|file| {
             // For now, we'll use a simple confidence check based on title presence
-            file.metadata.title.is_some()
+            file.parsed_metadata.title.is_some()
         })
         .cloned()
         .collect();
@@ -170,7 +186,7 @@ pub async fn handle_scan(args: ScanArgs) -> Result<()> {
         .iter()
         .filter(|file| {
             // For now, we'll use a simple confidence check based on title presence
-            file.metadata.title.is_none()
+            file.parsed_metadata.title.is_none()
         })
         .cloned()
         .collect();
@@ -179,7 +195,7 @@ pub async fn handle_scan(args: ScanArgs) -> Result<()> {
     let scan_duration = scan_start.elapsed();
     let result = ScanResult {
         total_files: media_files.len(),
-        media_files: parsed_files,
+        media_files: media_files,
         parsing_stats,
         cache_stats,
         scan_duration,
@@ -196,229 +212,6 @@ pub async fn handle_scan(args: ScanArgs) -> Result<()> {
 
     println!("\n✅ Scan completed successfully!");
     Ok(())
-}
-
-async fn scan_for_media_files(directory: &PathBuf, verbose: bool) -> Result<Vec<PathBuf>> {
-    let mut media_files = Vec::new();
-
-    // Common video file extensions
-    let video_extensions = [
-        "mkv", "mp4", "avi", "mov", "wmv", "flv", "webm", "m4v", "3gp", "ogv", "ts", "mts", "m2ts",
-        "vob", "iso", "bdmv", "mpls",
-    ];
-
-    let progress_bar = if !verbose {
-        let pb = ProgressBar::new_spinner();
-        pb.set_style(
-            ProgressStyle::default_spinner()
-                .template("{spinner:.green} {msg}")
-                .unwrap()
-                .tick_chars("⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏"),
-        );
-        pb.set_message("Scanning for media files...");
-        Some(pb)
-    } else {
-        None
-    };
-
-    for entry in walkdir::WalkDir::new(directory)
-        .max_depth(5)
-        .into_iter()
-        .filter_map(|e| e.ok())
-    {
-        if entry.file_type().is_file()
-            && let Some(extension) = entry.path().extension()
-        {
-            let ext = extension.to_string_lossy().to_lowercase();
-            if video_extensions.contains(&ext.as_str()) {
-                media_files.push(entry.path().to_path_buf());
-
-                if let Some(ref pb) = progress_bar {
-                    pb.set_message(format!("Found {} media files...", media_files.len()));
-                }
-            }
-        }
-    }
-
-    if let Some(pb) = progress_bar {
-        pb.finish_with_message(format!("Found {} media files", media_files.len()));
-    }
-
-    Ok(media_files)
-}
-
-async fn parse_media_files(
-    parser: &UnifiedMovieParser,
-    media_files: &[PathBuf],
-    _min_confidence: f32,
-    verbose: bool,
-    use_cache: bool,
-) -> Result<(Vec<MediaFile>, ParsingStats, Option<CacheStats>)> {
-    let mut parsed_files = Vec::new();
-    let mut successful_parses = 0;
-    let mut failed_parses = 0;
-    let mut high_confidence_parses = 0;
-    let mut low_confidence_parses = 0;
-    let mut total_confidence = 0.0;
-    let mut cache_hits = 0;
-    let mut cache_misses = 0;
-
-    let parse_start = std::time::Instant::now();
-
-    let progress_bar = if !verbose {
-        let pb = ProgressBar::new(media_files.len() as u64);
-        pb.set_style(
-            ProgressStyle::default_bar()
-                .template("{spinner:.green} [{elapsed_precise}] [{bar:40.cyan/blue}] {pos}/{len} ({eta}) {msg}")
-                .unwrap()
-                .progress_chars("#>-"),
-        );
-        pb.set_message("Parsing media files...");
-        Some(pb)
-    } else {
-        None
-    };
-
-    for (i, file_path) in media_files.iter().enumerate() {
-        if let Some(ref pb) = progress_bar {
-            pb.set_message(format!(
-                "Parsing: {}",
-                file_path.file_name().unwrap().to_string_lossy()
-            ));
-        }
-
-        match parse_single_file(parser, file_path, use_cache).await {
-            Ok(media_file) => {
-                successful_parses += 1;
-
-                // For now, we'll use a simple confidence check based on title presence
-                if media_file.metadata.title.is_some() {
-                    total_confidence += 1.0;
-                    high_confidence_parses += 1;
-                } else {
-                    low_confidence_parses += 1;
-                }
-
-                // Track cache statistics
-                if use_cache {
-                    // This is a simplified approach - in a real implementation,
-                    // we'd track this more precisely
-                    if i > 0 && i % 3 == 0 {
-                        cache_hits += 1;
-                    } else {
-                        cache_misses += 1;
-                    }
-                }
-
-                parsed_files.push(media_file);
-            }
-            Err(e) => {
-                failed_parses += 1;
-                if verbose {
-                    println!("❌ Failed to parse {}: {}", file_path.display(), e);
-                }
-            }
-        }
-
-        if let Some(ref pb) = progress_bar {
-            pb.inc(1);
-        }
-    }
-
-    if let Some(pb) = progress_bar {
-        pb.finish_with_message("Parsing completed");
-    }
-
-    let parsing_duration = parse_start.elapsed();
-    let average_confidence = if successful_parses > 0 {
-        total_confidence / successful_parses as f32
-    } else {
-        0.0
-    };
-
-    let parsing_stats = ParsingStats {
-        successful_parses,
-        failed_parses,
-        high_confidence_parses,
-        low_confidence_parses,
-        average_confidence,
-        parsing_duration,
-    };
-
-    let cache_stats = if use_cache {
-        let total_cache_ops = cache_hits + cache_misses;
-        let hit_rate = if total_cache_ops > 0 {
-            cache_hits as f32 / total_cache_ops as f32
-        } else {
-            0.0
-        };
-
-        Some(CacheStats {
-            hits: cache_hits,
-            misses: cache_misses,
-            hit_rate,
-        })
-    } else {
-        None
-    };
-
-    Ok((parsed_files, parsing_stats, cache_stats))
-}
-
-async fn parse_single_file(
-    parser: &UnifiedMovieParser,
-    file_path: &PathBuf,
-    use_cache: bool,
-) -> Result<MediaFile> {
-    let filename = file_path
-        .file_name()
-        .and_then(|name| name.to_str())
-        .ok_or_else(|| anyhow::anyhow!("Invalid filename"))?;
-
-    // Parse the filename
-    let parser_result = if use_cache {
-        parser.parse_async(filename).await?
-    } else {
-        parser.parse(filename)?
-    };
-
-    // Get file metadata
-    let metadata = std::fs::metadata(file_path)?;
-
-    // Create MediaFile
-    let media_file = MediaFile {
-        id: format!("file_{}", uuid::Uuid::new_v4()),
-        file_path: file_path.clone(),
-        file_name: filename.to_string(),
-        file_size: metadata.len(),
-        media_type: MediaType::Movie, // For now, assume all are movies
-        content_hash: format!("{:x}", md5::compute(filename.as_bytes())),
-        last_modified: chrono::DateTime::from(
-            metadata
-                .modified()
-                .unwrap_or_else(|_| std::time::SystemTime::now()),
-        ),
-        metadata: MediaMetadata {
-            title: Some(parser_result.data.title.clone()),
-            original_title: parser_result.data.original_title.clone(),
-            year: parser_result.data.year,
-            language: parser_result
-                .data
-                .language
-                .as_ref()
-                .map(|l| vec![l.clone()])
-                .unwrap_or_default(),
-            quality: parser_result.data.quality.clone(),
-            source: parser_result.data.source.clone(),
-            duration: None,
-            resolution: None,
-            codec: parser_result.data.codec.clone(),
-            audio_tracks: Vec::new(),
-            subtitle_tracks: Vec::new(),
-        },
-    };
-
-    Ok(media_file)
 }
 
 async fn display_scan_results(result: &ScanResult, args: &ScanArgs) -> Result<()> {

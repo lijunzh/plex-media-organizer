@@ -40,8 +40,10 @@ pub enum MediaType {
     Movie,
     TvShow,
     Music,
+    Video,
+    Audio,
     Subtitle,
-    Unknown,
+    Image,
 }
 
 /// Metadata extracted from a media file
@@ -62,38 +64,13 @@ pub struct MediaMetadata {
     /// Duration in seconds
     pub duration: Option<u64>,
     /// Resolution (width x height)
-    pub resolution: Option<Resolution>,
+    pub resolution: Option<crate::media::Resolution>,
     /// Video codec
     pub codec: Option<String>,
     /// Audio tracks
-    pub audio_tracks: Vec<AudioTrack>,
+    pub audio_tracks: Vec<crate::media::AudioTrack>,
     /// Subtitle tracks
-    pub subtitle_tracks: Vec<SubtitleTrack>,
-}
-
-/// Video resolution
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct Resolution {
-    pub width: u32,
-    pub height: u32,
-}
-
-/// Audio track information
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct AudioTrack {
-    pub language: String,
-    pub codec: Option<String>,
-    pub channels: Option<u8>,
-    pub bitrate: Option<u32>,
-}
-
-/// Subtitle track information
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct SubtitleTrack {
-    pub language: String,
-    pub codec: Option<String>,
-    pub forced: bool,
-    pub sdh: bool, // Subtitles for the deaf and hard of hearing
+    pub subtitle_tracks: Vec<crate::media::SubtitleTrack>,
 }
 
 /// Result of parsing a media file
@@ -158,44 +135,7 @@ pub struct UserCorrection {
     pub corrected_at: DateTime<Utc>,
 }
 
-/// Movie-specific information
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
-pub struct MovieInfo {
-    /// Movie title
-    pub title: String,
-    /// Original title (for foreign language movies)
-    pub original_title: Option<String>,
-    /// Original language code (e.g., "ja", "zh", "ko")
-    pub original_language: Option<String>,
-    /// Release year
-    pub year: Option<u32>,
-    /// Part number for multi-part movies
-    pub part_number: Option<u32>,
-    /// Whether this is part of a collection
-    pub is_collection: bool,
-    /// Collection name if applicable
-    pub collection_name: Option<String>,
-    /// Whether this is part of a series
-    pub is_series: bool,
-    /// Series name if applicable
-    pub series_name: Option<String>,
-    /// Series number/sequence if applicable
-    pub series_number: Option<u32>,
-    /// Whether this is an anime movie
-    pub is_anime: bool,
-    /// Anime movie number if applicable (e.g., Detective Conan Movie 26)
-    pub anime_movie_number: Option<u32>,
-    /// Whether the title contains Japanese characters
-    pub has_japanese_title: bool,
-    /// Whether the title contains Chinese characters
-    pub has_chinese_title: bool,
-    /// Video quality
-    pub quality: Option<String>,
-    /// Source
-    pub source: Option<String>,
-    /// Languages available
-    pub language: Option<String>,
-}
+
 
 /// TMDB movie match result with score
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -247,6 +187,8 @@ pub struct FailedFile {
     pub media_file: MediaFile,
     /// Error that occurred
     pub error: String,
+    /// Stage where the failure occurred
+    pub stage: String,
     /// When the failure occurred
     pub failed_at: DateTime<Utc>,
 }
