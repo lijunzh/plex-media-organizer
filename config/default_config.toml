@@ -1,0 +1,10 @@
+source_dirs = []
+destination = ""
+auto_organize_threshold = 90.0
+review_threshold = 50.0
+
+[organize]
+strategy = "move"
+movies_dir = "Movies"
+tv_dir = "TV Shows"
+music_dir = "Music"

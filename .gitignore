@@ -1,0 +1,22 @@
+# Rust
+/target/
+Cargo.lock
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# macOS
+.DS_Store
+
+# Data files that may contain PII
+*.csv
+*.xlsx
+*.xls
+
+# SQLite databases
+*.db
+*.sqlite
+*.sqlite3
