@@ -116,3 +116,89 @@ jobs:
           generate_release_notes: ${{ steps.notes.outputs.generate == 'true' }}
           body_path: ${{ steps.notes.outputs.generate != 'true' && 'release_notes.md' || '' }}
           files: artifacts/*.tar.gz
+
+  homebrew:
+    name: Update Homebrew Tap
+    needs: github-release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for release assets to be available
+        run: sleep 10
+
+      - name: Download release tarballs and compute SHA256
+        id: sha
+        env:
+          GH_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+        run: |
+          VERSION="${GITHUB_REF#refs/tags/v}"
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          BASE="https://github.com/lijunzh/plex-media-organizer/releases/download/v${VERSION}"
+
+          for target in aarch64-apple-darwin x86_64-apple-darwin aarch64-unknown-linux-gnu x86_64-unknown-linux-gnu; do
+            curl -fsSL -o "${target}.tar.gz" "${BASE}/plex-org-${target}.tar.gz"
+            sha=$(sha256sum "${target}.tar.gz" | awk '{print $1}')
+            key=$(echo "$target" | tr '-' '_')
+            echo "${key}=${sha}" >> $GITHUB_OUTPUT
+            echo "  ${target}: ${sha}"
+          done
+
+      - name: Update formula
+        env:
+          GH_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+        run: |
+          VERSION="${{ steps.sha.outputs.version }}"
+          git clone https://x-access-token:${GH_TOKEN}@github.com/lijunzh/homebrew-plex-media-organizer.git
+          cd homebrew-plex-media-organizer
+
+          cat > Formula/plex-org.rb << 'FORMULA'
+          class PlexOrg < Formula
+            desc "Organize torrent-downloaded media into Plex-compatible folder structures"
+            homepage "https://github.com/lijunzh/plex-media-organizer"
+            version "__VERSION__"
+            license "MIT"
+
+            on_macos do
+              if Hardware::CPU.arm?
+                url "https://github.com/lijunzh/plex-media-organizer/releases/download/v#{version}/plex-org-aarch64-apple-darwin.tar.gz"
+                sha256 "__SHA_ARM64_MACOS__"
+              else
+                url "https://github.com/lijunzh/plex-media-organizer/releases/download/v#{version}/plex-org-x86_64-apple-darwin.tar.gz"
+                sha256 "__SHA_X86_64_MACOS__"
+              end
+            end
+
+            on_linux do
+              if Hardware::CPU.arm?
+                url "https://github.com/lijunzh/plex-media-organizer/releases/download/v#{version}/plex-org-aarch64-unknown-linux-gnu.tar.gz"
+                sha256 "__SHA_ARM64_LINUX__"
+              else
+                url "https://github.com/lijunzh/plex-media-organizer/releases/download/v#{version}/plex-org-x86_64-unknown-linux-gnu.tar.gz"
+                sha256 "__SHA_X86_64_LINUX__"
+              end
+            end
+
+            def install
+              bin.install Dir["**/plex-org"].first
+            end
+
+            test do
+              assert_match "plex-org", shell_output("#{bin}/plex-org --version")
+            end
+          end
+          FORMULA
+
+          # Strip leading whitespace from heredoc
+          sed -i 's/^          //' Formula/plex-org.rb
+
+          # Substitute placeholders
+          sed -i "s/__VERSION__/${VERSION}/" Formula/plex-org.rb
+          sed -i "s/__SHA_ARM64_MACOS__/${{ steps.sha.outputs.aarch64_apple_darwin }}/" Formula/plex-org.rb
+          sed -i "s/__SHA_X86_64_MACOS__/${{ steps.sha.outputs.x86_64_apple_darwin }}/" Formula/plex-org.rb
+          sed -i "s/__SHA_ARM64_LINUX__/${{ steps.sha.outputs.aarch64_unknown_linux_gnu }}/" Formula/plex-org.rb
+          sed -i "s/__SHA_X86_64_LINUX__/${{ steps.sha.outputs.x86_64_unknown_linux_gnu }}/" Formula/plex-org.rb
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add Formula/plex-org.rb
+          git commit -m "plex-org v${VERSION}"
+          git push
