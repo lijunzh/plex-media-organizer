@@ -48,7 +48,8 @@ pub fn find_companions(video_path: &Path) -> Vec<SubtitleCompanion> {
     // Deduplicate by canonical path to avoid double-counting on
     // case-insensitive filesystems (macOS HFS+/APFS).
     let mut search_dirs = vec![parent.to_path_buf()];
-    let mut seen_canonical: std::collections::HashSet<std::path::PathBuf> = std::collections::HashSet::new();
+    let mut seen_canonical: std::collections::HashSet<std::path::PathBuf> =
+        std::collections::HashSet::new();
     if let Ok(canon) = std::fs::canonicalize(parent) {
         seen_canonical.insert(canon);
     }
@@ -103,10 +104,7 @@ pub fn find_companions(video_path: &Path) -> Vec<SubtitleCompanion> {
 
             debug!("subtitle companion: {} → suffix={:?}", name, suffix);
 
-            companions.push(SubtitleCompanion {
-                path,
-                suffix,
-            });
+            companions.push(SubtitleCompanion { path, suffix });
         }
     }
 

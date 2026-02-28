@@ -11,9 +11,7 @@ use chrono::Utc;
 use tracing::{info, warn};
 
 use crate::config::AppConfig;
-use crate::models::{
-    EnrichedMedia, OrganizeAction, UndoEntry, UndoManifest,
-};
+use crate::models::{EnrichedMedia, OrganizeAction, UndoEntry, UndoManifest};
 use crate::subtitles;
 use crate::utils::sanitize_name;
 
@@ -59,7 +57,9 @@ fn build_movie_path(
         None => title.clone(),
     };
     let filename = format!("{folder}{ext}");
-    root.join(&config.organize.movies_dir).join(&folder).join(filename)
+    root.join(&config.organize.movies_dir)
+        .join(&folder)
+        .join(filename)
 }
 
 fn build_tv_path(
@@ -100,17 +100,13 @@ fn build_music_path(
     } else {
         &track.artist
     });
-    let album_name = sanitize_name(
-        track.album.as_deref().unwrap_or("Unknown Album"),
-    );
+    let album_name = sanitize_name(track.album.as_deref().unwrap_or("Unknown Album"));
     let album_dir = match track.year {
         Some(y) => format!("{album_name} ({y})"),
         None => album_name,
     };
 
-    let track_name = sanitize_name(
-        track.track_title.as_deref().unwrap_or("Track"),
-    );
+    let track_name = sanitize_name(track.track_title.as_deref().unwrap_or("Track"));
     let filename = match track.track_number {
         Some(n) => format!("{n:02} - {track_name}{ext}"),
         None => format!("{track_name}{ext}"),
@@ -143,7 +139,10 @@ pub fn plan_actions(
         let original_dest = dest.clone();
         let mut counter = 1u32;
         while used_dests.contains(&dest) || dest.exists() {
-            let stem = original_dest.file_stem().and_then(|s| s.to_str()).unwrap_or("file");
+            let stem = original_dest
+                .file_stem()
+                .and_then(|s| s.to_str())
+                .unwrap_or("file");
             let ext = original_dest
                 .extension()
                 .and_then(|e| e.to_str())
@@ -239,32 +238,28 @@ pub fn execute_actions(actions: &[OrganizeAction], undo_dir: &Path) -> Result<Un
             }
             "symlink" => {
                 #[cfg(unix)]
-                std::os::unix::fs::symlink(
-                    fs::canonicalize(&action.source)?,
-                    &action.destination,
-                )
-                .with_context(|| {
-                    format!("Failed to symlink {}", action.source.display())
-                })?;
+                std::os::unix::fs::symlink(fs::canonicalize(&action.source)?, &action.destination)
+                    .with_context(|| format!("Failed to symlink {}", action.source.display()))?;
 
                 #[cfg(not(unix))]
                 anyhow::bail!("Symlink strategy is only supported on Unix");
             }
             _ => {
                 // Default: move
-                fs::rename(&action.source, &action.destination).or_else(|_| {
-                    // rename fails across filesystems; fall back to copy+delete
-                    fs::copy(&action.source, &action.destination)?;
-                    fs::remove_file(&action.source)?;
-                    Ok::<(), std::io::Error>(())
-                })
-                .with_context(|| {
-                    format!(
-                        "Failed to move {} → {}",
-                        action.source.display(),
-                        action.destination.display()
-                    )
-                })?;
+                fs::rename(&action.source, &action.destination)
+                    .or_else(|_| {
+                        // rename fails across filesystems; fall back to copy+delete
+                        fs::copy(&action.source, &action.destination)?;
+                        fs::remove_file(&action.source)?;
+                        Ok::<(), std::io::Error>(())
+                    })
+                    .with_context(|| {
+                        format!(
+                            "Failed to move {} → {}",
+                            action.source.display(),
+                            action.destination.display()
+                        )
+                    })?;
             }
         }
 
@@ -287,10 +282,7 @@ pub fn execute_actions(actions: &[OrganizeAction], undo_dir: &Path) -> Result<Un
     // Write undo manifest
     if !manifest.entries.is_empty() {
         fs::create_dir_all(undo_dir)?;
-        let manifest_path = undo_dir.join(format!(
-            "undo_{}.json",
-            now.format("%Y%m%d_%H%M%S")
-        ));
+        let manifest_path = undo_dir.join(format!("undo_{}.json", now.format("%Y%m%d_%H%M%S")));
         let json = serde_json::to_string_pretty(&manifest)?;
         fs::write(&manifest_path, json)?;
         info!("Undo manifest written: {}", manifest_path.display());
@@ -374,7 +366,10 @@ fn cleanup_empty_parents(path: &Path) {
     for _ in 0..3 {
         match current {
             Some(p) if p.is_dir() => {
-                if fs::read_dir(p).map(|mut d| d.next().is_none()).unwrap_or(false) {
+                if fs::read_dir(p)
+                    .map(|mut d| d.next().is_none())
+                    .unwrap_or(false)
+                {
                     let _ = fs::remove_dir(p);
                     current = p.parent();
                 } else {
@@ -389,7 +384,7 @@ fn cleanup_empty_parents(path: &Path) {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::models::{Movie, TvEpisode, MusicTrack, MediaType, ParsedMedia};
+    use crate::models::{MediaType, Movie, MusicTrack, ParsedMedia, TvEpisode};
 
     fn make_movie_enriched(title: &str, year: Option<i32>) -> EnrichedMedia {
         let parsed = ParsedMedia {
@@ -449,7 +444,9 @@ mod tests {
 
         assert_eq!(
             dest,
-            PathBuf::from("/plex/TV Shows/Breaking Bad/Season 01/Breaking Bad - S01E01 - Pilot.mkv")
+            PathBuf::from(
+                "/plex/TV Shows/Breaking Bad/Season 01/Breaking Bad - S01E01 - Pilot.mkv"
+            )
         );
     }
 

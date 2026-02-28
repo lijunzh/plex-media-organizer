@@ -7,9 +7,7 @@
 use tracing::debug;
 
 use crate::config::AppConfig;
-use crate::models::{
-    EnrichedMedia, MediaType, Movie, MusicTrack, ParsedMedia, TvEpisode,
-};
+use crate::models::{EnrichedMedia, MediaType, Movie, MusicTrack, ParsedMedia, TvEpisode};
 
 /// Enrichment pipeline.
 pub struct Enricher {
@@ -33,7 +31,10 @@ impl Enricher {
             MediaType::Tv => self.enrich_tv(&parsed, &mut enriched),
             MediaType::Music => self.enrich_music(&parsed, &mut enriched),
             MediaType::Unknown => {
-                debug!("unknown type for {:?}, skipping enrichment", parsed.raw_filename);
+                debug!(
+                    "unknown type for {:?}, skipping enrichment",
+                    parsed.raw_filename
+                );
             }
         }
 

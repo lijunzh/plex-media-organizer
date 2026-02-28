@@ -132,10 +132,7 @@ fn cmd_scan(path: &Path, _config: &AppConfig) -> Result<()> {
             _ => String::new(),
         };
 
-        let year_str = parsed
-            .year
-            .map(|y| y.to_string())
-            .unwrap_or_default();
+        let year_str = parsed.year.map(|y| y.to_string()).unwrap_or_default();
 
         let name = truncate(&file.full_name(), 48);
         let title = truncate(&parsed.title, 38);
@@ -256,9 +253,7 @@ fn dirs_undo() -> PathBuf {
     let home = std::env::var("HOME")
         .or_else(|_| std::env::var("USERPROFILE"))
         .unwrap_or_else(|_| ".".to_string());
-    PathBuf::from(home)
-        .join(".plex-organizer")
-        .join("undo")
+    PathBuf::from(home).join(".plex-organizer").join("undo")
 }
 
 fn truncate(s: &str, max: usize) -> String {

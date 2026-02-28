@@ -1,0 +1,71 @@
+name: "📁 Wrong Organization"
+description: Report a file that gets organized to the wrong location
+title: "[organize] "
+labels: ["organization", "bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve plex-media-organizer! 🎬
+
+        **Is this a parsing issue?** Run `hunch "your_filename.mkv"` to check.
+        If hunch gets it wrong, please file in [hunch issues](https://github.com/lijunzh/hunch/issues) instead.
+
+  - type: input
+    id: filename
+    attributes:
+      label: Source filename
+      description: The full filename (or path) that gets organized wrong.
+      placeholder: "Movie.Title.2024.1080p.BluRay.x264-GROUP.mkv"
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual destination
+      description: Where plex-org put the file (from `plex-org plan`).
+      placeholder: |
+        Movies/Wrong Title (2024)/Wrong Title (2024).mkv
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected destination
+      description: Where the file should have gone.
+      placeholder: |
+        Movies/Correct Title (2024)/Correct Title (2024).mkv
+    validations:
+      required: true
+
+  - type: textarea
+    id: scan_output
+    attributes:
+      label: Scan output
+      description: |
+        Paste the output of `plex-org scan /path/to/file` here.
+      render: text
+    validations:
+      required: false
+
+  - type: textarea
+    id: hunch_output
+    attributes:
+      label: Hunch output
+      description: |
+        Paste the output of `hunch "filename.mkv"` here so we can
+        tell if the issue is in parsing vs organization.
+      render: json
+    validations:
+      required: false
+
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: "Output of `plex-org --version`"
+      placeholder: "plex-org 0.2.0"
+    validations:
+      required: false

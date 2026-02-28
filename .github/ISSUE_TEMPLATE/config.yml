@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: "📖 Architecture & Roadmap"
+    url: https://github.com/lijunzh/plex-media-organizer/blob/main/ARCHITECTURE.md
+    about: Check the design and planned features before filing
+  - name: "🔍 Parsing issue? File in hunch"
+    url: https://github.com/lijunzh/hunch/issues
+    about: If the filename is parsed incorrectly, the issue belongs in hunch

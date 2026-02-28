@@ -105,9 +105,7 @@ fn parse_music(file: &MediaFile) -> ParsedMedia {
 
     // Try to extract track number and title from filename
     if let Some(caps) = TRACK_RE.captures(&file.filename) {
-        parsed.track_number = caps
-            .name("num")
-            .and_then(|m| m.as_str().parse().ok());
+        parsed.track_number = caps.name("num").and_then(|m| m.as_str().parse().ok());
         parsed.track_title = caps.name("title").map(|m| m.as_str().to_string());
         parsed.title = parsed
             .track_title
@@ -122,9 +120,7 @@ fn parse_music(file: &MediaFile) -> ParsedMedia {
     if let Some(caps) = ALBUM_DIR_RE.captures(&file.parent_dir) {
         parsed.artist = caps.name("artist").map(|m| m.as_str().trim().to_string());
         parsed.album = caps.name("album").map(|m| m.as_str().trim().to_string());
-        parsed.year = caps
-            .name("year")
-            .and_then(|m| m.as_str().parse().ok());
+        parsed.year = caps.name("year").and_then(|m| m.as_str().parse().ok());
         parsed.confidence += 20.0;
     }
 

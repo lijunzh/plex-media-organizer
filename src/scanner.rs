@@ -86,9 +86,8 @@ impl Default for ScanOptions {
 
 fn is_extras_file(stem_lower: &str) -> bool {
     for prefix in EXTRAS_PREFIXES {
-        if stem_lower.starts_with(prefix) {
+        if let Some(rest) = stem_lower.strip_prefix(prefix) {
             if *prefix == "pv" {
-                let rest = &stem_lower[prefix.len()..];
                 if rest.is_empty() || rest.starts_with(|c: char| c.is_ascii_digit()) {
                     return true;
                 }
@@ -211,7 +210,10 @@ pub fn scan_directory(path: &Path, options: &ScanOptions) -> Result<Vec<MediaFil
         };
         let size = metadata.len();
 
-        if options.min_video_size > 0 && video_set.contains(ext.as_str()) && size < options.min_video_size {
+        if options.min_video_size > 0
+            && video_set.contains(ext.as_str())
+            && size < options.min_video_size
+        {
             continue;
         }
 
@@ -234,7 +236,11 @@ pub fn scan_directory(path: &Path, options: &ScanOptions) -> Result<Vec<MediaFil
     }
 
     results.sort_by(|a, b| a.source_path.cmp(&b.source_path));
-    debug!("scanned {} → {} media files found", path.display(), results.len());
+    debug!(
+        "scanned {} → {} media files found",
+        path.display(),
+        results.len()
+    );
     Ok(results)
 }
 
