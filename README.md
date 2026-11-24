@@ -1,5 +1,12 @@
 # 🎬 Plex Media Organizer
 
+> **Archived (November 2026).** Plex Media Organizer is no longer maintained:
+> I now organize media with AI agents. For filename parsing, use
+> [hunch](https://github.com/lijunzh/hunch), which is still maintained and
+> callable from scripts and agents. The crates.io releases were yanked and the
+> Homebrew tap is archived; existing installs keep working.
+
+
 **Organize torrent-downloaded movies, TV shows, and music into
 [Plex-compatible folder structures](https://support.plex.tv/articles/naming-and-organizing-your-movie-media-files/) —
 powered by [hunch](https://crates.io/crates/hunch) for fast, offline filename parsing.**
